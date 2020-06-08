@@ -43,11 +43,8 @@ return [
         ->addKey('fof-oauth.only_icons', false),
 
     (new Extend\Routes('forum'))
-        ->get('/auth/discord', 'auth.discord', Controllers\DiscordAuthController::class)
-        ->get('/auth/facebook', 'auth.facebook', Controllers\FacebookAuthController::class)
-        ->get('/auth/github', 'auth.github', Controllers\GitHubAuthController::class)
-        ->get('/auth/gitlab', 'auth.gitlab', Controllers\GitLabAuthController::class)
-        ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
+        ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class)
+        ->get('/auth/{provider}', 'fof-oauth', Controllers\AuthController::class),
 
     (new Extend\Compat(function (Application $app, Dispatcher $events) {
         $app->register(OAuthServiceProvider::class);

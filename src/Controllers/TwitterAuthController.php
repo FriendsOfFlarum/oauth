@@ -9,6 +9,7 @@ use Flarum\Forum\Auth\ResponseFactory;
 use Flarum\Http\UrlGenerator;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Errors\AuthenticationException;
+use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\RedirectResponse;
 use League\OAuth1\Client\Credentials\CredentialsException;
 use League\OAuth1\Client\Server\Twitter;
@@ -51,7 +52,11 @@ class TwitterAuthController implements RequestHandlerInterface
         try {
             return $this->work($request);
         } catch (CredentialsException $e) {
-            throw new AuthenticationException($e->getMessage(), 0, $e);
+            $originalMessage = $e->getMessage();
+            $error = preg_replace('/Received HTTP status code \[400\] with message "(.+)" when getting temporary credentials\./m', '$1', $originalMessage);
+            $details = Arr::get(json_decode($error, true), 'errors.0');
+
+            throw new AuthenticationException(Arr::get($details, 'message', $originalMessage), Arr::get($details, 'code', 0), $e);
         }
     }
 
@@ -68,8 +73,8 @@ class TwitterAuthController implements RequestHandlerInterface
         $session = $request->getAttribute('session');
 
         $queryParams = $request->getQueryParams();
-        $oAuthToken = array_get($queryParams, 'oauth_token');
-        $oAuthVerifier = array_get($queryParams, 'oauth_verifier');
+        $oAuthToken = Arr::get($queryParams, 'oauth_token');
+        $oAuthVerifier = Arr::get($queryParams, 'oauth_verifier');
 
         if (! $oAuthToken || ! $oAuthVerifier) {
             $temporaryCredentials = $server->getTemporaryCredentials();

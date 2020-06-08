@@ -24,18 +24,6 @@ abstract class Controller extends AbstractOAuthController
         return $user->getId();
     }
 
-    protected function getSetting($key): string
-    {
-        return $this->settings->get("fof-oauth.{$this->getProviderName()}.{$key}");
-    }
-
-    protected function verifyEmail($email)
-    {
-        if (!$email || empty($email)) {
-            throw new AuthenticationException('invalid_email');
-        }
-    }
-
     /**
      * @param ServerRequestInterface $request
      *

@@ -4,7 +4,10 @@
 namespace FoF\OAuth;
 
 
+use Flarum\Forum\Auth\Registration;
 use Flarum\Settings\SettingsRepositoryInterface;
+use FoF\OAuth\Errors\AuthenticationException;
+use League\OAuth2\Client\Provider\AbstractProvider;
 
 abstract class Provider
 {
@@ -18,21 +21,39 @@ abstract class Provider
         $this->settings = $settings;
     }
 
-    abstract protected function name(): string;
+    // Provider data
 
-    abstract protected function link(): string;
+    abstract public function name(): string;
 
-    abstract protected function package(): string;
+    abstract public function link(): string;
 
-    abstract protected function controller(): string;
+    abstract public function package(): string;
 
-    abstract protected function fields(): array;
+    abstract public function fields(): array;
 
-    abstract protected function available(): bool;
+    abstract public function available(): bool;
 
-    protected function icon(): string {
+    public function icon(): string {
         return "fab fa-{$this->name()}";
     }
+
+
+    // Controller options
+
+    public function provider(string $redirectUri): AbstractProvider {
+        //
+    }
+
+    public function options(): array {
+        return [];
+    }
+
+    public function suggestions(Registration $registration, $user, string $token) {
+        //
+    }
+
+
+    // Helpers
 
     public function enabled() {
         $enabled = $this->settings->get("fof-oauth.{$this->name()}");
@@ -40,21 +61,15 @@ abstract class Provider
         return $enabled && $this->available();
     }
 
-    public function toForumPayload() {
-        return [
-            'name' => $this->name(),
-            'icon' => $this->icon()
-        ];
+    protected function getSetting($key): string
+    {
+        return $this->settings->get("fof-oauth.{$this->name()}.{$key}");
     }
 
-    public function toAdminPayload() {
-        return [
-            'name' => $this->name(),
-            'icon' => $this->icon(),
-            'link' => $this->link(),
-            'package' => $this->package(),
-            'fields' => $this->fields(),
-            'available' => $this->available(),
-        ];
+    protected function verifyEmail($email)
+    {
+        if (!$email || empty($email)) {
+            throw new AuthenticationException('invalid_email');
+        }
     }
 }

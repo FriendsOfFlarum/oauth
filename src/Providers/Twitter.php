@@ -9,27 +9,22 @@ use FoF\OAuth\Provider;
 
 class Twitter extends Provider
 {
-    protected function name(): string
+    public function name(): string
     {
         return 'twitter';
     }
 
-    protected function link(): string
+    public function link(): string
     {
         return 'https://developer.twitter.com/en/apps';
     }
 
-    protected function package(): string
+    public function package(): string
     {
         return 'league/oauth1-client';
     }
 
-    protected function controller(): string
-    {
-        return Controllers\TwitterAuthController::class;
-    }
-
-    protected function fields(): array
+    public function fields(): array
     {
         return [
             'api_key' => 'required',
@@ -37,7 +32,7 @@ class Twitter extends Provider
         ];
     }
 
-    protected function available(): bool
+    public function available(): bool
     {
         return class_exists(\League\OAuth1\Client\Server\Twitter::class);
     }

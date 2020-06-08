@@ -4,32 +4,30 @@
 namespace FoF\OAuth\Providers;
 
 
+use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Controllers;
 use FoF\OAuth\Provider;
+use League\OAuth2\Client\Provider\AbstractProvider;
+use League\OAuth2\Client\Provider\Facebook as FacebookProvider;
 
 class Facebook extends Provider
 {
-    protected function name(): string
+    public function name(): string
     {
         return 'facebook';
     }
 
-    protected function link(): string
+    public function link(): string
     {
         return 'https://developers.facebook.com/apps/';
     }
 
-    protected function package(): string
+    public function package(): string
     {
         return 'league/oauth2-facebook';
     }
 
-    protected function controller(): string
-    {
-        return Controllers\FacebookAuthController::class;
-    }
-
-    protected function fields(): array
+    public function fields(): array
     {
         return [
             'app_id' => 'required',
@@ -37,8 +35,31 @@ class Facebook extends Provider
         ];
     }
 
-    protected function available(): bool
+    public function available(): bool
     {
-        return class_exists(\League\OAuth2\Client\Provider\Facebook::class);
+        return class_exists(FacebookProvider::class);
+    }
+
+
+
+    public function provider(string $redirectUri): AbstractProvider
+    {
+        return new FacebookProvider([
+            'clientId' => $this->getSetting('app_id'),
+            'clientSecret' => $this->getSetting('app_secret'),
+            'redirectUri' => $redirectUri,
+            'graphApiVersion' => 'v3.0',
+        ]);
+    }
+
+    public function suggestions(Registration $registration, $user, string $token)
+    {
+        $this->verifyEmail($email = $user->getEmail());
+
+        $registration
+            ->provideTrustedEmail($email)
+            ->provideAvatar($user->getPictureUrl() ?: '')
+            ->suggestUsername($user->getName() ?: '')
+            ->setPayload($user->toArray());
     }
 }

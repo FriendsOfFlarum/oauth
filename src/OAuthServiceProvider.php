@@ -18,20 +18,35 @@ class OAuthServiceProvider extends ServiceProvider
             Providers\Twitter::class
         ], 'fof-oauth.providers');
 
-        $this->app->singleton('fof-oauth.providers.forum', $this->map('toForumPayload', true));
-        $this->app->singleton('fof-oauth.providers.admin', $this->map('toAdminPayload'));
+        $this->app->singleton('fof-oauth.providers.forum', $this->map(function (Provider $provider) {
+            if (!$provider->enabled()) {
+                return null;
+            }
+
+            return [
+                'name' => $provider->name(),
+                'icon' => $provider->icon()
+            ];
+        }));
+
+        $this->app->singleton('fof-oauth.providers.admin', $this->map(function (Provider $provider) {
+            return [
+                'name' => $provider->name(),
+                'icon' => $provider->icon(),
+                'link' => $provider->link(),
+                'package' => $provider->package(),
+                'fields' => $provider->fields(),
+                'available' => $provider->available(),
+            ];
+        }));
     }
 
-    protected function map($method, $checkIfEnabled = false) {
-        return function () use ($checkIfEnabled, $method) {
+    protected function map(callable $cb) {
+        return function () use ($cb) {
             $providers = $this->app->tagged('fof-oauth.providers');
 
-            return array_map(function ($provider) use ($checkIfEnabled, $method) {
-                if ($checkIfEnabled && !$provider->enabled()) {
-                    return null;
-                }
-
-                return $provider->$method();
+            return array_map(function ($provider) use ($cb) {
+                return $cb($provider);
             }, $providers);
         };
     }
