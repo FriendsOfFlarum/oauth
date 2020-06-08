@@ -1,0 +1,65 @@
+fof-oauth:
+  admin:
+    settings:
+      title: FriendsOfFlarum OAuth
+
+      only_icons_label: Only show the Log In Button icons (alternative layout)
+
+      providers:
+        callback_url_text: If necessary, set the callback URL to {url}.
+        requires_package_text: This service requires the Composer package <code>{package}</code> to be installed.
+
+        discord:
+          description: Create an app at {link}. Add the redirect URL in the OAuth2 tab.
+
+          client_id_label: => fof-oauth.ref.settings.client_id
+          client_secret_label: => fof-oauth.ref.settings.client_secret
+
+        facebook:
+          description: Create an app at {link}.
+
+          app_id_label: => fof-oauth.ref.settings.app_id
+          app_secret_label: => fof-oauth.ref.settings.app_secret
+
+        github:
+          description: Create an OAuth app at {link}.
+
+          client_id_label: => fof-oauth.ref.settings.client_id
+          client_secret_label: => fof-oauth.ref.settings.client_secret
+
+        gitlab:
+          description: Create an application at {link}. Give the application the <code>read_user</code> scope.
+
+          client_id_label: => fof-oauth.ref.settings.app_id
+          client_secret_label: => fof-oauth.ref.settings.app_secret
+
+        twitter:
+          description: Create an app at {link}. You will need to set a Terms of Service URL and a Privacy Policy URL. Make sure to then add the request email permission.
+
+          api_key_label: API Key
+          api_secret_label: API Secret
+
+  forum:
+    log_in:
+      with_button: Log In with {provider}
+
+    error:
+      bad_verification_code: Invalid or expired verification token. Please try again.
+      invalid_state: Invalid state. Please try again.
+
+  lib:
+    providers:
+      discord: Discord
+      facebook: Facebook
+      github: GitHub
+      gitlab: GitLab
+      twitter: Twitter
+
+  ref:
+    settings:
+      app_id: App ID
+      app_secret: App Secret
+
+      client_id: Client ID
+      client_secret: Client Secret
+

@@ -1,0 +1,53 @@
+{
+  "name": "fof/oauth",
+  "description": "Allow users to log in with GitHub, Twitter, Facebook, and more!",
+  "keywords": [
+    "flarum",
+    "friendsofflarum",
+    "oauth",
+    "facebook",
+    "discord",
+    "github",
+    "gitlab",
+    "twitter"
+  ],
+  "type": "flarum-extension",
+  "license": "MIT",
+  "require": {
+    "flarum/core": "^0.1.0-beta.12",
+    "fof/extend": ">=0.3.0",
+    "fof/components": ">=0.1.1"
+  },
+  "suggest": {
+    "league/oauth1-client": "Twitter OAuth",
+    "league/oauth2-facebook": "Facebook OAuth",
+    "league/oauth2-github": "GitHub OAuth",
+    "omines/oauth2-gitlab": "GitLab OAuth",
+    "wohali/oauth2-discord-new": "Discord OAuth"
+  },
+  "authors": [
+    {
+      "name": "David Sevilla Martin",
+      "email": "me+fof@datitisev.me",
+      "role": "Developer"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "FoF\\OAuth\\": "src/"
+    }
+  },
+  "extra": {
+    "flarum-extension": {
+      "title": "FoF OAuth",
+      "icon": {
+        "name": "fas fa-sign-in-alt",
+        "backgroundColor": "#e74c3c",
+        "color": "#fff"
+      }
+    },
+    "flagrow": {
+      "discuss": ""
+    }
+  }
+}
