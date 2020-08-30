@@ -1,4 +1,4 @@
-import { extend } from 'flarum/extend';
+import { extend, override } from 'flarum/extend';
 import LogInButtons from 'flarum/components/LogInButtons';
 import LogInButton from 'flarum/components/LogInButton';
 import ItemList from 'flarum/utils/ItemList';
@@ -32,17 +32,20 @@ app.initializers.add('fof/oauth', () => {
     });
 
     if (onlyIcons) {
-        extend(LogInButton, 'initProps', function (nul, props) {
-            if (!props.children) return;
-
-            props.title = extractText(props.children);
-            props.children = '';
+        extend(LogInButton.prototype, 'oncreate', function () {
+            this.$().tooltip({ container: '#modal' });
         });
 
-        extend(LogInButton.prototype, 'config', function (nul, isInitialized) {
-            if (isInitialized) return;
+        override(LogInButton.prototype, 'view', function (orig, vnode) {
+            this.attrs.title = extractText(vnode.children);
 
-            this.$().tooltip({ container: '#modal' });
+            return orig(vnode);
+        });
+
+        override(LogInButton.prototype, 'getButtonContent', function (orig) {
+            console.log(this.constructor.name);
+
+            return orig();
         });
 
         extend(LogInButtons.prototype, 'view', function (vdom) {

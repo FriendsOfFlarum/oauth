@@ -51,7 +51,7 @@ return [
 
         $events->listen(Serializing::class, function (Serializing $event) use ($app) {
             if ($event->isSerializer(ForumSerializer::class) && $event->actor->isGuest()) {
-                $event->attributes['fof-oauth'] = $app->make('fof-oauth.providers.forum');
+                $event->attributes['fof-oauth'] = app()->make('fof-oauth.providers.forum');
             }
         });
     }))
