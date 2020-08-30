@@ -8,6 +8,7 @@ use Flarum\Foundation\ErrorHandling\Registry;
 use Flarum\Foundation\ErrorHandling\Reporter;
 use FoF\OAuth\Errors\AuthenticationException;
 use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -35,7 +36,7 @@ class ErrorHandler implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (app()->inDebugMode()) {
+        if (Arr::get(app('flarum.config'), 'debug', true)) {
             return $handler->handle($request);
         }
 

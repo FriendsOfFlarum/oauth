@@ -15,8 +15,8 @@
   "license": "MIT",
   "require": {
     "flarum/core": "^0.1.0-beta.12",
-    "fof/extend": ">=0.3.0",
-    "fof/components": ">=0.1.1"
+    "fof/extend": "dev-master",
+    "fof/components": "dev-master"
   },
   "suggest": {
     "league/oauth1-client": "Twitter OAuth",

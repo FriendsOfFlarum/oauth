@@ -9,10 +9,12 @@ const {
 } = settings;
 
 export default class AuthSettingsModal extends SettingsModal {
-    init() {
-        super.init();
+    oninit(vnode) {
+        super.oninit(vnode);
 
         this.showing = [];
+
+        this.setting = this.setting.bind(this);
     }
 
     title() {
@@ -26,7 +28,9 @@ export default class AuthSettingsModal extends SettingsModal {
     form() {
         return [
             <div className="Form-group">
-                <BooleanItem key="fof-oauth.only_icons">{app.translator.trans(`fof-oauth.admin.settings.only_icons_label`)}</BooleanItem>
+                <BooleanItem name="fof-oauth.only_icons" setting={this.setting}>
+                    {app.translator.trans(`fof-oauth.admin.settings.only_icons_label`)}
+                </BooleanItem>
             </div>,
 
             <hr />,
@@ -45,7 +49,7 @@ export default class AuthSettingsModal extends SettingsModal {
                     >
                         <div className="Provider--info">
                             <div className="Form-group">
-                                <BooleanItem key={`fof-oauth.${name}`}>
+                                <BooleanItem name={`fof-oauth.${name}`} setting={this.setting}>
                                     {icon(provider.icon)}
                                     <span>{app.translator.trans(`fof-oauth.lib.providers.${name}`)}</span>
                                 </BooleanItem>
@@ -85,8 +89,9 @@ export default class AuthSettingsModal extends SettingsModal {
 
                                     {Object.keys(provider.fields).map((field) => (
                                         <StringItem
-                                            key={`fof-oauth.${name}.${field}`}
-                                            {...{ [showSettings && provider.fields[field].includes('required') ? 'required' : '']: true }}
+                                            name={`fof-oauth.${name}.${field}`}
+                                            setting={this.setting}
+                                            {...{ [showSettings && provider.fields[field].includes('required') ? 'required' : null]: true }}
                                         >
                                             {app.translator.trans(`fof-oauth.admin.settings.providers.${name}.${field}_label`)}
                                         </StringItem>
