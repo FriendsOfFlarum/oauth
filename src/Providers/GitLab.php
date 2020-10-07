@@ -31,6 +31,7 @@ class GitLab extends Provider
         return [
             'client_id' => 'required',
             'client_secret' => 'required',
+            'domain' => '',
         ];
     }
 
@@ -43,11 +44,18 @@ class GitLab extends Provider
 
     public function provider(string $redirectUri): AbstractProvider
     {
-        return new GitlabProvider([
+        $options = [
             'clientId' => $this->getSetting('client_id'),
             'clientSecret' => $this->getSetting('client_secret'),
             'redirectUri' => $redirectUri,
-        ]);
+        ];
+        $domain = $this->getSetting('domain');
+
+        if ($domain) {
+            $options['domain'] = $domain;
+        }
+
+        return new GitlabProvider($options);
     }
 
     public function options(): array
