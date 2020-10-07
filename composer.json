@@ -25,6 +25,13 @@
     "omines/oauth2-gitlab": "GitLab OAuth",
     "wohali/oauth2-discord-new": "Discord OAuth"
   },
+  "replace": {
+    "flarum/auth-facebook": "*",
+    "flarum/auth-github": "*",
+    "flarum/auth-twitter": "*",
+    "fof/auth-discord": "*",
+    "fof/auth-gitlab": "*"
+  },
   "authors": [
     {
       "name": "David Sevilla Martin",
