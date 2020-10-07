@@ -45,8 +45,6 @@ class OAuthServiceProvider extends ServiceProvider
         return function () use ($cb) {
             $providers = $this->app->tagged('fof-oauth.providers');
 
-//            dd($providers);
-
             return array_map(function ($provider) use ($cb) {
                 return $cb($provider);
             }, iterator_to_array($providers));
