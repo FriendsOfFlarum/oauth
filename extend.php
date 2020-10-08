@@ -3,7 +3,7 @@
 /*
  * This file is part of fof/oauth.
  *
- * Copyright (c) 2020 David Sevilla Martin.
+ * Copyright (c) 2020 FriendsOfFlarum.
  *
  * For the full copyright and license information, please view the LICENSE.md
  * file that was distributed with this source code.
@@ -34,7 +34,7 @@ return [
             $document->payload['fof-oauth'] = app('fof-oauth.providers.admin');
         }),
 
-    new Extend\Locales(__DIR__ . '/resources/locale'),
+    new Extend\Locales(__DIR__.'/resources/locale'),
 
     (new Extend\Middleware('forum'))
         ->add(Middleware\ErrorHandler::class),
@@ -49,10 +49,10 @@ return [
     (new Extend\Compat(function (Application $app, Dispatcher $events) {
         $app->register(OAuthServiceProvider::class);
 
-        $events->listen(Serializing::class, function (Serializing $event) use ($app) {
+        $events->listen(Serializing::class, function (Serializing $event) {
             if ($event->isSerializer(ForumSerializer::class) && $event->actor->isGuest()) {
                 $event->attributes['fof-oauth'] = app()->make('fof-oauth.providers.forum');
             }
         });
-    }))
+    })),
 ];

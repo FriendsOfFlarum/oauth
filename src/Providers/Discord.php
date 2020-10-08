@@ -1,8 +1,15 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) 2020 FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
 
 namespace FoF\OAuth\Providers;
-
 
 use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Provider;
@@ -24,19 +31,17 @@ class Discord extends Provider
     public function fields(): array
     {
         return [
-            'client_id' => 'required',
+            'client_id'     => 'required',
             'client_secret' => 'required',
         ];
     }
 
-
-
     public function provider(string $redirectUri): AbstractProvider
     {
         return new DiscordProvider([
-            'clientId' => $this->getSetting('client_id'),
+            'clientId'     => $this->getSetting('client_id'),
             'clientSecret' => $this->getSetting('client_secret'),
-            'redirectUri' => $redirectUri,
+            'redirectUri'  => $redirectUri,
         ]);
     }
 

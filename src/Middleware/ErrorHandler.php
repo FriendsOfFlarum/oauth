@@ -1,10 +1,16 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) 2020 FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
 
 namespace FoF\OAuth\Middleware;
 
-
-use Flarum\Foundation\ErrorHandling\Registry;
 use Flarum\Foundation\ErrorHandling\Reporter;
 use FoF\OAuth\Errors\AuthenticationException;
 use Illuminate\Contracts\View\Factory as ViewFactory;
@@ -52,7 +58,8 @@ class ErrorHandler implements MiddlewareInterface
         }
     }
 
-    protected function getMessage(AuthenticationException $exception) {
+    protected function getMessage(AuthenticationException $exception)
+    {
         $code = $exception->getShortCode();
         $key = "fof-oauth.forum.error.$code";
         $translation = $this->translator->trans($key);
@@ -62,7 +69,8 @@ class ErrorHandler implements MiddlewareInterface
             : $translation;
     }
 
-    protected function report(AuthenticationException $e) {
+    protected function report(AuthenticationException $e)
+    {
         $reporters = app()->tagged(Reporter::class);
 
         if ($e->shouldBeReported()) {

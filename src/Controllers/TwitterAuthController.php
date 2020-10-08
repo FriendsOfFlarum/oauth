@@ -1,8 +1,15 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) 2020 FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
 
 namespace FoF\OAuth\Controllers;
-
 
 use Flarum\Forum\Auth\Registration;
 use Flarum\Forum\Auth\ResponseFactory;
@@ -65,9 +72,9 @@ class TwitterAuthController implements RequestHandlerInterface
         $redirectUri = $this->url->to('forum')->route('auth.twitter');
 
         $server = new Twitter([
-            'identifier' => $this->getSetting('api_key'),
-            'secret' => $this->getSetting('api_secret'),
-            'callback_uri' => $redirectUri
+            'identifier'   => $this->getSetting('api_key'),
+            'secret'       => $this->getSetting('api_secret'),
+            'callback_uri' => $redirectUri,
         ]);
 
         $session = $request->getAttribute('session');
@@ -76,7 +83,7 @@ class TwitterAuthController implements RequestHandlerInterface
         $oAuthToken = Arr::get($queryParams, 'oauth_token');
         $oAuthVerifier = Arr::get($queryParams, 'oauth_verifier');
 
-        if (! $oAuthToken || ! $oAuthVerifier) {
+        if (!$oAuthToken || !$oAuthVerifier) {
             $temporaryCredentials = $server->getTemporaryCredentials();
 
             $session->put('temporary_credentials', serialize($temporaryCredentials));

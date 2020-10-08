@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) 2020 FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Database\Schema\Builder;
 
@@ -26,5 +35,5 @@ return [
         $schema->getConnection()->table('settings')
             ->where('key', 'LIKE', 'fof-oauth.%')
             ->delete();
-    }
+    },
 ];

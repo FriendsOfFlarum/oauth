@@ -1,8 +1,15 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) 2020 FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
 
 namespace FoF\OAuth\Controllers;
-
 
 use Flarum\Forum\Auth\Registration;
 use Flarum\Http\Exception\RouteNotFoundException;
@@ -36,7 +43,7 @@ class AuthController extends Controller
         }
 
         if (!$this->provider) {
-            throw new RouteNotFoundException;
+            throw new RouteNotFoundException();
         }
 
         return parent::handle($request);

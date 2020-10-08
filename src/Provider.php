@@ -1,8 +1,15 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) 2020 FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
 
 namespace FoF\OAuth;
-
 
 use Flarum\Forum\Auth\Registration;
 use Flarum\Settings\SettingsRepositoryInterface;
@@ -29,29 +36,32 @@ abstract class Provider
 
     abstract public function fields(): array;
 
-    public function icon(): string {
+    public function icon(): string
+    {
         return "fab fa-{$this->name()}";
     }
 
-
     // Controller options
 
-    public function provider(string $redirectUri): AbstractProvider {
+    public function provider(string $redirectUri): AbstractProvider
+    {
         //
     }
 
-    public function options(): array {
+    public function options(): array
+    {
         return [];
     }
 
-    public function suggestions(Registration $registration, $user, string $token) {
+    public function suggestions(Registration $registration, $user, string $token)
+    {
         //
     }
 
-
     // Helpers
 
-    public function enabled() {
+    public function enabled()
+    {
         return $this->settings->get("fof-oauth.{$this->name()}");
     }
 

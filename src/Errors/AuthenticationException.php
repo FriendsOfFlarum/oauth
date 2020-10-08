@@ -1,8 +1,15 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) 2020 FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
 
 namespace FoF\OAuth\Errors;
-
 
 use Exception;
 use Flarum\Foundation\KnownError;
@@ -13,7 +20,7 @@ class AuthenticationException extends Exception implements KnownError
     const MESSAGE_TYPES = [
         'bad_verification_code' => [
             'OAuthException: This authorization code has expired.',
-            'Received HTTP status code [401] with message "This feature is temporarily unavailable" when getting token credentials.'
+            'Received HTTP status code [401] with message "This feature is temporarily unavailable" when getting token credentials.',
         ],
 
         'invalid_state' => [
