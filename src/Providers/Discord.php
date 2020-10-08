@@ -5,7 +5,6 @@ namespace FoF\OAuth\Providers;
 
 
 use Flarum\Forum\Auth\Registration;
-use FoF\OAuth\Controllers;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use Wohali\OAuth2\Client\Provider\Discord as DiscordProvider;
@@ -22,22 +21,12 @@ class Discord extends Provider
         return 'https://discordapp.com/developers/applications';
     }
 
-    public function package(): string
-    {
-        return 'wohali/oauth2-discord-new';
-    }
-
     public function fields(): array
     {
         return [
             'client_id' => 'required',
             'client_secret' => 'required',
         ];
-    }
-
-    public function available(): bool
-    {
-        return class_exists(DiscordProvider::class);
     }
 
 

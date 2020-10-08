@@ -34,9 +34,7 @@ class OAuthServiceProvider extends ServiceProvider
                 'name' => $provider->name(),
                 'icon' => $provider->icon(),
                 'link' => $provider->link(),
-                'package' => $provider->package(),
                 'fields' => $provider->fields(),
-                'available' => $provider->available(),
             ];
         }));
     }

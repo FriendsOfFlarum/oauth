@@ -21,11 +21,6 @@ class GitLab extends Provider
         return 'https://gitlab.com/profile/applications';
     }
 
-    public function package(): string
-    {
-        return 'omines/oauth2-gitlab';
-    }
-
     public function fields(): array
     {
         return [
@@ -33,11 +28,6 @@ class GitLab extends Provider
             'client_secret' => 'required',
             'domain' => '',
         ];
-    }
-
-    public function available(): bool
-    {
-        return class_exists(GitlabProvider::class);
     }
 
 

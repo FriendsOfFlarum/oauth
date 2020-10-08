@@ -5,7 +5,6 @@ namespace FoF\OAuth\Providers;
 
 
 use Flarum\Forum\Auth\Registration;
-use FoF\OAuth\Controllers;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Facebook as FacebookProvider;
@@ -22,22 +21,12 @@ class Facebook extends Provider
         return 'https://developers.facebook.com/apps/';
     }
 
-    public function package(): string
-    {
-        return 'league/oauth2-facebook';
-    }
-
     public function fields(): array
     {
         return [
             'app_id' => 'required',
             'app_secret' => 'required',
         ];
-    }
-
-    public function available(): bool
-    {
-        return class_exists(FacebookProvider::class);
     }
 
 

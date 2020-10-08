@@ -36,17 +36,13 @@ export default class AuthSettingsModal extends SettingsModal {
             <hr />,
 
             app.data['fof-oauth'].map((provider) => {
-                const { name, available } = provider;
+                const { name } = provider;
                 const enabled = !!Number(this.setting(`fof-oauth.${name}`)());
                 const showSettings = !!this.showing[name];
                 const callbackUrl = `${app.forum.attribute('baseUrl')}/auth/${name}`;
 
                 return (
-                    <div
-                        className={`Provider ${enabled ? 'enabled' : 'disabled'} ${available ? 'available' : 'unavailable'} ${
-                            showSettings && 'showing'
-                        }`}
-                    >
+                    <div className={`Provider ${enabled ? 'enabled' : 'disabled'} ${showSettings && 'showing'}`}>
                         <div className="Provider--info">
                             <div className="Form-group">
                                 <BooleanItem name={`fof-oauth.${name}`} setting={this.setting}>
@@ -60,48 +56,42 @@ export default class AuthSettingsModal extends SettingsModal {
                                     className={`Button Button--rounded ${this.showing[name] && 'active'}`}
                                     onclick={() => (this.showing[name] = !showSettings)}
                                 >
-                                    {icon(`fas fa-${available ? 'cog' : 'question'}`)}
+                                    {icon(`fas fa-cog`)}
                                 </Button>
                             }
                         </div>
 
                         <div className="Provider--settings">
-                            {available ? (
-                                <div>
-                                    <p>
-                                        {app.translator.trans(`fof-oauth.admin.settings.providers.${name}.description`, {
-                                            link: (
-                                                <a href={provider.link} target="_blank">
-                                                    {provider.link}
-                                                </a>
-                                            ),
-                                        })}
-                                    </p>
-                                    <p>
-                                        {app.translator.trans(`fof-oauth.admin.settings.providers.callback_url_text`, {
-                                            url: (
-                                                <a href={callbackUrl} target="_blank">
-                                                    {callbackUrl}
-                                                </a>
-                                            ),
-                                        })}
-                                    </p>
-
-                                    {Object.keys(provider.fields).map((field) => (
-                                        <StringItem
-                                            name={`fof-oauth.${name}.${field}`}
-                                            setting={this.setting}
-                                            {...{ [showSettings && provider.fields[field].includes('required') ? 'required' : null]: true }}
-                                        >
-                                            {app.translator.trans(`fof-oauth.admin.settings.providers.${name}.${field}_label`)}
-                                        </StringItem>
-                                    ))}
-                                </div>
-                            ) : (
+                            <div>
                                 <p>
-                                    {app.translator.trans('fof-oauth.admin.settings.providers.requires_package_text', { package: provider.package })}
+                                    {app.translator.trans(`fof-oauth.admin.settings.providers.${name}.description`, {
+                                        link: (
+                                            <a href={provider.link} target="_blank">
+                                                {provider.link}
+                                            </a>
+                                        ),
+                                    })}
                                 </p>
-                            )}
+                                <p>
+                                    {app.translator.trans(`fof-oauth.admin.settings.providers.callback_url_text`, {
+                                        url: (
+                                            <a href={callbackUrl} target="_blank">
+                                                {callbackUrl}
+                                            </a>
+                                        ),
+                                    })}
+                                </p>
+
+                                {Object.keys(provider.fields).map((field) => (
+                                    <StringItem
+                                        name={`fof-oauth.${name}.${field}`}
+                                        setting={this.setting}
+                                        {...{ [showSettings && provider.fields[field].includes('required') ? 'required' : null]: true }}
+                                    >
+                                        {app.translator.trans(`fof-oauth.admin.settings.providers.${name}.${field}_label`)}
+                                    </StringItem>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 );

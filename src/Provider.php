@@ -27,11 +27,7 @@ abstract class Provider
 
     abstract public function link(): string;
 
-    abstract public function package(): string;
-
     abstract public function fields(): array;
-
-    abstract public function available(): bool;
 
     public function icon(): string {
         return "fab fa-{$this->name()}";
@@ -56,9 +52,7 @@ abstract class Provider
     // Helpers
 
     public function enabled() {
-        $enabled = $this->settings->get("fof-oauth.{$this->name()}");
-
-        return $enabled && $this->available();
+        return $this->settings->get("fof-oauth.{$this->name()}");
     }
 
     protected function getSetting($key): string

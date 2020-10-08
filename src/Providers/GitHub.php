@@ -5,7 +5,6 @@ namespace FoF\OAuth\Providers;
 
 
 use Flarum\Forum\Auth\Registration;
-use FoF\OAuth\Controllers;
 use FoF\OAuth\Provider;
 use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
@@ -28,22 +27,12 @@ class GitHub extends Provider
         return 'https://github.com/settings/developers';
     }
 
-    public function package(): string
-    {
-        return 'league/oauth2-github';
-    }
-
     public function fields(): array
     {
         return [
             'client_id' => 'required',
             'client_secret' => 'required',
         ];
-    }
-
-    public function available(): bool
-    {
-        return class_exists(GitHubProvider::class);
     }
 
 

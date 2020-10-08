@@ -7,7 +7,6 @@ fof-oauth:
 
       providers:
         callback_url_text: If necessary, set the callback URL to {url}.
-        requires_package_text: This service requires the Composer package <code>{package}</code> to be installed.
 
         discord:
           description: Create an app at {link}. Add the redirect URL in the OAuth2 tab.

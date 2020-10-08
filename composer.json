@@ -16,14 +16,13 @@
   "require": {
     "flarum/core": "^0.1.0-beta.14",
     "fof/extend": ">=0.3.0",
-    "fof/components": ">=0.2.0"
-  },
-  "suggest": {
-    "league/oauth1-client": "Twitter OAuth",
-    "league/oauth2-facebook": "Facebook OAuth",
-    "league/oauth2-github": "GitHub OAuth",
-    "omines/oauth2-gitlab": "GitLab OAuth",
-    "wohali/oauth2-discord-new": "Discord OAuth"
+    "fof/components": ">=0.2.0",
+
+    "league/oauth1-client": "^1.8.2",
+    "league/oauth2-facebook": "^2.0.3",
+    "league/oauth2-github": "^2.0.0",
+    "omines/oauth2-gitlab": "^3.3.0",
+    "wohali/oauth2-discord-new": "^1.1.0"
   },
   "replace": {
     "flarum/auth-facebook": "*",
