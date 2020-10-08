@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/fof/oauth.svg)](https://packagist.org/packages/fof/oauth) [![OpenCollective](https://img.shields.io/badge/opencollective-fof-blue.svg)](https://opencollective.com/fof/donate) [![Donate](https://img.shields.io/badge/donate-datitisev-important.svg)](https://datitisev.me/donate)
 
 
-A [Flarum](http://flarum.org) extension. Allow users to log in with GitHub, Twitter, Facebook, and more!
+A [Flarum](http://flarum.org) extension. Allow users to log in with GitHub, Twitter, Facebook, Discord, and GitLab!
 
 ### Installation
 
