@@ -55,12 +55,13 @@ class Discord extends Provider
         $this->verifyEmail($email = $user->getEmail());
 
         $hash = $user->getAvatarHash();
-        $file = $hash ? "{$user->getId()}/{$user->getAvatarHash()}.png" : null;
-        $avatar = $file ? "https://cdn.discordapp.com/avatars/$file" : "https://cdn.discordapp.com/embed/avatars/0.png";
+        $file = $hash ?
+            "https://cdn.discordapp.com/avatars/{$user->getId()}/{$user->getAvatarHash()}.png"
+            : "https://cdn.discordapp.com/embed/avatars/0.png";
 
         $registration
             ->provideTrustedEmail($email)
-            ->provideAvatar($avatar)
+            ->provideAvatar($file)
             ->suggestUsername($user->getUsername() ?: '')
             ->setPayload($user->toArray());
     }
