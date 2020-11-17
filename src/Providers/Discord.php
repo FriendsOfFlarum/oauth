@@ -56,7 +56,7 @@ class Discord extends Provider
 
         $hash = $user->getAvatarHash();
         $file = $hash ? "{$user->getId()}/{$user->getAvatarHash()}.png" : null;
-        $avatar = ($file) ? "https://cdn.discordapp.com/avatars/$file" : "https://cdn.discordapp.com/embed/avatars/0.png";
+        $avatar = $file ? "https://cdn.discordapp.com/avatars/$file" : "https://cdn.discordapp.com/embed/avatars/0.png";
 
         $registration
             ->provideTrustedEmail($email)
