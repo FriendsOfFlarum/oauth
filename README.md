@@ -7,8 +7,6 @@ A [Flarum](http://flarum.org) extension. Allow users to log in with GitHub, Twit
 
 ### Installation
 
-Use [Bazaar](https://discuss.flarum.org/d/5151-flagrow-bazaar-the-extension-marketplace) or install manually with composer:
-
 ```sh
 composer require fof/oauth
 ```
@@ -24,6 +22,7 @@ composer update fof/oauth
 
 [![OpenCollective](https://img.shields.io/badge/donate-friendsofflarum-44AEE5?style=for-the-badge&logo=open-collective)](https://opencollective.com/fof/donate) [![GitHub](https://img.shields.io/badge/donate-datitisev-ea4aaa?style=for-the-badge&logo=github)](https://datitisev.me/donate/github)
 
+- [Discuss](https://discuss.flarum.org/d/25182)
 - [Packagist](https://packagist.org/packages/fof/oauth)
 - [GitHub](https://github.com/FriendsOfFlarum/oauth)
 
