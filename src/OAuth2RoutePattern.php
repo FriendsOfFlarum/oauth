@@ -1,11 +1,20 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) 2020 FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth;
 
 /**
  * We use an object that can be cast to string, because it allows us to use the Flarum Route extender
  * Without having to build the URL during the booting container event
- * By using __toString, the code will only be evaluated when Flarum resolves flarum.forum.routes
+ * By using __toString, the code will only be evaluated when Flarum resolves flarum.forum.routes.
  */
 class OAuth2RoutePattern
 {
@@ -26,6 +35,6 @@ class OAuth2RoutePattern
             $providerNames[] = $provider->name();
         }
 
-        return '/auth/{provider:' . implode('|', $providerNames) . '}';
+        return '/auth/{provider:'.implode('|', $providerNames).'}';
     }
 }
