@@ -45,6 +45,11 @@ fof-oauth:
           client_id_label: => fof-oauth.ref.settings.client_id
           client_secret_label: => fof-oauth.ref.settings.client_secret
 
+        linkedin:
+          description: Create an application at {link}.
+          client_id_label: => fof-oauth.ref.settings.client_id
+          client_secret_label: => fof-oauth.ref.settings.client_secret
+
   forum:
     log_in:
       with_button: Log In with {provider}
@@ -61,6 +66,7 @@ fof-oauth:
       gitlab: GitLab
       twitter: Twitter
       google: Google
+      linkedin: LinkedIn
 
   ref:
     settings:

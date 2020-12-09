@@ -23,6 +23,7 @@ class OAuthServiceProvider extends ServiceProvider
             Providers\GitHub::class,
             Providers\GitLab::class,
             Providers\Twitter::class,
+            Providers\LinkedIn::class,
             Providers\Google::class,
         ], 'fof-oauth.providers');
 

@@ -1,6 +1,6 @@
 {
   "name": "fof/oauth",
-  "description": "Allow users to log in with GitHub, Twitter, Facebook, Google, and more!",
+  "description": "Allow users to log in with GitHub, Twitter, Facebook, Google, LinkedIn, and more!",
   "keywords": [
     "flarum",
     "friendsofflarum",
@@ -10,7 +10,8 @@
     "github",
     "gitlab",
     "twitter",
-    "google"
+    "google",
+    "linkedin"
   ],
   "type": "flarum-extension",
   "license": "MIT",
@@ -23,14 +24,17 @@
     "league/oauth2-github": "^2.0.0",
     "league/oauth2-google": "^3.0.3",
     "omines/oauth2-gitlab": "^3.3.0",
-    "wohali/oauth2-discord-new": "^1.1.0"
+    "wohali/oauth2-discord-new": "^1.1.0",
+    "league/oauth2-linkedin": "^5.1.2"
   },
   "replace": {
     "flarum/auth-facebook": "*",
     "flarum/auth-github": "*",
     "flarum/auth-twitter": "*",
     "fof/auth-discord": "*",
-    "fof/auth-gitlab": "*"
+    "fof/auth-gitlab": "*",
+    "luuhai48/oauth-google": "*",
+    "luuhai48/oauth-linkedin": "*"
   },
   "authors": [
     {
