@@ -1,3 +1,5 @@
+@import (css) url(https://fonts.googleapis.com/css?family=Roboto);
+
 .LogInButton--discord {
   .Button--color(#fff, #7289da);
 }
@@ -19,7 +21,45 @@
 }
 
 .LogInButton--google {
-  .Button--color(#fff, #4286f4);
+  color: white;
+  background-color: #4285f4;
+  border-radius: 2px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.218s, border-color 0.218s, box-shadow 0.218s;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  outline: none;
+  padding: 1px;
+  user-select: none;
+
+  &:hover {
+    box-shadow: 0 0 3px 3px rgba(66, 133, 244, 0.3);
+  }
+  &:hover, &:active, &:focus {
+    background-color: #4285f4;
+  }
+
+  .Button-icon {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAMAAABHPGVmAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAC3UExURUdwTP84AEyxTQ550wx40xp7zv9eAA1505SJXiV8zLiVIv88AP89AP85AE6xTF2yRWSyQf86AP5jAFKxSv89AFyxRlexSU6xTP83AP86AP/DAFCxSw150v/DAP84AP7AAP8/AP/CAAx40w950P89AFCxS1CxS//DAP/CAAt40/nCAhF50B6IsTKah//BAA140rm8G0qxTgl41P/DAP83AP+EAIu3MebBBj+maf9aAP+kAP+2AGS0Q8y4bCgAAAAxdFJOUwDp8hDyNCLTBBUKVobW4C8YvxN+bUdaz/Oo7bik2Ps2RVnEYDWap72m4YVG/f1tfvn45KBTAAAEEklEQVRo3t2a61biMBSF0wI10qb3q4VaEVAHFQt1xrm8/3NNuBdI2iQNzFqz1/If+HH2zjknFQFgU18b60biIKRgIeQkhp9rfSBPUMsNBylZWWb4Z6csRo6hywFBzU9QVlZ+e1WZ4vjjthxXT5SyThiuJLrWAqH5TlayCBmiGM1AJbMUIYzrcyDEMDBnNKqSToZ0riPgGkrJryxOOIrJnVJQSIeMVvlKKazYcNmsysoWylgs05KypZxxI8MpW8txL89Q9IZheHnGNeoAbnJ5BjQuzwB+xjSh4jjOhBl5U5/HCC92PR+Pc903EqQIMNz60Fdr1q3MJeiO/dOl2cioDwQZeJFDeL7+qwuhkVFrFvIp4whC13fYGTVmxfUbz93O7GYG/WRlKK/fEBCMHTaGRt3nLIPbNWIGBnj//NlmBfV1BoY2XP4iUWKfdZkyvOZ9uVz+/jzPg5XBtHCfliudFWNIZICH5Ua/fx4va1ciAz4vd6pahjSJjFXsex0si3OZjL1bG8s+LxFI1a2KZXLNOnLrkL8BLufWzjLJhYBvy3N9Si6k/0yA3N3XvKNzy64OXK86d0iAPNU8zXQGNxwaYPXA/R0B8l5XyM2CU4+E3Jvc4oYMiLkPXamQESDl/gylQm7AEwHyDUiFdMGQM3dpkAe5kAUJUnu4hCB3/w1k+I8gVwlePuQqzXiFsfJCHJBPsgfk+zVGPXFpPUiFzM9vRE2hdEZduoi5P4I+6Xh9WDWXwR5dM1KVLz3SlejH98ITu/rMSKWMOoTLHWYUkS104x2Qc8fX1JPkP/4UWKEIpNclX1bASSirMlYSKYVcyCoScNQpO0YhkgoxkcVgfVIrnbKxai3T4mXcjhY0t6p+fRQVpZyGwfmC7tb+fB2s2hrG96z12F3Q3do9Bv34c8woVK4TNnshz5RZ9RHl45SBKQHH6aVMtFUnbnR/d2rVNnxmSm9EvdEfnraIDExhdGxGm8yj28OLLJMMKVSP5cudx5dFcyEAeAVN08Z+sb036k7sVM+4HVEpZlhbDAzSovh6Jd8gZsevDVUqpUgDKgZak/UbyZTBSaf1p3RIoaYhsf37wWT/2V7pzc6Q/QYTeYF9/Llsy0ur5b8R1u6Z6gzbcKZeaFk2lmWF3iQ6ff1bg1lre72iWapqRpFpkj/PF7VFKvWnRUtV4z8PZBtLJI9CCoQlfCZtKd05vbOC9pRN/PO6XSSJUsvAQ6I95et13rBTYfv0GfYDtFqe5Ihp09kTtQUjZbxKwVA4GNVjvUhBYcuigOca1ffMS5ax737uZKYB/1/eYTDlwOC9JvYvRewYYcSmaTyG3jQnQct/jLLD8x14RJiGNpAgO/BS0jJUzdQL8eaX9U0LxKBJhYS38NQLLEaX/gIGHNymY/90kQAAAABJRU5ErkJggg==');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 18px 18px;
+    background-color: white;
+    padding: 16px;
+    &::before {
+      display: none;
+    }
+  }
+
+  .Button-label {
+    font-size: 14px;
+    font-weight: 500;
+    font-family: "Roboto", sans-serif;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 .LogInButton--linkedin {
@@ -45,6 +85,9 @@
     .Button-icon {
       font-size: 30px;
       margin-right: 0;
+    }
+    .Button-label {
+      display: none;
     }
   }
 }
