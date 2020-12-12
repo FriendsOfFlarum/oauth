@@ -24,7 +24,6 @@
   color: white;
   background-color: #4285f4;
   border-radius: 2px;
-  padding: 0;
   display: flex;
   align-items: center;
   transition: background-color 0.218s, border-color 0.218s, box-shadow 0.218s;
@@ -74,7 +73,12 @@
   flex-wrap: wrap;
   width: 100%;
 
-  .LogInButton {
+  .LogInButton--google {
+    order: 999999;
+    margin: 15px auto;
+  }
+
+  .LogInButton:not(.LogInButton--google) {
     width: 50px;
     height: 50px;
     vertical-align: center;

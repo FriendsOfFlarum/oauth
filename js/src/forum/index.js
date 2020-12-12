@@ -16,11 +16,7 @@ app.initializers.add('fof/oauth', () => {
 
             app.forum
                 .attribute('fof-oauth')
-                .filter(
-                    onlyIcons
-                    ? (item) => item && item.name !== "google"
-                    : Boolean
-                )
+                .filter(Boolean)
                 .forEach(({ name, icon }) =>
                     buttons.add(
                         name,
@@ -49,22 +45,6 @@ app.initializers.add('fof/oauth', () => {
 
         extend(LogInButtons.prototype, 'view', function (vdom) {
             vdom.attrs.className += ' LogInButtons--icons';
-        });
-
-        override(LogInModal.prototype, 'body', function () {
-            return [
-                <LogInButtons />,
-                (app.forum.attribute('fof-oauth').find(item => item && item.name === "google")
-                ? <div class="LogInButtons">
-                    <LogInButton className={'Button LogInButton--google'} icon={'fab fa-google'} path={'/auth/google'}>
-                        {app.translator.trans('fof-oauth.forum.log_in.with_button', {
-                            provider: app.translator.trans('fof-oauth.lib.providers.google'),
-                        })}
-                    </LogInButton>
-                </div>
-                : null),
-                <div className="Form Form--centered">{this.fields().toArray()}</div>
-            ];
         });
     }
 });
