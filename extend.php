@@ -11,14 +11,12 @@
 
 namespace FoF\OAuth;
 
-use Flarum\Api\Event\Serializing;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Foundation\Application;
 use Flarum\Frontend\Document;
 use FoF\Components\Extend\AddFofComponents;
 use FoF\Extend\Extend\ExtensionSettings;
-use Illuminate\Events\Dispatcher;
 
 return [
     new AddFofComponents(),
@@ -46,13 +44,17 @@ return [
         ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class)
         ->get('/auth/{provider}', 'fof-oauth', Controllers\AuthController::class),
 
-    (new Extend\Compat(function (Application $app, Dispatcher $events) {
+    function (Application $app) {
         $app->register(OAuthServiceProvider::class);
+    },
 
-        $events->listen(Serializing::class, function (Serializing $event) {
-            if ($event->isSerializer(ForumSerializer::class) && $event->actor->isGuest()) {
-                $event->attributes['fof-oauth'] = app()->make('fof-oauth.providers.forum');
+    (new Extend\ApiSerializer(ForumSerializer::class))
+        ->mutate(function (ForumSerializer $serializer) {
+            $attributes = [];
+            if ($serializer->getActor()->isGuest()) {
+                $attributes['fof-oauth'] = app()->make('fof-oauth.providers.forum');
             }
-        });
-    })),
+
+            return $attributes;
+        }),
 ];

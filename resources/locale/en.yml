@@ -1,8 +1,6 @@
 fof-oauth:
   admin:
     settings:
-      title: FriendsOfFlarum OAuth
-
       only_icons_label: Only show the Log In Button icons (alternative layout)
 
       providers:

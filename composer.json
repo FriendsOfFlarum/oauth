@@ -1,60 +1,73 @@
 {
-  "name": "fof/oauth",
-  "description": "Allow users to log in with GitHub, Twitter, Facebook, Google, and more!",
-  "keywords": [
-    "flarum",
-    "friendsofflarum",
-    "oauth",
-    "facebook",
-    "discord",
-    "github",
-    "gitlab",
-    "twitter",
-    "google"
-  ],
-  "type": "flarum-extension",
-  "license": "MIT",
-  "require": {
-    "flarum/core": "^0.1.0-beta.14",
-    "fof/extend": ">=0.3.0",
-    "fof/components": ">=0.2.0",
-    "league/oauth1-client": "^1.8.2",
-    "league/oauth2-facebook": "^2.0.3",
-    "league/oauth2-github": "^2.0.0",
-    "league/oauth2-google": "^3.0.3",
-    "omines/oauth2-gitlab": "^3.3.0",
-    "wohali/oauth2-discord-new": "^1.1.0"
-  },
-  "replace": {
-    "flarum/auth-facebook": "*",
-    "flarum/auth-github": "*",
-    "flarum/auth-twitter": "*",
-    "fof/auth-discord": "*",
-    "fof/auth-gitlab": "*"
-  },
-  "authors": [
-    {
-      "name": "David Sevilla Martin",
-      "email": "me+fof@datitisev.me",
-      "role": "Developer"
-    }
-  ],
-  "autoload": {
-    "psr-4": {
-      "FoF\\OAuth\\": "src/"
-    }
-  },
-  "extra": {
-    "flarum-extension": {
-      "title": "FoF OAuth",
-      "icon": {
-        "name": "fas fa-sign-in-alt",
-        "backgroundColor": "#e74c3c",
-        "color": "#fff"
-      }
+    "name": "fof/oauth",
+    "description": "Allow users to log in with GitHub, Twitter, Facebook, Google, and more!",
+    "keywords": [
+        "flarum",
+        "friendsofflarum",
+        "oauth",
+        "facebook",
+        "discord",
+        "github",
+        "gitlab",
+        "twitter",
+        "google"
+    ],
+    "type": "flarum-extension",
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/FriendsOfFlarum/oauth/issues",
+        "source": "https://github.com/FriendsOfFlarum/oauth",
+        "forum": "https://discuss.flarum.org/d/25182"
     },
-    "flagrow": {
-      "discuss": "https://discuss.flarum.org/d/25182"
+    "homepage": "https://friendsofflarum.org",
+    "funding": [
+        {
+            "type": "website",
+            "url": "https://opencollective.com/fof/donate"
+        }
+    ],
+    "require": {
+        "flarum/core": "^0.1.0-beta.15",
+        "fof/extend": ">=0.3.0",
+        "fof/components": ">=0.2.0",
+        "league/oauth1-client": "^1.8.2",
+        "league/oauth2-facebook": "^2.0.3",
+        "league/oauth2-github": "^2.0.0",
+        "league/oauth2-google": "^3.0.3",
+        "omines/oauth2-gitlab": "^3.3.0",
+        "wohali/oauth2-discord-new": "^1.1.0"
+    },
+    "replace": {
+        "flarum/auth-facebook": "*",
+        "flarum/auth-github": "*",
+        "flarum/auth-twitter": "*",
+        "fof/auth-discord": "*",
+        "fof/auth-gitlab": "*"
+    },
+    "authors": [
+        {
+            "name": "David Sevilla Martin",
+            "email": "me+fof@datitisev.me",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "FoF\\OAuth\\": "src/"
+        }
+    },
+    "extra": {
+        "flarum-extension": {
+            "title": "FoF OAuth",
+            "category": "authentication",
+            "icon": {
+                "name": "fas fa-sign-in-alt",
+                "backgroundColor": "#e74c3c",
+                "color": "#fff"
+            }
+        },
+        "flagrow": {
+            "discuss": "https://discuss.flarum.org/d/25182"
+        }
     }
-  }
 }
