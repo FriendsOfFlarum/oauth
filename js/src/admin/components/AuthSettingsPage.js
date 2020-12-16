@@ -19,17 +19,17 @@ export default class AuthSettingsPage extends ExtensionPage {
 
     content() {
         return [
-            m('.container', [
-                m('.AuthSettingsPage', [
+            <div class="container">
+                <div class="AuthSettingsPage">
                     <div className="Form-group">
                         <BooleanItem name="fof-oauth.only_icons" setting={this.setting}>
                             {app.translator.trans(`fof-oauth.admin.settings.only_icons_label`)}
                         </BooleanItem>
-                    </div>,
+                    </div>
 
-                    <hr />,
+                    <hr />
 
-                    app.data['fof-oauth'].map((provider) => {
+                    {app.data['fof-oauth'].map((provider) => {
                         const { name } = provider;
                         const enabled = !!Number(this.setting(`fof-oauth.${name}`)());
                         const showSettings = !!this.showing[name];
@@ -89,10 +89,10 @@ export default class AuthSettingsPage extends ExtensionPage {
                                 </div>
                             </div>
                         );
-                    }),
-                    this.submitButton(),
-                ]),
-            ]),
+                    })}
+                    {this.submitButton()}
+                </div>
+            </div>,
         ];
     }
 }
