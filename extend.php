@@ -54,6 +54,7 @@ return [
             if ($serializer->getActor()->isGuest()) {
                 $attributes['fof-oauth'] = app()->make('fof-oauth.providers.forum');
             }
+
             return $attributes;
         }),
 ];
