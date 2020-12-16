@@ -1,5 +1,5 @@
-import AuthSettingsModal from './components/AuthSettingsModal';
+import AuthSettingsPage from './components/AuthSettingsPage';
 
 app.initializers.add('fof/oauth', () => {
-    app.extensionSettings['fof-oauth'] = () => app.modal.show(AuthSettingsModal);
+  app.extensionData.for('fof-oauth').registerPage(AuthSettingsPage);
 });
