@@ -30,7 +30,7 @@ class WeChat extends Provider
 
     public function icon(): string
     {
-        return "fab fa-weixin";
+        return 'fab fa-weixin';
     }
 
     public function fields(): array
@@ -46,7 +46,7 @@ class WeChat extends Provider
         return new WeChatProvider([
             'appid'         => $this->getSetting('app_id'),
             'secret'        => $this->getSetting('app_secret'),
-            'redirectUri'   => $redirectUri
+            'redirectUri'   => $redirectUri,
         ]);
     }
 
