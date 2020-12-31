@@ -43,6 +43,11 @@ fof-oauth:
           client_id_label: => fof-oauth.ref.settings.client_id
           client_secret_label: => fof-oauth.ref.settings.client_secret
 
+        wechat:
+          description: Create an application at {link}. Don't add http/https to callback domain name string (info - https://www.programmersought.com/article/69151622340/).
+
+          app_id_label: => fof-oauth.ref.settings.app_id
+          app_secret_label: => fof-oauth.ref.settings.app_secret
   forum:
     log_in:
       with_button: Log In with {provider}
@@ -59,6 +64,7 @@ fof-oauth:
       gitlab: GitLab
       twitter: Twitter
       google: Google
+      wechat: WeChat
 
   ref:
     settings:
