@@ -42,7 +42,7 @@ return [
 
     (new Extend\Routes('forum'))
         ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class)
-        ->get('/auth/{provider}', 'fof-oauth', Controllers\AuthController::class),
+        ->get(new OAuth2RoutePattern(), 'fof-oauth', Controllers\AuthController::class),
 
     function (Application $app) {
         $app->register(OAuthServiceProvider::class);
