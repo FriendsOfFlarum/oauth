@@ -42,12 +42,6 @@ app.initializers.add('fof/oauth', () => {
             return orig(vnode);
         });
 
-        override(LogInButton.prototype, 'getButtonContent', function (orig) {
-            console.log(this.constructor.name);
-
-            return orig();
-        });
-
         extend(LogInButtons.prototype, 'view', function (vdom) {
             vdom.attrs.className += ' LogInButtons--icons';
         });
