@@ -19,8 +19,8 @@ export default class AuthSettingsPage extends ExtensionPage {
 
     content() {
         return [
-            <div class="container">
-                <div class="AuthSettingsPage">
+            <div className="container">
+                <div className="AuthSettingsPage">
                     <div className="Form-group">
                         <BooleanItem name="fof-oauth.only_icons" setting={this.setting}>
                             {app.translator.trans(`fof-oauth.admin.settings.only_icons_label`)}
