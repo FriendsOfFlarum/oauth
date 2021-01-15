@@ -10,16 +10,22 @@ app.initializers.add('fof/oauth', () => {
         app.forum
             .attribute('fof-oauth')
             .filter(Boolean)
-            .forEach(({name, icon}) =>
+            .forEach(({name, icon}) => {
+                let className = `Button LogInButton--${name}`;
+
+                if (onlyIcons) {
+                    className += ' Button--icon';
+                }
+
                 items.add(
                     name,
-                    <LogInButton className={`Button LogInButton--${name}`} icon={icon} path={`/auth/${name}`}>
+                    <LogInButton className={className} icon={icon} path={`/auth/${name}`}>
                         {app.translator.trans(`fof-oauth.forum.log_in.with_button`, {
                             provider: app.translator.trans(`fof-oauth.lib.providers.${name}`),
                         })}
                     </LogInButton>
-                )
-            );
+                );
+            });
     });
 
     if (onlyIcons) {
