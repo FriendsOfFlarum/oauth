@@ -11,7 +11,7 @@ app.initializers.add('fof/oauth', () => {
             .attribute('fof-oauth')
             .filter(Boolean)
             .forEach(({name, icon}) => {
-                let className = `Button LogInButton--${name}`;
+                let className = `Button FoFLogInButton LogInButton--${name}`;
 
                 if (onlyIcons) {
                     className += ' Button--icon';
@@ -40,7 +40,7 @@ app.initializers.add('fof/oauth', () => {
         });
 
         extend(LogInButtons.prototype, 'view', function (vdom) {
-            vdom.attrs.className += ' LogInButtons--icons';
+            vdom.attrs.className += ' FoFLogInButtons--icons';
         });
     }
 });
