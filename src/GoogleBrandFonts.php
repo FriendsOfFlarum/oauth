@@ -1,12 +1,21 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) 2020 FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE.md
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth;
 
 use Flarum\Frontend\Document;
 use FoF\OAuth\Providers\Google;
 
 /**
- * For performance, we only load the required fonts when the Google provider is enabled
+ * For performance, we only load the required fonts when the Google provider is enabled.
  */
 class GoogleBrandFonts
 {
