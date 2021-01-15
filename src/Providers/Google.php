@@ -66,7 +66,7 @@ class Google extends Provider
 
     public function suggestions(Registration $registration, $user, string $token)
     {
-        $email = $user->getEmail();
+        $this->verifyEmail($email = $user->getEmail());
 
         $registration
             ->provideTrustedEmail($email)

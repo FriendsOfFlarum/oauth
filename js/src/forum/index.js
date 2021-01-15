@@ -13,7 +13,8 @@ app.initializers.add('fof/oauth', () => {
             .forEach(({name, icon}) => {
                 let className = `Button FoFLogInButton LogInButton--${name}`;
 
-                if (onlyIcons) {
+                // Google branding does not allow inline icon, so we'll keep the full button
+                if (onlyIcons && name !== 'google') {
                     className += ' Button--icon';
                 }
 
