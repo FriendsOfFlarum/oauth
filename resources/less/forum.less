@@ -1,4 +1,10 @@
 .FoFLogInButton {
+  .Button-label {
+    // Margin that meets Google requirements
+    // We use it everywhere for consistency
+    margin-left: 24px;
+  }
+
   &.LogInButton--discord {
     .Button--color(#fff, #7289da);
   }
@@ -19,36 +25,22 @@
     .Button--color(#fff, #D06503);
   }
 
-  // Custom CSS that meets https://developers.google.com/identity/branding-guidelines
+  // Custom CSS that meets the bare minimum of https://developers.google.com/identity/branding-guidelines
   &.LogInButton--google {
-    .Button--color(#fff, #4286f4);
-
-    text-align: left;
-    height: 44px; // Additional 2 pixels around to create the "border"
-    padding: 2px 10px 2px 2px; // Right: 2px + mandatory 8px padding
+    .Button--color(#757575, #fff);
 
     .Button-icon {
-      width: 40px;
-      height: 40px;
-      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAMAAABHPGVmAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAC3UExURUdwTP84AEyxTQ550wx40xp7zv9eAA1505SJXiV8zLiVIv88AP89AP85AE6xTF2yRWSyQf86AP5jAFKxSv89AFyxRlexSU6xTP83AP86AP/DAFCxSw150v/DAP84AP7AAP8/AP/CAAx40w950P89AFCxS1CxS//DAP/CAAt40/nCAhF50B6IsTKah//BAA140rm8G0qxTgl41P/DAP83AP+EAIu3MebBBj+maf9aAP+kAP+2AGS0Q8y4bCgAAAAxdFJOUwDp8hDyNCLTBBUKVobW4C8YvxN+bUdaz/Oo7bik2Ps2RVnEYDWap72m4YVG/f1tfvn45KBTAAAEEklEQVRo3t2a61biMBSF0wI10qb3q4VaEVAHFQt1xrm8/3NNuBdI2iQNzFqz1/If+HH2zjknFQFgU18b60biIKRgIeQkhp9rfSBPUMsNBylZWWb4Z6csRo6hywFBzU9QVlZ+e1WZ4vjjthxXT5SyThiuJLrWAqH5TlayCBmiGM1AJbMUIYzrcyDEMDBnNKqSToZ0riPgGkrJryxOOIrJnVJQSIeMVvlKKazYcNmsysoWylgs05KypZxxI8MpW8txL89Q9IZheHnGNeoAbnJ5BjQuzwB+xjSh4jjOhBl5U5/HCC92PR+Pc903EqQIMNz60Fdr1q3MJeiO/dOl2cioDwQZeJFDeL7+qwuhkVFrFvIp4whC13fYGTVmxfUbz93O7GYG/WRlKK/fEBCMHTaGRt3nLIPbNWIGBnj//NlmBfV1BoY2XP4iUWKfdZkyvOZ9uVz+/jzPg5XBtHCfliudFWNIZICH5Ua/fx4va1ciAz4vd6pahjSJjFXsex0si3OZjL1bG8s+LxFI1a2KZXLNOnLrkL8BLufWzjLJhYBvy3N9Si6k/0yA3N3XvKNzy64OXK86d0iAPNU8zXQGNxwaYPXA/R0B8l5XyM2CU4+E3Jvc4oYMiLkPXamQESDl/gylQm7AEwHyDUiFdMGQM3dpkAe5kAUJUnu4hCB3/w1k+I8gVwlePuQqzXiFsfJCHJBPsgfk+zVGPXFpPUiFzM9vRE2hdEZduoi5P4I+6Xh9WDWXwR5dM1KVLz3SlejH98ITu/rMSKWMOoTLHWYUkS104x2Qc8fX1JPkP/4UWKEIpNclX1bASSirMlYSKYVcyCoScNQpO0YhkgoxkcVgfVIrnbKxai3T4mXcjhY0t6p+fRQVpZyGwfmC7tb+fB2s2hrG96z12F3Q3do9Bv34c8woVK4TNnshz5RZ9RHl45SBKQHH6aVMtFUnbnR/d2rVNnxmSm9EvdEfnraIDExhdGxGm8yj28OLLJMMKVSP5cudx5dFcyEAeAVN08Z+sb036k7sVM+4HVEpZlhbDAzSovh6Jd8gZsevDVUqpUgDKgZak/UbyZTBSaf1p3RIoaYhsf37wWT/2V7pzc6Q/QYTeYF9/Llsy0ur5b8R1u6Z6gzbcKZeaFk2lmWF3iQ6ff1bg1lre72iWapqRpFpkj/PF7VFKvWnRUtV4z8PZBtLJI9CCoQlfCZtKd05vbOC9pRN/PO6XSSJUsvAQ6I95et13rBTYfv0GfYDtFqe5Ihp09kTtQUjZbxKwVA4GNVjvUhBYcuigOca1ffMS5ax737uZKYB/1/eYTDlwOC9JvYvRewYYcSmaTyG3jQnQct/jLLD8x14RJiGNpAgO/BS0jJUzdQL8eaX9U0LxKBJhYS38NQLLEaX/gIGHNymY/90kQAAAABJRU5ErkJggg==');
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 18px 18px;
-      background-color: white;
-      margin: 0 13px 0 0; // Right margin = mandatory 24px total from logo
-
       &::before {
-        display: none;
+        content: '';
+        display: inline-block;
+        width: 18px; // Same size as other icons, which happen to match Google minimums
+        height: 18px;
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAMAAABHPGVmAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAC3UExURUdwTP84AEyxTQ550wx40xp7zv9eAA1505SJXiV8zLiVIv88AP89AP85AE6xTF2yRWSyQf86AP5jAFKxSv89AFyxRlexSU6xTP83AP86AP/DAFCxSw150v/DAP84AP7AAP8/AP/CAAx40w950P89AFCxS1CxS//DAP/CAAt40/nCAhF50B6IsTKah//BAA140rm8G0qxTgl41P/DAP83AP+EAIu3MebBBj+maf9aAP+kAP+2AGS0Q8y4bCgAAAAxdFJOUwDp8hDyNCLTBBUKVobW4C8YvxN+bUdaz/Oo7bik2Ps2RVnEYDWap72m4YVG/f1tfvn45KBTAAAEEklEQVRo3t2a61biMBSF0wI10qb3q4VaEVAHFQt1xrm8/3NNuBdI2iQNzFqz1/If+HH2zjknFQFgU18b60biIKRgIeQkhp9rfSBPUMsNBylZWWb4Z6csRo6hywFBzU9QVlZ+e1WZ4vjjthxXT5SyThiuJLrWAqH5TlayCBmiGM1AJbMUIYzrcyDEMDBnNKqSToZ0riPgGkrJryxOOIrJnVJQSIeMVvlKKazYcNmsysoWylgs05KypZxxI8MpW8txL89Q9IZheHnGNeoAbnJ5BjQuzwB+xjSh4jjOhBl5U5/HCC92PR+Pc903EqQIMNz60Fdr1q3MJeiO/dOl2cioDwQZeJFDeL7+qwuhkVFrFvIp4whC13fYGTVmxfUbz93O7GYG/WRlKK/fEBCMHTaGRt3nLIPbNWIGBnj//NlmBfV1BoY2XP4iUWKfdZkyvOZ9uVz+/jzPg5XBtHCfliudFWNIZICH5Ua/fx4va1ciAz4vd6pahjSJjFXsex0si3OZjL1bG8s+LxFI1a2KZXLNOnLrkL8BLufWzjLJhYBvy3N9Si6k/0yA3N3XvKNzy64OXK86d0iAPNU8zXQGNxwaYPXA/R0B8l5XyM2CU4+E3Jvc4oYMiLkPXamQESDl/gylQm7AEwHyDUiFdMGQM3dpkAe5kAUJUnu4hCB3/w1k+I8gVwlePuQqzXiFsfJCHJBPsgfk+zVGPXFpPUiFzM9vRE2hdEZduoi5P4I+6Xh9WDWXwR5dM1KVLz3SlejH98ITu/rMSKWMOoTLHWYUkS104x2Qc8fX1JPkP/4UWKEIpNclX1bASSirMlYSKYVcyCoScNQpO0YhkgoxkcVgfVIrnbKxai3T4mXcjhY0t6p+fRQVpZyGwfmC7tb+fB2s2hrG96z12F3Q3do9Bv34c8woVK4TNnshz5RZ9RHl45SBKQHH6aVMtFUnbnR/d2rVNnxmSm9EvdEfnraIDExhdGxGm8yj28OLLJMMKVSP5cudx5dFcyEAeAVN08Z+sb036k7sVM+4HVEpZlhbDAzSovh6Jd8gZsevDVUqpUgDKgZak/UbyZTBSaf1p3RIoaYhsf37wWT/2V7pzc6Q/QYTeYF9/Llsy0ur5b8R1u6Z6gzbcKZeaFk2lmWF3iQ6ff1bg1lre72iWapqRpFpkj/PF7VFKvWnRUtV4z8PZBtLJI9CCoQlfCZtKd05vbOC9pRN/PO6XSSJUsvAQ6I95et13rBTYfv0GfYDtFqe5Ihp09kTtQUjZbxKwVA4GNVjvUhBYcuigOca1ffMS5ax737uZKYB/1/eYTDlwOC9JvYvRewYYcSmaTyG3jQnQct/jLLD8x14RJiGNpAgO/BS0jJUzdQL8eaX9U0LxKBJhYS38NQLLEaX/gIGHNymY/90kQAAAABJRU5ErkJggg==');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 18px 18px;
+        margin-bottom: -2px; // -2 px is so the button still has the same height as the other ones
       }
-    }
-
-    .Button-label {
-      display: inline-block;
-      font-size: 14px;
-      font-weight: 500;
-      font-family: 'Roboto', sans-serif;
-      vertical-align: top;
-      line-height: 42px;
     }
   }
 }
@@ -77,6 +69,8 @@
   }
 
   .FoFLogInButton.LogInButton--google {
+    // Ideally we'd want the Google button on its own line in icon mode. But since it's flexbox,
+    // there's no way to have the button on its own line without making it 100% width which is even more ugly
     width: auto;
   }
 }
