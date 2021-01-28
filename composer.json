@@ -42,7 +42,8 @@
         "flarum/auth-github": "*",
         "flarum/auth-twitter": "*",
         "fof/auth-discord": "*",
-        "fof/auth-gitlab": "*"
+        "fof/auth-gitlab": "*",
+        "luuhai48/oauth-google": "*"
     },
     "authors": [
         {

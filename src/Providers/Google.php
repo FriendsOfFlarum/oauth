@@ -12,28 +12,12 @@
 namespace FoF\OAuth\Providers;
 
 use Flarum\Forum\Auth\Registration;
-use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Google as GoogleProvider;
 
 class Google extends Provider
 {
-    /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
-
-    public function __construct(SettingsRepositoryInterface $settings)
-    {
-        $this->settings = $settings;
-    }
-
-    /**
-     * @var GoogleProvider
-     */
-    protected $provider;
-
     public function name(): string
     {
         return 'google';
@@ -54,19 +38,19 @@ class Google extends Provider
 
     public function provider(string $redirectUri): AbstractProvider
     {
-        return $this->provider = new GoogleProvider([
-            'clientId'        => $this->getSetting('client_id'),
-            'clientSecret'    => $this->getSetting('client_secret'),
-            'redirectUri'     => $redirectUri,
-            'approvalPrompt'  => 'force',
-            'hostedDomain'    => null,
-            'accessType'      => 'offline',
+        return new GoogleProvider([
+            'clientId'       => $this->getSetting('client_id'),
+            'clientSecret'   => $this->getSetting('client_secret'),
+            'redirectUri'    => $redirectUri,
+            'approvalPrompt' => 'force',
+            'hostedDomain'   => null,
+            'accessType'     => 'offline',
         ]);
     }
 
     public function suggestions(Registration $registration, $user, string $token)
     {
-        $email = $user->getEmail();
+        $this->verifyEmail($email = $user->getEmail());
 
         $registration
             ->provideTrustedEmail($email)
