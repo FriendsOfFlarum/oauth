@@ -17,7 +17,6 @@ use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\LinkedIn as LinkedInProvider;
 
-
 class LinkedIn extends Provider
 {
     /**
