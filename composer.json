@@ -10,7 +10,8 @@
         "github",
         "gitlab",
         "twitter",
-        "google"
+        "google",
+        "linkedin"
     ],
     "type": "flarum-extension",
     "license": "MIT",
@@ -27,7 +28,7 @@
         }
     ],
     "require": {
-        "flarum/core": "^0.1.0-beta.15",
+        "flarum/core": "^0.1.0-beta.16",
         "fof/extend": ">=0.3.0",
         "fof/components": ">=0.2.0",
         "league/oauth1-client": "^1.8.2",
@@ -62,7 +63,7 @@
     "extra": {
         "flarum-extension": {
             "title": "FoF OAuth",
-            "category": "authentication",
+            "category": "feature",
             "icon": {
                 "name": "fas fa-sign-in-alt",
                 "backgroundColor": "#e74c3c",

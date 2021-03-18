@@ -30,7 +30,7 @@ class AuthController extends Controller
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $name = Arr::get($request->getQueryParams(), 'provider');
-        $providers = app()->tagged('fof-oauth.providers');
+        $providers = resolve('container')->tagged('fof-oauth.providers');
 
         foreach ($providers as $provider) {
             if ($provider->name() === $name) {

@@ -1,8 +1,8 @@
 import { settings } from '@fof-components';
 
-import Button from 'flarum/components/Button';
-import ExtensionPage from 'flarum/components/ExtensionPage';
-import icon from 'flarum/helpers/icon';
+import Button from 'flarum/common/components/Button';
+import ExtensionPage from 'flarum/common/components/ExtensionPage';
+import icon from 'flarum/common/helpers/icon';
 
 const {
     items: { BooleanItem, StringItem },

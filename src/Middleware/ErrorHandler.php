@@ -20,7 +20,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ErrorHandler implements MiddlewareInterface
 {
@@ -42,7 +42,7 @@ class ErrorHandler implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (Arr::get(app('flarum.config'), 'debug', true)) {
+        if (Arr::get(resolve('flarum.config'), 'debug', true)) {
             return $handler->handle($request);
         }
 
@@ -71,7 +71,7 @@ class ErrorHandler implements MiddlewareInterface
 
     protected function report(AuthenticationException $e)
     {
-        $reporters = app()->tagged(Reporter::class);
+        $reporters = resolve('container')->tagged(Reporter::class);
 
         if ($e->shouldBeReported()) {
             foreach ($reporters as $reporter) {

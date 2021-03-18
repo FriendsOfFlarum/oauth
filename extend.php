@@ -49,10 +49,10 @@ return [
     },
 
     (new Extend\ApiSerializer(ForumSerializer::class))
-        ->mutate(function (ForumSerializer $serializer) {
+        ->attributes(function (ForumSerializer $serializer) {
             $attributes = [];
             if ($serializer->getActor()->isGuest()) {
-                $attributes['fof-oauth'] = app()->make('fof-oauth.providers.forum');
+                $attributes['fof-oauth'] = resolve('fof-oauth.providers.forum');
             }
 
             return $attributes;

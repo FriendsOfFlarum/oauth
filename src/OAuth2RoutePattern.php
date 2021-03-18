@@ -23,7 +23,7 @@ class OAuth2RoutePattern
         /**
          * @var Provider[] $providers
          */
-        $providers = app()->tagged('fof-oauth.providers');
+        $providers = resolve('container')->tagged('fof-oauth.providers');
 
         $providerNames = [];
 

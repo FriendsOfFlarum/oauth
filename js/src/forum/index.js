@@ -1,7 +1,7 @@
-import { extend, override } from 'flarum/extend';
-import LogInButtons from 'flarum/components/LogInButtons';
-import LogInButton from 'flarum/components/LogInButton';
-import extractText from 'flarum/utils/extractText';
+import { extend, override } from 'flarum/common/extend';
+import LogInButtons from 'flarum/common/components/LogInButtons';
+import LogInButton from 'flarum/common/components/LogInButton';
+import extractText from 'flarum/common/utils/extractText';
 
 app.initializers.add('fof/oauth', () => {
     const onlyIcons = !!Number(app.data['fof-oauth.only_icons']);
@@ -10,7 +10,7 @@ app.initializers.add('fof/oauth', () => {
         app.forum
             .attribute('fof-oauth')
             .filter(Boolean)
-            .forEach(({name, icon}) => {
+            .forEach(({ name, icon }) => {
                 let className = `Button FoFLogInButton LogInButton--${name}`;
 
                 // Google branding does not allow inline icon, so we'll keep the full button
