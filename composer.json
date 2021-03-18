@@ -35,7 +35,8 @@
         "league/oauth2-github": "^2.0.0",
         "league/oauth2-google": "^3.0.3",
         "omines/oauth2-gitlab": "^3.3.0",
-        "wohali/oauth2-discord-new": "^1.1.0"
+        "wohali/oauth2-discord-new": "^1.1.0",
+        "league/oauth2-linkedin": "^5.1.2"
     },
     "replace": {
         "flarum/auth-facebook": "*",
@@ -43,7 +44,8 @@
         "flarum/auth-twitter": "*",
         "fof/auth-discord": "*",
         "fof/auth-gitlab": "*",
-        "luuhai48/oauth-google": "*"
+        "luuhai48/oauth-google": "*",
+        "luuhai48/oauth-linkedin": "*"
     },
     "authors": [
         {
