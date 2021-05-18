@@ -28,9 +28,9 @@
         }
     ],
     "require": {
-        "flarum/core": "^0.1.0-beta.16",
-        "fof/extend": ">=0.3.0",
-        "fof/components": ">=0.2.0",
+        "flarum/core": "^1.0.0",
+        "fof/extend": "@dev",
+        "fof/components": "^1.0.0",
         "league/oauth1-client": "^1.8.2",
         "league/oauth2-facebook": "^2.0.3",
         "league/oauth2-github": "^2.0.0",
