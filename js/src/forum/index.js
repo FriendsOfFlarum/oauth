@@ -1,6 +1,8 @@
+import app from 'flarum/forum/app';
+
 import { extend, override } from 'flarum/common/extend';
-import LogInButtons from 'flarum/common/components/LogInButtons';
-import LogInButton from 'flarum/common/components/LogInButton';
+import LogInButtons from 'flarum/forum/components/LogInButtons';
+import LogInButton from 'flarum/forum/components/LogInButton';
 import extractText from 'flarum/common/utils/extractText';
 
 app.initializers.add('fof/oauth', () => {
