@@ -8,7 +8,7 @@ A [Flarum](http://flarum.org) extension. Allow users to log in with GitHub, Twit
 ### Installation
 
 ```sh
-composer require fof/oauth
+composer require fof/oauth:"*"
 ```
 
 ### Updating
