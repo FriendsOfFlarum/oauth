@@ -39,8 +39,7 @@ return [
         ->serializeToForum('fof-oauth.only_icons', 'fof-oauth.only_icons', null, false),
 
     (new Extend\Routes('forum'))
-        ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class)
-        ->get(new OAuth2RoutePattern(), 'fof-oauth', Controllers\AuthController::class),
+        ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
 
     (new Extend\ServiceProvider())
         ->register(OAuthServiceProvider::class),
