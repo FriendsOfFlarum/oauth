@@ -15,6 +15,7 @@ use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
 use FoF\Components\Extend\AddFofComponents;
+use FoF\Extend\Extend\ExtensionSettings;
 
 return [
     new AddFofComponents(),
@@ -35,8 +36,8 @@ return [
     (new Extend\Middleware('forum'))
         ->add(Middleware\ErrorHandler::class),
 
-    (new Extend\Settings())
-        ->serializeToForum('fof-oauth.only_icons', 'fof-oauth.only_icons', null, false),
+    (new ExtensionSettings())
+        ->addKey('fof-oauth.only_icons', false),
 
     (new Extend\Routes('forum'))
         ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
