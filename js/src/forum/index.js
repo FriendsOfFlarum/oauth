@@ -4,6 +4,7 @@ import { extend, override } from 'flarum/common/extend';
 import LogInButtons from 'flarum/forum/components/LogInButtons';
 import LogInButton from 'flarum/forum/components/LogInButton';
 import extractText from 'flarum/common/utils/extractText';
+import Tooltip from 'flarum/common/components/Tooltip';
 
 app.initializers.add('fof/oauth', () => {
     const onlyIcons = !!Number(app.data['fof-oauth.only_icons']);
@@ -32,14 +33,10 @@ app.initializers.add('fof/oauth', () => {
     });
 
     if (onlyIcons) {
-        extend(LogInButton.prototype, 'oncreate', function () {
-            this.$().tooltip({ container: '#modal' });
-        });
-
         override(LogInButton.prototype, 'view', function (orig, vnode) {
-            this.attrs.title = extractText(vnode.children);
+            const child = orig(vnode);
 
-            return orig(vnode);
+            return <Tooltip text={extractText(child.children)}>{child}</Tooltip>;
         });
 
         extend(LogInButtons.prototype, 'view', function (vdom) {
