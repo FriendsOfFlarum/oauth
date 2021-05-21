@@ -10,26 +10,26 @@ app.initializers.add('fof/oauth', () => {
     const onlyIcons = !!Number(app.data['fof-oauth.only_icons']);
 
     extend(LogInButtons.prototype, 'items', function (items) {
-        app.forum
-            .attribute('fof-oauth')
-            .filter(Boolean)
-            .forEach(({ name, icon }) => {
-                let className = `Button FoFLogInButton LogInButton--${name}`;
+        const buttons = app.forum.attribute('fof-oauth').filter(Boolean);
+        const googleButton = buttons.splice(buttons.indexOf(buttons.find((b) => b.name === 'google')), 1);
 
-                // Google branding does not allow inline icon, so we'll keep the full button
-                if (onlyIcons && name !== 'google') {
-                    className += ' Button--icon';
-                }
+        buttons.concat(googleButton).forEach(({ name, icon }) => {
+            let className = `Button FoFLogInButton LogInButton--${name}`;
 
-                items.add(
-                    name,
-                    <LogInButton className={className} icon={icon} path={`/auth/${name}`}>
-                        {app.translator.trans(`fof-oauth.forum.log_in.with_button`, {
-                            provider: app.translator.trans(`fof-oauth.lib.providers.${name}`),
-                        })}
-                    </LogInButton>
-                );
-            });
+            // Google branding does not allow inline icon, so we'll keep the full button
+            if (onlyIcons && name !== 'google') {
+                className += ' Button--icon';
+            }
+
+            items.add(
+                name,
+                <LogInButton className={className} icon={icon} path={`/auth/${name}`}>
+                    {app.translator.trans(`fof-oauth.forum.log_in.with_button`, {
+                        provider: app.translator.trans(`fof-oauth.lib.providers.${name}`),
+                    })}
+                </LogInButton>
+            );
+        });
     });
 
     if (onlyIcons) {
