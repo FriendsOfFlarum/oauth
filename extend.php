@@ -13,7 +13,6 @@ namespace FoF\OAuth;
 
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
-use Flarum\Foundation\Application;
 use Flarum\Frontend\Document;
 use FoF\Components\Extend\AddFofComponents;
 use FoF\Extend\Extend\ExtensionSettings;
@@ -29,7 +28,7 @@ return [
         ->js(__DIR__.'/js/dist/admin.js')
         ->css(__DIR__.'/resources/less/admin.less')
         ->content(function (Document $document) {
-            $document->payload['fof-oauth'] = app('fof-oauth.providers.admin');
+            $document->payload['fof-oauth'] = resolve('fof-oauth.providers.admin');
         }),
 
     new Extend\Locales(__DIR__.'/resources/locale'),
@@ -41,12 +40,10 @@ return [
         ->addKey('fof-oauth.only_icons', false),
 
     (new Extend\Routes('forum'))
-        ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class)
-        ->get(new OAuth2RoutePattern(), 'fof-oauth', Controllers\AuthController::class),
+        ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
 
-    function (Application $app) {
-        $app->register(OAuthServiceProvider::class);
-    },
+    (new Extend\ServiceProvider())
+        ->register(OAuthServiceProvider::class),
 
     (new Extend\ApiSerializer(ForumSerializer::class))
         ->attributes(function (ForumSerializer $serializer) {

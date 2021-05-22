@@ -1,7 +1,7 @@
 import { settings } from '@fof-components';
 
 import Button from 'flarum/common/components/Button';
-import ExtensionPage from 'flarum/common/components/ExtensionPage';
+import ExtensionPage from 'flarum/admin/components/ExtensionPage';
 import icon from 'flarum/common/helpers/icon';
 
 const {

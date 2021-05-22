@@ -11,6 +11,9 @@
 
 namespace FoF\OAuth;
 
+use Flarum\Http\RouteCollection;
+use Flarum\Http\RouteHandlerFactory;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\ServiceProvider;
 
 class OAuthServiceProvider extends ServiceProvider
@@ -26,6 +29,14 @@ class OAuthServiceProvider extends ServiceProvider
             Providers\Google::class,
             Providers\LinkedIn::class,
         ], 'fof-oauth.providers');
+
+        // Add OAuth provider routes
+        $this->app->resolving('flarum.forum.routes', function (RouteCollection $collection, Container $container) {
+            /** @var RouteHandlerFactory $factory */
+            $factory = $container->make(RouteHandlerFactory::class);
+
+            $collection->addRoute('GET', new OAuth2RoutePattern(), 'fof-oauth', $factory->toController(Controllers\AuthController::class));
+        });
 
         $this->app->singleton('fof-oauth.providers.forum', $this->map(function (Provider $provider) {
             if (!$provider->enabled()) {
