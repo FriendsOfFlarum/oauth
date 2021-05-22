@@ -6,6 +6,21 @@ import LogInButton from 'flarum/forum/components/LogInButton';
 import extractText from 'flarum/common/utils/extractText';
 import Tooltip from 'flarum/common/components/Tooltip';
 
+export const translateLogIn = (name) => {
+    const KEY = `fof-oauth.forum.log_in.with_${name}_button`;
+    const specificTranslation = app.translator.trans(KEY);
+
+    if (specificTranslation !== KEY) return specificTranslation;
+
+    const PROVIDER_KEY = `fof-oauth.forum.providers.${name}`;
+    const alternativeProvider = app.translator.trans(PROVIDER_KEY);
+    const provider = alternativeProvider !== PROVIDER_KEY ? alternativeProvider : app.translator.trans(`fof-oauth.lib.providers.${name}`);
+
+    return app.translator.trans(`fof-oauth.forum.log_in.with_button`, {
+        provider,
+    });
+};
+
 app.initializers.add('fof/oauth', () => {
     const onlyIcons = !!Number(app.data['fof-oauth.only_icons']);
 
@@ -24,9 +39,7 @@ app.initializers.add('fof/oauth', () => {
             items.add(
                 name,
                 <LogInButton className={className} icon={icon} path={`/auth/${name}`}>
-                    {app.translator.trans(`fof-oauth.forum.log_in.with_button`, {
-                        provider: app.translator.trans(`fof-oauth.lib.providers.${name}`),
-                    })}
+                    {translateLogIn(name)}
                 </LogInButton>
             );
         });
