@@ -42,7 +42,7 @@ fof-oauth:
 
           client_id_label: => fof-oauth.ref.settings.client_id
           client_secret_label: => fof-oauth.ref.settings.client_secret
-        
+
         linkedin:
           description: Create an application at {link}.
 
@@ -51,7 +51,14 @@ fof-oauth:
 
   forum:
     log_in:
+      # Add `with_<provider>_button` keys if you need to replace the entire button text for a specific provider
+      # e.g. `with_google_button: Log In with Google`
       with_button: Log In with {provider}
+
+    # If you need to replace a provider's name for the log in button,
+    # you can copy paste the `lib.providers` into a `forum.providers`
+    # and keep the providers you need to change the name of
+    # e.g. `providers: discord: Discord`
 
     error:
       bad_verification_code: Invalid or expired verification token. Please try again.
