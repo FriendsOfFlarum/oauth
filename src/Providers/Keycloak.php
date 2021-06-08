@@ -56,9 +56,9 @@ class Keycloak extends Provider
             'authServerUrl'       => rtrim($this->getSetting('auth_server_url'), '/'),
             'clientId'            => $this->getSetting('client_id'),
             'clientSecret'        => $this->getSetting('client_secret'),
-            'encryptionAlgorithm' => $this->getSetting('encryption_algorithm'),
-            'encryptionKey'       => $this->getSetting('encryption_key'),
-            'encryptionKeyPath'   => $this->getSetting('encryption_key_path'),
+            'encryptionAlgorithm' => $this->getSetting('encryption_algorithm') ?: null,
+            'encryptionKey'       => $this->getSetting('encryption_key') ?: null,
+            'encryptionKeyPath'   => $this->getSetting('encryption_key_path') ?: null,
             'realm'               => $this->getSetting('realm'),
             'redirectUri'         => $redirectUri,
         ]);
