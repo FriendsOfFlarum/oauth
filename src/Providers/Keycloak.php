@@ -16,7 +16,6 @@ use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use pviojo\OAuth2\Client\Provider\Keycloak as KeycloakProvider;
 
-
 class Keycloak extends Provider
 {
     public function name(): string
