@@ -27,8 +27,8 @@ class Keycloak extends Provider
     {
         return sprintf(
             '%s/auth/admin/%s/console/',
-            $this->settings->get("fof-oauth.{$this->name()}.{auth_server_url}", '<https://<auth_server_url/auth>'),
-            $this->settings->get("fof-oauth.{$this->name()}.{realm}", '<realm>')
+            $this->getSetting('auth_server_url') ?: '<https://<auth_server_url>',
+            $this->getSetting('realm') ?: '<realm>'
         );
     }
 
