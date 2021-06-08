@@ -3,9 +3,9 @@
 /*
  * This file is part of fof/oauth.
  *
- * Copyright (c) 2020 FriendsOfFlarum.
+ * Copyright (c) FriendsOfFlarum.
  *
- * For the full copyright and license information, please view the LICENSE.md
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -48,7 +48,7 @@ class Keycloak extends Provider
 
     public function icon(): string
     {
-        return "fab fa-user-lock";
+        return 'fab fa-user-lock';
     }
 
     public function provider(string $redirectUri): AbstractProvider
