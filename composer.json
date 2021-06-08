@@ -11,7 +11,8 @@
         "gitlab",
         "twitter",
         "google",
-        "linkedin"
+        "linkedin",
+        "keycloak"
     ],
     "type": "flarum-extension",
     "license": "MIT",
@@ -37,7 +38,8 @@
         "league/oauth2-google": "^4.0.0",
         "omines/oauth2-gitlab": "^3.3.0",
         "wohali/oauth2-discord-new": "^1.1.0",
-        "league/oauth2-linkedin": "^5.1.2"
+        "league/oauth2-linkedin": "^5.1.2",
+        "pviojo/oauth2-keycloak": "^2.0.2"
     },
     "replace": {
         "flarum/auth-facebook": "*",
