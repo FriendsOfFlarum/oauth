@@ -51,14 +51,28 @@ fof-oauth:
 
   forum:
     log_in:
-      # Add `with_<provider>_button` keys if you need to replace the entire button text for a specific provider
-      # e.g. `with_google_button: Log In with Google`
       with_button: Log In with {provider}
 
-    # If you need to replace a provider's name for the log in button,
-    # you can copy paste the `lib.providers` into a `forum.providers`
-    # and keep the providers you need to change the name of
-    # e.g. `providers: discord: Discord`
+      # Modify these if your provider requires specific wording.
+      # You may use {provider} in the translation.
+      with_discord_button: '=> fof-oauth.forum.log_in.with_button'
+      with_facebook_button: '=> fof-oauth.forum.log_in.with_button'
+      with_github_button: '=> fof-oauth.forum.log_in.with_button'
+      with_gitlab_button: '=> fof-oauth.forum.log_in.with_button'
+      with_google_button: '=> fof-oauth.forum.log_in.with_button'
+      with_linkedin_button: '=> fof-oauth.forum.log_in.with_button'
+      with_twitter_button: '=> fof-oauth.forum.log_in.with_button'
+
+    # Modify these if you need to change how the provider name
+    # appears in the log in button.
+    providers:
+      discord: '=> fof-oauth.lib.providers.discord'
+      facebook: '=> fof-oauth.lib.providers.facebook'
+      github: '=> fof-oauth.lib.providers.github'
+      gitlab: '=> fof-oauth.lib.providers.gitlab'
+      google: '=> fof-oauth.lib.providers.google'
+      linkedin: '=> fof-oauth.lib.providers.linkedin'
+      twitter: '=> fof-oauth.lib.providers.twitter'
 
     error:
       bad_verification_code: Invalid or expired verification token. Please try again.
