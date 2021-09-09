@@ -14,12 +14,9 @@ namespace FoF\OAuth;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
-use FoF\Components\Extend\AddFofComponents;
 use FoF\Extend\Extend\ExtensionSettings;
 
 return [
-    new AddFofComponents(),
-
     (new Extend\Frontend('forum'))
         ->js(__DIR__.'/js/dist/forum.js')
         ->css(__DIR__.'/resources/less/forum.less'),

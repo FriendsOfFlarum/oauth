@@ -30,7 +30,6 @@
     "require": {
         "flarum/core": "^1.0.0",
         "fof/extend": "^1.0.0",
-        "fof/components": "^1.0.0",
         "league/oauth1-client": "^1.8.2",
         "league/oauth2-facebook": "^2.0.3",
         "league/oauth2-github": "^3.0.0",
