@@ -1,5 +1,8 @@
 fof-oauth:
   admin:
+    # This is used by extensions which extend fof/oauth to add additional providers
+    configure_button_label: Configure with FoF OAuth
+
     settings:
       only_icons_label: Only show the Log In Button icons (alternative layout)
 

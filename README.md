@@ -26,6 +26,16 @@ You can replace the text for the forum sign in buttons in two ways.
 - Use `fof-oauth.forum.providers.<name>` to replace the name of the provider on the forum side
 - Use `fof-oauth.forum.log_in.with_<name>_button` to replace the entire button "Log In with <name>" text
 
+### Extending
+
+It is possible to add additional `Providers` using an extender. See [OAuth-Microsoft](https://github.com/imorland/oauth-microsoft) for an example of how to accomplish this but basically:
+
+- In your new extension, require `fof/oauth` as a dependency
+- Define a new `Provider` which extends `FoF\OAuth\Provider`
+- From your new extensions `extend.php`, register the provider `(new FoF\OAuth\Extend\RegisterProvider(MyNewProvider::class))`
+- Provide the required translations under the `fof-oauth` namespace. See the linked example extension for details on which keys are required.
+- (optionally) Provide an admin panel link to `fof/oauth` for easy configuration. Again, see the linked example.
+
 ### Links
 
 [![OpenCollective](https://img.shields.io/badge/donate-friendsofflarum-44AEE5?style=for-the-badge&logo=open-collective)](https://opencollective.com/fof/donate) [![GitHub](https://img.shields.io/badge/donate-datitisev-ea4aaa?style=for-the-badge&logo=github)](https://datitisev.me/donate/github)
