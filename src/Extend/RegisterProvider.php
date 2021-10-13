@@ -32,7 +32,7 @@ class RegisterProvider implements ExtenderInterface
 
         if ($provider instanceof Provider) {
             $container->tag([
-                $this->provider
+                $this->provider,
             ], 'fof-oauth.providers');
         } else {
             throw new InvalidArgumentException("{$this->provider} has to extend ".Provider::class);
