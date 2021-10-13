@@ -28,13 +28,14 @@ You can replace the text for the forum sign in buttons in two ways.
 
 ### Extending
 
-It is possible to add additional `Providers` using an extender. See [OAuth-Microsoft](https://github.com/imorland/oauth-microsoft) for an example of how to accomplish this but basically:
+It is possible to add additional `Providers` using an extender. See [OAuth-Microsoft](https://github.com/imorland/flarum-ext-oauth-microsoft) for an example of how to accomplish this but basically:
 
 - In your new extension, require `fof/oauth` as a dependency
 - Define a new `Provider` which extends `FoF\OAuth\Provider`
 - From your new extensions `extend.php`, register the provider `(new FoF\OAuth\Extend\RegisterProvider(MyNewProvider::class))`
 - Provide the required translations under the `fof-oauth` namespace. See the linked example extension for details on which keys are required.
 - (optionally) Provide an admin panel link to `fof/oauth` for easy configuration. Again, see the linked example.
+- (optionally) Provide any CSS required to style your new login button. See the linked example.
 
 ### Links
 
