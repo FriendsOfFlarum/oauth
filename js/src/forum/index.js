@@ -5,6 +5,7 @@ import LogInButtons from 'flarum/forum/components/LogInButtons';
 import LogInButton from 'flarum/forum/components/LogInButton';
 import extractText from 'flarum/common/utils/extractText';
 import Tooltip from 'flarum/common/components/Tooltip';
+import SignUpModal from 'flarum/forum/components/SignUpModal';
 
 app.initializers.add('fof/oauth', () => {
     const onlyIcons = !!Number(app.data['fof-oauth.only_icons']);
@@ -43,4 +44,19 @@ app.initializers.add('fof/oauth', () => {
             vdom.attrs.className += ' FoFLogInButtons--icons';
         });
     }
+
+    extend(SignUpModal.prototype, 'fields', function (items) {
+        // If a suggested username was not provided by the OAuth service, display some help text to the user.
+        if (!!this.attrs.token && !!!this.attrs.username) {
+            items.add(
+                'username-help',
+                <div>
+                    <p>{app.translator.trans('fof-oauth.forum.signup.username_help')}</p>
+                </div>,
+                35
+            );
+        }
+
+        return items;
+    });
 });

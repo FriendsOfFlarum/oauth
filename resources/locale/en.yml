@@ -77,6 +77,9 @@ fof-oauth:
       linkedin: '=> fof-oauth.lib.providers.linkedin'
       twitter: '=> fof-oauth.lib.providers.twitter'
 
+    signup:
+      username_help: Please choose a username to be known by here
+
     error:
       bad_verification_code: Invalid or expired verification token. Please try again.
       invalid_state: Invalid state. Please try again.
