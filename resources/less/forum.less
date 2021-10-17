@@ -53,16 +53,17 @@
 // Optional icon-only layout
 
 .FoFLogInButtons--icons {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
   width: 100%;
+  display: flex;
+  column-gap: 10px;
+  row-gap: 15px;
+  justify-content: space-around;
+  flex-flow: row wrap;
+  margin-bottom: 20px;
 
   .FoFLogInButton:not(.LogInButton--google) {
     width: 50px;
     height: 50px;
-    vertical-align: center;
-    text-align: center;
     padding: 0;
     border-radius: 30px;
 
@@ -72,13 +73,30 @@
     }
   }
 
-  .FoFLogInButton:last-of-type {
-    margin-bottom: 20px;
+  .LogInButtonContainer {
+    height: 50px;
   }
 
-  .FoFLogInButton.LogInButton--google {
-    // Ideally we'd want the Google button on its own line in icon mode. But since it's flexbox,
-    // there's no way to have the button on its own line without making it 100% width which is even more ugly
-    width: auto;
+  .LogInButtonContainer--google {
+    flex-basis: 100%;
+
+    .FoFLogInButton {
+      width: min-content;
+      margin: 0 auto;
+    }
   }
+
+  .LogInButton:last-child {
+    margin-bottom: 0;
+  }
+
+  //.FoFLogInButton.LogInButton--google {
+  //  place-self: center;
+  //  // Ideally we'd want the Google button on its own line in icon mode. But since it's flexbox,
+  //  // there's no way to have the button on its own line without making it 100% width which is even more ugly
+  //  width: min-content;
+  //  margin-left: auto;
+  //  margin-right: auto;
+  //  flex-basis: 100%;
+  //}
 }
