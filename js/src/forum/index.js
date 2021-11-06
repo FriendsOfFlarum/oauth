@@ -24,11 +24,13 @@ app.initializers.add('fof/oauth', () => {
 
             items.add(
                 name,
-                <LogInButton className={className} icon={icon} path={`/auth/${name}`}>
-                    {app.translator.trans(`fof-oauth.forum.log_in.with_${name}_button`, {
-                        provider: app.translator.trans(`fof-oauth.forum.providers.${name}`),
-                    })}
-                </LogInButton>
+                <div className={`LogInButtonContainer LogInButtonContainer--${name}`}>
+                    <LogInButton className={className} icon={icon} path={`/auth/${name}`}>
+                        {app.translator.trans(`fof-oauth.forum.log_in.with_${name}_button`, {
+                            provider: app.translator.trans(`fof-oauth.forum.providers.${name}`),
+                        })}
+                    </LogInButton>
+                </div>
             );
         });
     });
