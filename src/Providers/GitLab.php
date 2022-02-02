@@ -25,7 +25,7 @@ class GitLab extends Provider
 
     public function link(): string
     {
-        return 'https://gitlab.com/profile/applications';
+        return 'https://gitlab.com/-/profile/applications';
     }
 
     public function fields(): array
