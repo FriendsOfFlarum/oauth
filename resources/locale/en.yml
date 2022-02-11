@@ -52,6 +52,17 @@ fof-oauth:
           client_id_label: => fof-oauth.ref.settings.client_id
           client_secret_label: => fof-oauth.ref.settings.client_secret
 
+        keycloak:
+          description: Create a client at {link}.
+
+          auth_server_url: Auth Server URL (eg. https://keycloak.example.com/auth)
+          client_id_label: => fof-oauth.ref.settings.client_id
+          client_secret_label: => fof-oauth.ref.settings.client_secret
+          encryption_algorithm: Encryption Algorithm (required when using an encryption key)
+          encryption_key_path: Encryption Key Path
+          encryption_key: Encryption Key
+          realm: Realm
+
   forum:
     log_in:
       with_button: Log In with {provider}
@@ -93,6 +104,7 @@ fof-oauth:
       twitter: Twitter
       google: Google
       linkedin: LinkedIn
+      keycloak:  Keycloak
 
   ref:
     settings:
