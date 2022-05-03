@@ -28,7 +28,7 @@ You can replace the text for the forum sign in buttons in two ways.
 
 ### Extending
 
-It is possible to add additional `Providers` using an extender. See [OAuth-Microsoft](https://github.com/imorland/flarum-ext-oauth-microsoft) for an example of how to accomplish this but basically:
+It is possible to add additional `Providers` using an extender. See [OAuth-Amazon](https://github.com/imorland/flarum-ext-oauth-amazon) for an example of how to accomplish this but basically:
 
 - In your new extension, require `fof/oauth` as a dependency
 - Define a new `Provider` which extends `FoF\OAuth\Provider`
