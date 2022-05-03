@@ -47,6 +47,9 @@ export default class AuthSettingsPage extends ExtensionPage {
                       <Button
                         className={`Button Button--rounded ${this.showing[name] && 'active'}`}
                         onclick={() => (this.showing[name] = !showSettings)}
+                        aria-label={app.translator.trans('fof-oauth.admin.settings_accessibility_label', {
+                          name,
+                        })}
                       >
                         {icon(`fas fa-cog`)}
                       </Button>
