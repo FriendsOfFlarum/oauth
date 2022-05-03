@@ -101,11 +101,19 @@ export default class AuthSettingsPage extends ExtensionPage {
                   },
                 })
               )}
+
+              {this.customProviderSettings(name).toArray()}
             </div>
           </div>
         </div>
       );
     });
+
+    return items;
+  }
+
+  customProviderSettings(name) {
+    const items = new ItemList();
 
     return items;
   }
