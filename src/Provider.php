@@ -41,6 +41,11 @@ abstract class Provider
         return "fab fa-{$this->name()}";
     }
 
+    public function priority(): int
+    {
+        return 0;
+    }
+
     // Controller options
 
     public function provider(string $redirectUri): AbstractProvider
