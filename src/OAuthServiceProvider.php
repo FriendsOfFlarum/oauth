@@ -44,8 +44,9 @@ class OAuthServiceProvider extends ServiceProvider
             }
 
             return [
-                'name' => $provider->name(),
-                'icon' => $provider->icon(),
+                'name'     => $provider->name(),
+                'icon'     => $provider->icon(),
+                'priority' => $provider->priority(),
             ];
         }));
 

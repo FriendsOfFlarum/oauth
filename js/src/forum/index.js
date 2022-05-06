@@ -14,7 +14,7 @@ app.initializers.add('fof/oauth', () => {
     const buttons = app.forum.attribute('fof-oauth').filter(Boolean);
     const googleButton = buttons.splice(buttons.indexOf(buttons.find((b) => b.name === 'google')), 1);
 
-    buttons.concat(googleButton).forEach(({ name, icon }) => {
+    buttons.concat(googleButton).forEach(({ name, icon, priority }) => {
       let className = `Button FoFLogInButton LogInButton--${name}`;
 
       // Google branding does not allow inline icon, so we'll keep the full button
@@ -30,7 +30,8 @@ app.initializers.add('fof/oauth', () => {
               provider: app.translator.trans(`fof-oauth.forum.providers.${name}`),
             })}
           </LogInButton>
-        </div>
+        </div>,
+        priority
       );
     });
   });
