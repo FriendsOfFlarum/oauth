@@ -32,4 +32,9 @@ class Twitter extends Provider
             'api_secret' => 'required',
         ];
     }
+
+    public function excludeFromRoutePattern(): bool
+    {
+        return true;
+    }
 }

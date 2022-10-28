@@ -81,4 +81,11 @@ abstract class Provider
             throw new AuthenticationException('invalid_email');
         }
     }
+
+    // Set this value to `true` in your provider class if you wish to provide your own
+    // route or controller.
+    public function excludeFromRoutePattern(): bool
+    {
+        return false;
+    }
 }
