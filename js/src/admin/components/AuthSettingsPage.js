@@ -45,7 +45,7 @@ export default class AuthSettingsPage extends ExtensionPage {
       items.add(
         `fof-oauth.${name}`,
         <div className={`Provider ${enabled ? 'enabled' : 'disabled'} ${showSettings && 'showing'}`}>
-          <div className="Provider--info">
+          <div className={`Provider--info Provider--${name}`}>
             {this.buildSettingComponent({
               type: 'boolean',
               setting: `fof-oauth.${name}`,
