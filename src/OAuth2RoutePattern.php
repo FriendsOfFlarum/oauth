@@ -29,8 +29,8 @@ class OAuth2RoutePattern
 
         foreach ($providers as $provider) {
             // Skip disabled providers, this increases compatibility with other oauth extensions which might offer the same providers
-            // Skip Twitter because it has its own oauth1 route defined in extend.php
-            if (!$provider->enabled() || $provider->name() === 'twitter') {
+            // Skip providers that want to provider their own route (ie in extend.php)
+            if (!$provider->enabled() || $provider->excludeFromRoutePattern()) {
                 continue;
             }
 
