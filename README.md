@@ -1,20 +1,52 @@
 # OAuth by FriendsOfFlarum
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/fof/oauth.svg)](https://packagist.org/packages/fof/oauth) [![OpenCollective](https://img.shields.io/badge/opencollective-fof-blue.svg)](https://opencollective.com/fof/donate) [![Donate](https://img.shields.io/badge/donate-datitisev-important.svg)](https://datitisev.me/donate)
+![License](https://img.shields.io/badge/license-MIT-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/fof/oauth.svg)](https://packagist.org/packages/fof/oauth) [![Total Downloads](https://img.shields.io/packagist/dt/fof/oauth.svg)](https://packagist.org/packages/fof/oauthh)  [![OpenCollective](https://img.shields.io/badge/opencollective-fof-blue.svg)](https://opencollective.com/fof/donate)
 
 
-A [Flarum](http://flarum.org) extension. Allow users to log in with GitHub, Twitter, Facebook, Discord, GitLab, Google and LinkedIn!
+A [Flarum](http://flarum.org) extension. Allow users to log in with various OAuth providers
+
+### Bundled providers
+
+By default these providers are included:
+
+- Discord
+- Facebook
+- Github
+- Gitlab
+- Google
+- LinkedIn
+- Twitter
+
+### Additional providers
+
+Additional OAuth providers are available for this extension. Here's a handy list of known extensions, let us know if you know of any more and we'll get them added!
+
+- [Amazon](https://extiverse.com/extension/ianm/oauth-amazon)
+- [Apple](https://extiverse.com/extension/blomstra/oauth-apple)
+- [Slack](https://extiverse.com/extension/blomstra/oauth-slack)
+- [Line](https://extiverse.com/extension/ianm/oauth-line)
+- [Microsoft](https://github.com/imorland/flarum-ext-oauth-microsoft) *experimental
+- [Twitch](https://github.com/imorland/flarum-ext-oauth-twitch)
+
+### Screenshots
+
+Default provider settings example
+![provider setup example](https://user-images.githubusercontent.com/16573496/201470744-ca8be058-f79c-4fc4-8c19-3ac5af2bd44b.png)
+
+Login/signup example with `Github`, `Twitter`, `Twitch` and `Google` enabled.
+![example login](https://user-images.githubusercontent.com/16573496/201470704-91874f67-284a-4fb2-967c-fd9d0eff2d9f.png)
 
 ### Installation
 
 ```sh
-composer require fof/oauth:"*"
+composer require fof/oauth
 ```
 
 ### Updating
 
 ```sh
 composer update fof/oauth
+php flarum cache:clear
 ```
 
 
@@ -39,7 +71,7 @@ It is possible to add additional `Providers` using an extender. See [OAuth-Amazo
 
 ### Links
 
-[![OpenCollective](https://img.shields.io/badge/donate-friendsofflarum-44AEE5?style=for-the-badge&logo=open-collective)](https://opencollective.com/fof/donate) [![GitHub](https://img.shields.io/badge/donate-datitisev-ea4aaa?style=for-the-badge&logo=github)](https://datitisev.me/donate/github)
+[![OpenCollective](https://img.shields.io/badge/donate-friendsofflarum-44AEE5?style=for-the-badge&logo=open-collective)](https://opencollective.com/fof/donate)
 
 - [Discuss](https://discuss.flarum.org/d/25182)
 - [Packagist](https://packagist.org/packages/fof/oauth)
