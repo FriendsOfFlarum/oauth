@@ -17,6 +17,7 @@ use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
 use Flarum\Settings\SettingsRepositoryInterface;
+use Flarum\User\LoginProvider;
 use Flarum\User\User as FlarumUser;
 use FoF\OAuth\Errors\AuthenticationException;
 use Illuminate\Session\Store;
@@ -163,6 +164,10 @@ class TwitterAuthController implements RequestHandlerInterface
      */
     protected function link(FlarumUser $user, User $resourceOwner): HtmlResponse
     {
+        if (LoginProvider::where('identifier', $resourceOwner->uid)->where('provider', 'twitter')->exists()) {
+            throw new ValidationException(['linkAccount' => 'Account already linked to another user']);
+        }
+        
         $user->loginProviders()->firstOrCreate([
             'provider'   => 'twitter',
             'identifier' => $resourceOwner->uid,
