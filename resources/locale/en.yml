@@ -73,6 +73,7 @@ fof-oauth:
           label: Linked accounts
           last-used-label: Last used
           link-created-label: Link created
+          orphaned-account: You previously signed into the forum using this provider, but it is no longer active here. This may be temporary, or it has been permanently removed.
           help: Manage your 3rd party signin links
           identifier-label: "{provider} ID"
           unlink-confirm: Are you sure you want to remove the link with {provider}? You will no longer be able to sign in to this forum unless you re-authenticate in the future.

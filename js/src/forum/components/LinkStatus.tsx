@@ -39,7 +39,7 @@ export default class LinkStatus extends Component<IAttrs, IState> {
         {provider.orphaned() && (
           <p className="helpText">
             {icon('fas fa-exclamation-circle')}
-            <span>{app.translator.trans('fof-oauth.forum.user.settings.orphaned-account')}</span>
+            <span>{app.translator.trans('fof-oauth.forum.user.settings.linked-account.orphaned-account')}</span>
           </p>
         )}
         <ul className="Provider-Info">
