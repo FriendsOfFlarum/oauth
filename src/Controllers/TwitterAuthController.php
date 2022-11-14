@@ -18,8 +18,8 @@ use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User as FlarumUser;
-use Illuminate\Session\Store;
 use FoF\OAuth\Errors\AuthenticationException;
+use Illuminate\Session\Store;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
@@ -156,7 +156,7 @@ class TwitterAuthController implements RequestHandlerInterface
     /**
      * Link the currently authenticated user to the OAuth account.
      *
-     * @param FlarumUser                   $user
+     * @param FlarumUser             $user
      * @param ResourceOwnerInterface $resourceOwner
      *
      * @return HtmlResponse
