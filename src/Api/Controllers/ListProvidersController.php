@@ -1,0 +1,86 @@
+<?php
+
+namespace FoF\OAuth\Api\Controllers;
+
+use Flarum\Api\Controller\AbstractListController;
+use Flarum\Http\RequestUtil;
+use Flarum\User\LoginProvider;
+use Flarum\User\User;
+use Flarum\User\UserRepository;
+use FoF\OAuth\Api\Serializers\ProviderSerializer;
+use FoF\OAuth\LoginProviderStatus;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Psr\Http\Message\ServerRequestInterface;
+use Tobscure\JsonApi\Document;
+
+class ListProvidersController extends AbstractListController
+{
+    /**
+     * {@inheritdoc}
+     */
+    public $serializer = ProviderSerializer::class;
+
+    /**
+     * @var UserRepository
+     */
+    protected $users;
+
+    public function __construct(UserRepository $users)
+    {
+        $this->users = $users;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function data(ServerRequestInterface $request, Document $document)
+    {
+        $actor = RequestUtil::getActor($request);
+
+        $providers = $this->getProviders();
+
+        $loginProviders = $this->getUserProviders($actor, $providers);
+
+        $data = new Collection();
+
+        $providers->each(function (array $provider) use ($loginProviders, &$data, $actor) {
+            $loginProvider = $loginProviders->where('provider', Arr::get($provider, 'name'))->first();
+
+            $data->add(LoginProviderStatus::build(
+                Arr::get($provider, 'name'),
+                Arr::get($provider, 'icon'),
+                Arr::get($provider, 'priority'),
+                $actor,
+                $loginProvider
+            ));
+        });
+
+        return $data;
+    }
+
+    private function getUserProviders(User $user, Collection $providers): Collection
+    {
+        return LoginProvider::query()
+            ->whereIn('provider', $this->getProviderKeys($providers))
+            ->where('user_id', $user->id)
+            ->get();
+    }
+
+    private function getProviders(): Collection
+    {
+        /** @var Collection $providers */
+        $providers = collect(resolve('fof-oauth.providers.forum'))->reject(function ($provider) {
+            return $provider === null;;
+        });
+
+        return $providers;
+    }
+
+    private function getProviderKeys(Collection $providers): array
+    {
+        return $providers->map(function ($provider) {
+            return Arr::get($provider, 'name');
+        })->toArray();
+    }
+}

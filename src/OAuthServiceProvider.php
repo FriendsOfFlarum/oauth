@@ -11,16 +11,16 @@
 
 namespace FoF\OAuth;
 
+use Flarum\Foundation\AbstractServiceProvider;
 use Flarum\Http\RouteCollection;
 use Flarum\Http\RouteHandlerFactory;
 use Illuminate\Contracts\Container\Container;
-use Illuminate\Support\ServiceProvider;
 
-class OAuthServiceProvider extends ServiceProvider
+class OAuthServiceProvider extends AbstractServiceProvider
 {
     public function register()
     {
-        $this->app->tag([
+        $this->container->tag([
             Providers\Discord::class,
             Providers\Facebook::class,
             Providers\GitHub::class,
@@ -31,14 +31,14 @@ class OAuthServiceProvider extends ServiceProvider
         ], 'fof-oauth.providers');
 
         // Add OAuth provider routes
-        $this->app->resolving('flarum.forum.routes', function (RouteCollection $collection, Container $container) {
+        $this->container->resolving('flarum.forum.routes', function (RouteCollection $collection, Container $container) {
             /** @var RouteHandlerFactory $factory */
             $factory = $container->make(RouteHandlerFactory::class);
 
             $collection->addRoute('GET', new OAuth2RoutePattern(), 'fof-oauth', $factory->toController(Controllers\AuthController::class));
         });
 
-        $this->app->singleton('fof-oauth.providers.forum', $this->map(function (Provider $provider) {
+        $this->container->singleton('fof-oauth.providers.forum', $this->map(function (Provider $provider) {
             if (!$provider->enabled()) {
                 return null;
             }
@@ -50,7 +50,7 @@ class OAuthServiceProvider extends ServiceProvider
             ];
         }));
 
-        $this->app->singleton('fof-oauth.providers.admin', $this->map(function (Provider $provider) {
+        $this->container->singleton('fof-oauth.providers.admin', $this->map(function (Provider $provider) {
             return [
                 'name'   => $provider->name(),
                 'icon'   => $provider->icon(),
@@ -63,7 +63,7 @@ class OAuthServiceProvider extends ServiceProvider
     protected function map(callable $cb)
     {
         return function () use ($cb) {
-            $providers = $this->app->tagged('fof-oauth.providers');
+            $providers = $this->container->tagged('fof-oauth.providers');
 
             return array_map(function ($provider) use ($cb) {
                 return $cb($provider);

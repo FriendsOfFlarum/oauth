@@ -67,6 +67,15 @@ fof-oauth:
       with_linkedin_button: '=> fof-oauth.forum.log_in.with_button'
       with_twitter_button: '=> fof-oauth.forum.log_in.with_button'
 
+    user:
+      settings:
+        linked-account:
+          label: Linked accounts
+          last-used-label: Last used
+          link-created-label: Link created
+          help: Manage your 3rd party signin links
+          identifier-label: "{provider} ID"
+          unlink-confirm: Are you sure you want to remove the link with {provider}? You will no longer be able to sign in to this forum unless you re-authenticate in the future.
     # Modify these if you need to change how the provider name
     # appears in the log in button.
     providers:
@@ -80,6 +89,8 @@ fof-oauth:
 
     signup:
       username_help: Please choose a username to be known by here
+
+    unlink: Remove link
 
     error:
       bad_verification_code: Invalid or expired verification token. Please try again.
