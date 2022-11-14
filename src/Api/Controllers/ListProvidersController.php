@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth\Api\Controllers;
 
 use Flarum\Api\Controller\AbstractListController;
@@ -71,7 +80,7 @@ class ListProvidersController extends AbstractListController
     {
         /** @var Collection $providers */
         $providers = collect(resolve('fof-oauth.providers.forum'))->reject(function ($provider) {
-            return $provider === null;;
+            return $provider === null;
         });
 
         return $providers;

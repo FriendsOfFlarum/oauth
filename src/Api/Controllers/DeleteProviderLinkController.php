@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth\Api\Controllers;
 
 use Flarum\Api\Controller\AbstractDeleteController;
@@ -18,7 +27,7 @@ class DeleteProviderLinkController extends AbstractDeleteController
      * @var Dispatcher
      */
     protected $events;
-    
+
     public function __construct(Dispatcher $events)
     {
         $this->events = $events;
