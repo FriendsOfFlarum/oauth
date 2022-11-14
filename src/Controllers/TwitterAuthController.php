@@ -167,7 +167,7 @@ class TwitterAuthController implements RequestHandlerInterface
         if (LoginProvider::where('identifier', $resourceOwner->uid)->where('provider', 'twitter')->exists()) {
             throw new ValidationException(['linkAccount' => 'Account already linked to another user']);
         }
-        
+
         $user->loginProviders()->firstOrCreate([
             'provider'   => 'twitter',
             'identifier' => $resourceOwner->uid,
