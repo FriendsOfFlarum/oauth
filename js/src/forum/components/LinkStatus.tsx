@@ -50,10 +50,8 @@ export default class LinkStatus extends Component<IAttrs, IState> {
               </li>,
               <li>
                 <label>
-                  {provider.orphaned()
-                    ? `${provider.name()} ID`
-                    : app.translator.trans('fof-oauth.forum.user.settings.linked-account.identifier-label', {
-                        provider: app.translator.trans(`fof-oauth.lib.providers.${provider.name()}`),
+                  {app.translator.trans('fof-oauth.forum.user.settings.linked-account.identifier-label', {
+                        provider: provider.orphaned() ? provider.name() : app.translator.trans(`fof-oauth.lib.providers.${provider.name()}`),
                       })}
                 </label>
                 <p>
