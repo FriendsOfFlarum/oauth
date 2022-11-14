@@ -34,7 +34,7 @@ export default class LinkStatus extends Component<IAttrs, IState> {
     const className = `Button FoFLogInButton LogInButton--${provider.name()} LogInButton${provider.linked() ? '--linked' : '--unlinked'}`;
 
     return (
-      <div className={`LinkedAccounts-Account LinkedAccounts-Account--${provider.name()}}`}>
+      <li className={`LinkedAccounts-Account LinkedAccounts-Account--${provider.name()}}`}>
         <legend>{app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`)}</legend>
         <ul className="Provider-Info">
           <li className={`Provider-Icon Provider-Icon--${provider.name()}`}>{icon(provider.icon())}</li>
@@ -74,7 +74,7 @@ export default class LinkStatus extends Component<IAttrs, IState> {
             </li>
           )}
         </ul>
-      </div>
+      </li>
     );
   }
 

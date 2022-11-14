@@ -105,14 +105,10 @@
 .SettingsPage {
   .item-account {
     .item-linkedAccounts {
-      display: block;
+      display: inline-block;
       margin: 0;
 
       fieldset {
-        legend {
-          float: left;
-          width: 100%;
-        }
 
         &:not(:last-child) {
           margin-bottom: 16px;
@@ -123,15 +119,14 @@
 }
 
 .LinkedAccounts-Account {
-  width: 100%;
   padding: 10px;
+  
   background-color: @header-control-bg;
   margin-top: 10px;
   border-radius: 4px;
   color: @muted-color;
 
   .Provider-Info {
-    display: flex;
 
     .Provider-Icon {
       padding-right: 5px;
