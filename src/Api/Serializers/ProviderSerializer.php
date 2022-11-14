@@ -26,6 +26,7 @@ class ProviderSerializer extends AbstractSerializer
             'name'               => $provider->name,
             'icon'               => $provider->icon,
             'priority'           => $provider->priority,
+            'orphaned'           => $provider->orphaned,
             'linked'             => $provider->linked,
             'identifier'         => $provider->identifier,
             'providerIdentifier' => $provider->providerIdentifier,

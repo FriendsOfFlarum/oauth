@@ -35,7 +35,7 @@ export default class LinkStatus extends Component<IAttrs, IState> {
 
     return (
       <li className={`LinkedAccounts-Account LinkedAccounts-Account--${provider.name()}}`}>
-        <legend>{app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`)}</legend>
+        <legend>{provider.orphaned() ? provider.name() : app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`)}</legend>
         <ul className="Provider-Info">
           <li className={`Provider-Icon Provider-Icon--${provider.name()}`}>{icon(provider.icon())}</li>
           {provider.linked() ? (
@@ -50,9 +50,11 @@ export default class LinkStatus extends Component<IAttrs, IState> {
               </li>,
               <li>
                 <label>
-                  {app.translator.trans('fof-oauth.forum.user.settings.linked-account.identifier-label', {
-                    provider: app.translator.trans(`fof-oauth.lib.providers.${provider.name()}`),
-                  })}
+                  {provider.orphaned()
+                    ? `${provider.name()} ID`
+                    : app.translator.trans('fof-oauth.forum.user.settings.linked-account.identifier-label', {
+                        provider: app.translator.trans(`fof-oauth.lib.providers.${provider.name()}`),
+                      })}
                 </label>
                 <p>
                   <code>{provider.providerIdentifier()}</code>

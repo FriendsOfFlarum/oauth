@@ -70,7 +70,8 @@ class ListProvidersController extends AbstractListController
                 'fas fa-question',
                 -100,
                 $loginProvider->user,
-                $loginProvider
+                $loginProvider,
+                true
             ));
         });
 

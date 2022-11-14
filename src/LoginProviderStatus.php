@@ -32,6 +32,11 @@ class LoginProviderStatus
     public $priority;
 
     /**
+     * @var bool
+     */
+    public $orphaned;
+
+    /**
      * @var int|null
      */
     public $userId;
@@ -61,13 +66,14 @@ class LoginProviderStatus
      */
     public $lastLogin;
 
-    public static function build(string $name, string $icon, int $priority, User $user, LoginProvider $provider = null)
+    public static function build(string $name, string $icon, int $priority, User $user, LoginProvider $provider = null, bool $orphaned = false)
     {
         $status = new self();
 
         $status->name = $name;
         $status->icon = $icon;
         $status->priority = $priority;
+        $status->orphaned = $orphaned;
         $status->linked = (bool) $provider;
         $status->userId = $user->id;
 
