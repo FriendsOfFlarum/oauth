@@ -55,12 +55,21 @@ class ListProvidersController extends AbstractListController
 
         $providers->each(function (array $provider) use ($loginProviders, &$data, $actor) {
             $loginProvider = $loginProviders->where('provider', Arr::get($provider, 'name'))->first();
-
             $data->add(LoginProviderStatus::build(
                 Arr::get($provider, 'name'),
                 Arr::get($provider, 'icon'),
                 Arr::get($provider, 'priority'),
                 $actor,
+                $loginProvider
+            ));
+        });
+
+        $this->getOrphanedUserProviders($actor, $providers)->each(function (LoginProvider $loginProvider) use (&$data) {
+            $data->add(LoginProviderStatus::build(
+                $loginProvider->provider,
+                'fas fa-question',
+                -100,
+                $loginProvider->user,
                 $loginProvider
             ));
         });
@@ -73,6 +82,14 @@ class ListProvidersController extends AbstractListController
         return LoginProvider::query()
             ->whereIn('provider', $this->getProviderKeys($providers))
             ->where('user_id', $user->id)
+            ->get();
+    }
+
+    private function getOrphanedUserProviders(User $user, Collection $providers): Collection
+    {
+        return LoginProvider::query()
+            ->where('user_id', $user->id)
+            ->whereNotIn('provider', $this->getProviderKeys($providers))
             ->get();
     }
 
