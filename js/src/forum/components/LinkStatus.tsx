@@ -34,7 +34,7 @@ export default class LinkStatus extends Component<IAttrs, IState> {
     const className = `Button FoFLogInButton LogInButton--${provider.name()} LogInButton${provider.linked() ? '--linked' : '--unlinked'}`;
 
     return (
-      <li className={`LinkedAccounts-Account LinkedAccounts-Account--${provider.name()}}`}>
+      <li className={`LinkedAccounts-Account LinkedAccounts-Account--${provider.name()}`}>
         <legend>{provider.orphaned() ? provider.name() : app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`)}</legend>
         {provider.orphaned() && (
           <p className="helpText">
