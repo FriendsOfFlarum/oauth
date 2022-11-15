@@ -32,6 +32,8 @@ export default class LinkStatus extends Component<IAttrs, IState> {
 
     return (
       <li className={`LinkedAccounts-Account LinkedAccounts-Account--${provider.name()}`}>
+        {icon(provider.icon(), { className: `Provider-Icon Provider-Icon--${provider.name()}` })}
+
         <legend>{provider.orphaned() ? provider.name() : app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`)}</legend>
 
         {provider.orphaned() && (
@@ -41,44 +43,40 @@ export default class LinkStatus extends Component<IAttrs, IState> {
           </p>
         )}
 
-        <ul className="Provider-Info">
-          <li className={`Provider-Icon Provider-Icon--${provider.name()}`}>{icon(provider.icon())}</li>
-          {provider.linked() ? (
-            [
-              <li>
-                <label>{app.translator.trans('fof-oauth.forum.user.settings.linked-account.link-created-label')}</label>
-                <p>{humanTime(provider.firstLogin())}</p>
-              </li>,
-              <li>
-                <label>{app.translator.trans('fof-oauth.forum.user.settings.linked-account.last-used-label')}</label>
-                <p>{humanTime(provider.lastLogin())}</p>
-              </li>,
-              <li>
-                <label>
+        <div className="Provider-Info">
+          {provider.linked() && (
+            <>
+              <dl>
+                <dt>{app.translator.trans('fof-oauth.forum.user.settings.linked-account.link-created-label')}</dt>
+                <dd>{humanTime(provider.firstLogin())}</dd>
+
+                <dt>{app.translator.trans('fof-oauth.forum.user.settings.linked-account.last-used-label')}</dt>
+                <dd>{humanTime(provider.lastLogin())}</dd>
+
+                <dt>
                   {app.translator.trans('fof-oauth.forum.user.settings.linked-account.identifier-label', {
                     provider: provider.orphaned() ? provider.name() : app.translator.trans(`fof-oauth.lib.providers.${provider.name()}`),
                   })}
-                </label>
-                <p>
+                </dt>
+                <dd>
                   <code>{provider.providerIdentifier()}</code>
-                </p>
-              </li>,
-              <li>
-                <Button className={className} icon={provider.icon()} onclick={() => this.deleteProvider(provider)} loading={this.state.loading}>
-                  {app.translator.trans('fof-oauth.forum.unlink')}
-                </Button>
-              </li>,
-            ]
-          ) : (
-            <li>
-              <LogInButton className={className} icon={provider.icon()} path={`/auth/${provider.name()}?linkTo=${user.id()}`}>
-                {app.translator.trans(`fof-oauth.forum.log_in.with_${provider.name()}_button`, {
-                  provider: app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`),
-                })}
-              </LogInButton>
-            </li>
+                </dd>
+              </dl>
+
+              <Button className={className} icon={provider.icon()} onclick={() => this.deleteProvider(provider)} loading={this.state.loading}>
+                {app.translator.trans('fof-oauth.forum.unlink')}
+              </Button>
+            </>
           )}
-        </ul>
+
+          {!provider.linked() && !provider.orphaned() && (
+            <LogInButton className={className} icon={provider.icon()} path={`/auth/${provider.name()}?linkTo=${user.id()}`}>
+              {app.translator.trans(`fof-oauth.forum.log_in.with_${provider.name()}_button`, {
+                provider: app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`),
+              })}
+            </LogInButton>
+          )}
+        </div>
       </li>
     );
   }
