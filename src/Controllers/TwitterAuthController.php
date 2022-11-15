@@ -13,10 +13,16 @@ namespace FoF\OAuth\Controllers;
 
 use Flarum\Forum\Auth\Registration;
 use Flarum\Forum\Auth\ResponseFactory;
+use Flarum\Foundation\ValidationException;
+use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
 use Flarum\Settings\SettingsRepositoryInterface;
+use Flarum\User\LoginProvider;
+use Flarum\User\User as FlarumUser;
 use FoF\OAuth\Errors\AuthenticationException;
+use Illuminate\Session\Store;
 use Illuminate\Support\Arr;
+use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use League\OAuth1\Client\Credentials\CredentialsException;
 use League\OAuth1\Client\Server\Twitter;
@@ -77,11 +83,16 @@ class TwitterAuthController implements RequestHandlerInterface
             'callback_uri' => $redirectUri,
         ]);
 
+        /** @var Store $session */
         $session = $request->getAttribute('session');
 
         $queryParams = $request->getQueryParams();
         $oAuthToken = Arr::get($queryParams, 'oauth_token');
         $oAuthVerifier = Arr::get($queryParams, 'oauth_verifier');
+
+        if ($requestLinkTo = Arr::pull($queryParams, 'linkTo')) {
+            $session->put('linkTo', $requestLinkTo);
+        }
 
         if (!$oAuthToken || !$oAuthVerifier) {
             $temporaryCredentials = $server->getTemporaryCredentials();
@@ -98,6 +109,21 @@ class TwitterAuthController implements RequestHandlerInterface
         $tokenCredentials = $server->getTokenCredentials($temporaryCredentials, $oAuthToken, $oAuthVerifier);
 
         $user = $server->getUserDetails($tokenCredentials);
+
+        if ($shouldLink = $session->remove('linkTo')) {
+            // Don't register a new user, just link to the existing account, else continue with registration.
+            $actor = RequestUtil::getActor($request);
+
+            if ($actor->exists) {
+                $actor->assertRegistered();
+
+                if ($actor->id !== (int) $shouldLink) {
+                    throw new ValidationException(['linkAccount' => 'User data mismatch']);
+                }
+
+                return $this->link($actor, $user);
+            }
+        }
 
         return $this->response->make(
             'twitter',
@@ -126,5 +152,29 @@ class TwitterAuthController implements RequestHandlerInterface
     protected function getSetting($key): ?string
     {
         return $this->settings->get("fof-oauth.twitter.{$key}");
+    }
+
+    /**
+     * Link the currently authenticated user to the OAuth account.
+     *
+     * @param FlarumUser             $user
+     * @param ResourceOwnerInterface $resourceOwner
+     *
+     * @return HtmlResponse
+     */
+    protected function link(FlarumUser $user, User $resourceOwner): HtmlResponse
+    {
+        if (LoginProvider::where('identifier', $resourceOwner->uid)->where('provider', 'twitter')->exists()) {
+            throw new ValidationException(['linkAccount' => 'Account already linked to another user']);
+        }
+
+        $user->loginProviders()->firstOrCreate([
+            'provider'   => 'twitter',
+            'identifier' => $resourceOwner->uid,
+        ])->touch();
+
+        $content = '<script>window.close(); window.opener.location.reload();</script>';
+
+        return new HtmlResponse($content);
     }
 }

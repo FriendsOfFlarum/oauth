@@ -14,7 +14,6 @@ namespace FoF\OAuth;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
-use FoF\Extend\Extend\ExtensionSettings;
 
 return [
     (new Extend\Frontend('forum'))
@@ -33,11 +32,12 @@ return [
     (new Extend\Middleware('forum'))
         ->add(Middleware\ErrorHandler::class),
 
-    (new ExtensionSettings())
-        ->addKey('fof-oauth.only_icons', false),
-
     (new Extend\Routes('forum'))
         ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
+
+    (new Extend\Routes('api'))
+        ->get('/linked-accounts', 'users.provider.list', Api\Controllers\ListProvidersController::class)
+        ->delete('/linked-accounts/{id}', 'users.provider.delete', Api\Controllers\DeleteProviderLinkController::class),
 
     (new Extend\ServiceProvider())
         ->register(OAuthServiceProvider::class),
@@ -51,4 +51,8 @@ return [
 
             return $attributes;
         }),
+
+    (new Extend\Settings())
+        ->default('fof-oauth.only_icons', false)
+        ->serializeToForum('fof-oauth.only_icons', 'fof-oauth.only_icons', 'boolVal'),
 ];
