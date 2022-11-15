@@ -1,10 +1,7 @@
 import app from 'flarum/forum/app';
 import Component, { ComponentAttrs } from 'flarum/common/Component';
-import classList from 'flarum/common/utils/classList';
 import icon from 'flarum/common/helpers/icon';
 import Button from 'flarum/common/components/Button';
-import LinkButton from 'flarum/common/components/LinkButton';
-import Badge from 'flarum/common/components/Badge';
 import LogInButton from 'flarum/forum/components/LogInButton';
 import humanTime from 'flarum/common/utils/humanTime';
 
