@@ -33,12 +33,14 @@ export default class LinkStatus extends Component<IAttrs, IState> {
     return (
       <li className={`LinkedAccounts-Account LinkedAccounts-Account--${provider.name()}`}>
         <legend>{provider.orphaned() ? provider.name() : app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`)}</legend>
+
         {provider.orphaned() && (
-          <p className="helpText">
+          <p className="LinkedAccounts-AccountOrphaned helpText">
             {icon('fas fa-exclamation-circle')}
             <span>{app.translator.trans('fof-oauth.forum.user.settings.linked-account.orphaned-account')}</span>
           </p>
         )}
+
         <ul className="Provider-Info">
           <li className={`Provider-Icon Provider-Icon--${provider.name()}`}>{icon(provider.icon())}</li>
           {provider.linked() ? (
