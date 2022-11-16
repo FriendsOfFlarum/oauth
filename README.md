@@ -27,6 +27,7 @@ Additional OAuth providers are available for this extension. Here's a handy list
 - [Line](https://extiverse.com/extension/ianm/oauth-line)
 - [Microsoft](https://github.com/imorland/flarum-ext-oauth-microsoft) *experimental
 - [Twitch](https://github.com/imorland/flarum-ext-oauth-twitch)
+- [Auth0](https://extiverse.com/extension/lodge104/flarum-ext-oauth-auth0)
 
 ### Screenshots
 
