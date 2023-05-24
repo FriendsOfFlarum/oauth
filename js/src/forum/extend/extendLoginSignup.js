@@ -4,7 +4,9 @@ import LogInButtons from 'flarum/forum/components/LogInButtons';
 import LogInButton from 'flarum/forum/components/LogInButton';
 import extractText from 'flarum/common/utils/extractText';
 import Tooltip from 'flarum/common/components/Tooltip';
+import LogInModal from 'flarum/forum/components/LogInModal';
 import SignUpModal from 'flarum/forum/components/SignUpModal';
+import ForumApplication from 'flarum/forum/ForumApplication';
 
 export default function () {
   extend(LogInButtons.prototype, 'items', function (items) {
@@ -23,7 +25,7 @@ export default function () {
       items.add(
         name,
         <div className={`LogInButtonContainer LogInButtonContainer--${name}`}>
-          <LogInButton className={className} icon={icon} path={`/auth/${name}`}>
+          <LogInButton className={className} icon={icon} path={`/auth/${name}`} disabled={app.fof_oauth_loginInProgress}>
             {app.translator.trans(`fof-oauth.forum.log_in.with_${name}_button`, {
               provider: app.translator.trans(`fof-oauth.forum.providers.${name}`),
             })}
@@ -48,6 +50,27 @@ export default function () {
     if (!onlyIcons) return;
 
     vdom.attrs.className += ' FoFLogInButtons--icons';
+  });
+
+  extend(ForumApplication.prototype, 'authenticationComplete', function (_, payload) {
+    if (payload.loggedIn) {
+      app.fof_oauth_loginInProgress = true;
+      // This will automatically be reset, as authenticationComplete also triggers a window reload.
+
+      m.redraw();
+    }
+  });
+
+  extend(LogInModal.prototype, 'onbeforeupdate', function (vnode) {
+    if (app.fof_oauth_loginInProgress) {
+      this.loading = true;
+    }
+  });
+
+  extend(SignUpModal.prototype, 'onbeforeupdate', function (vnode) {
+    if (app.fof_oauth_loginInProgress) {
+      this.loading = true;
+    }
   });
 
   extend(SignUpModal.prototype, 'fields', function (items) {
