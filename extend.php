@@ -14,6 +14,7 @@ namespace FoF\OAuth;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
+use FoF\Extend\Events\OAuthLoginSuccessful;
 
 return [
     (new Extend\Frontend('forum'))
@@ -54,5 +55,9 @@ return [
 
     (new Extend\Settings())
         ->default('fof-oauth.only_icons', false)
+        ->default('fof-oauth.update_email_from_provider', true)
         ->serializeToForum('fof-oauth.only_icons', 'fof-oauth.only_icons', 'boolVal'),
+
+    (new Extend\Event())
+        ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class),
 ];

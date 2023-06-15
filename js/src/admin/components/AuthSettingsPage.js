@@ -21,6 +21,12 @@ export default class AuthSettingsPage extends ExtensionPage {
               setting: 'fof-oauth.only_icons',
               label: app.translator.trans(`fof-oauth.admin.settings.only_icons_label`),
             })}
+            {this.buildSettingComponent({
+              type: 'boolean',
+              setting: 'fof-oauth.update_email_from_provider',
+              label: app.translator.trans('fof-oauth.admin.settings.update_email_from_provider_label'),
+              help: app.translator.trans('fof-oauth.admin.settings.update_email_from_provider_help'),
+            })}
 
             <hr />
 
