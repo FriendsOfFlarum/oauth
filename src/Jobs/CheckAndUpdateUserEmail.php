@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth\Jobs;
 
 use Flarum\User\LoginProvider;
@@ -31,8 +40,8 @@ class CheckAndUpdateUserEmail implements ShouldQueue
     public $providedEmail;
 
     /**
-     * @param string $providerName
-     * @param mixed $identifier
+     * @param string      $providerName
+     * @param mixed       $identifier
      * @param string|null $providedEmail
      */
     public function __construct(string $providerName, $identifier, ?string $providedEmail)
