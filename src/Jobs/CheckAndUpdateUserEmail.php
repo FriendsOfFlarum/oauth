@@ -53,8 +53,18 @@ class CheckAndUpdateUserEmail implements ShouldQueue
 
     public function handle(UserValidator $validator)
     {
+        $provider = LoginProvider::where('provider', $this->providerName)->where('identifier', $this->identifier)->first();
+
+        if (!$provider) {
+            return;
+        }
+
         /** @var User $user */
-        $user = User::find(LoginProvider::where('provider', $this->providerName)->where('identifier', $this->identifier)->first()->user_id);
+        $user = User::find($provider->user_id);
+
+        if (!$user) {
+            return;
+        }
 
         if (!empty($this->providedEmail) && $user && $user->email !== $this->providedEmail) {
             $validator->setUser($user);
