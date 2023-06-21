@@ -26,6 +26,16 @@ export default class LinkStatus extends Component<IAttrs, IState> {
     loading: false,
   };
 
+  onbeforeupdate(vnode: Mithril.Vnode<ComponentAttrs, this>) {
+    super.onbeforeupdate(vnode);
+    if (app.fof_oauth_linkingInProgress) {
+      this.state.loading = true;
+    } else if (app.fof_oauth_linkingInProgress === false) {
+      this.state.loading = false;
+      delete app.fof_oauth_linkingInProgress;
+    }
+  }
+
   view(vnode: Mithril.Vnode<ComponentAttrs, this>) {
     const { provider, user } = this.attrs;
     const className = `Button FoFLogInButton LogInButton--${provider.name()} LogInButton${provider.linked() ? '--linked' : '--unlinked'}`;
@@ -70,7 +80,12 @@ export default class LinkStatus extends Component<IAttrs, IState> {
           )}
 
           {!provider.linked() && !provider.orphaned() && (
-            <LogInButton className={className} icon={provider.icon()} path={`/auth/${provider.name()}?linkTo=${user.id()}`}>
+            <LogInButton
+              className={className}
+              icon={provider.icon()}
+              path={`/auth/${provider.name()}?linkTo=${user.id()}`}
+              loading={this.state.loading}
+            >
               {app.translator.trans(`fof-oauth.forum.log_in.with_${provider.name()}_button`, {
                 provider: app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`),
               })}

@@ -173,7 +173,7 @@ class TwitterAuthController implements RequestHandlerInterface
             'identifier' => $resourceOwner->uid,
         ])->touch();
 
-        $content = '<script>window.close(); window.opener.location.reload();</script>';
+        $content = '<script>window.close(); window.opener.app.linkingComplete();</script>';
 
         return new HtmlResponse($content);
     }
