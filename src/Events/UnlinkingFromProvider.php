@@ -22,7 +22,7 @@ class UnlinkingFromProvider
     public $user;
 
     /**
-     * @var string
+     * @var LoginProvider
      */
     public $provider;
 
