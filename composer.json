@@ -36,7 +36,7 @@
         "omines/oauth2-gitlab": "^3.5.0",
         "wohali/oauth2-discord-new": "^1.2.1",
         "league/oauth2-linkedin": "^5.1.2",
-        "fof/extend": "^1.1.4"
+        "fof/extend": "^1.1.5"
     },
     "replace": {
         "flarum/auth-facebook": "*",
