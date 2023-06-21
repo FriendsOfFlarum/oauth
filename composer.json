@@ -29,14 +29,14 @@
     ],
     "require": {
         "flarum/core": "^1.2.0",
-        "league/oauth1-client": "^1.8.2",
-        "league/oauth2-facebook": "^2.0.3",
-        "league/oauth2-github": "^3.0.0",
-        "league/oauth2-google": "^4.0.0",
-        "omines/oauth2-gitlab": "^3.3.0",
-        "wohali/oauth2-discord-new": "^1.1.0",
+        "league/oauth1-client": "^1.10.1",
+        "league/oauth2-facebook": "^2.2.0",
+        "league/oauth2-github": "^3.1.0",
+        "league/oauth2-google": "^4.0.1",
+        "omines/oauth2-gitlab": "^3.5.0",
+        "wohali/oauth2-discord-new": "^1.2.1",
         "league/oauth2-linkedin": "^5.1.2",
-        "fof/extend": "^1.1.1"
+        "fof/extend": "^1.1.2"
     },
     "replace": {
         "flarum/auth-facebook": "*",

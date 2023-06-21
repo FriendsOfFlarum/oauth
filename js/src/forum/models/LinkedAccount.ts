@@ -1,13 +1,38 @@
 import Model from 'flarum/common/Model';
 
 export default class LinkedAccount extends Model {
-  name = Model.attribute<string>('name');
-  icon = Model.attribute<string>('icon');
-  priority = Model.attribute<number>('priority');
-  linked = Model.attribute<boolean>('linked');
-  orphaned = Model.attribute<boolean>('orphaned');
-  identifier = Model.attribute<string>('identifier');
-  providerIdentifier = Model.attribute<string>('providerIdentifier');
-  firstLogin = Model.attribute('firstLogin', Model.transformDate);
-  lastLogin = Model.attribute('lastLogin', Model.transformDate);
+  name() {
+    return Model.attribute<string>('name').call(this);
+  }
+
+  icon() {
+    return Model.attribute<string>('icon').call(this);
+  }
+
+  priority() {
+    return Model.attribute<number>('priority').call(this);
+  }
+
+  linked() {
+    return Model.attribute<boolean>('linked').call(this);
+  }
+
+  orphaned() {
+    return Model.attribute<boolean>('orphaned').call(this);
+  }
+
+  identifier() {
+    return Model.attribute<string>('identifier').call(this);
+  }
+
+  providerIdentifier() {
+    return Model.attribute<string>('providerIdentifier').call(this);
+  }
+  firstLogin() {
+    return Model.attribute('firstLogin', Model.transformDate).call(this);
+  }
+
+  lastLogin() {
+    return Model.attribute('lastLogin', Model.transformDate).call(this);
+  }
 }
