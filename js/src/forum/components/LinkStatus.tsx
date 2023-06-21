@@ -28,11 +28,12 @@ export default class LinkStatus extends Component<IAttrs, IState> {
 
   onbeforeupdate(vnode: Mithril.Vnode<ComponentAttrs, this>) {
     super.onbeforeupdate(vnode);
-    if (app.fof_oauth_linkingInProgress) {
+    if (app.fof_oauth_linkingInProgress && app.fof_oauth_linkingProvider === this.attrs.provider.name()) {
       this.state.loading = true;
-    } else if (app.fof_oauth_linkingInProgress === false) {
+    } else if (app.fof_oauth_linkingInProgress === false && app.fof_oauth_linkingProvider === this.attrs.provider.name()) {
       this.state.loading = false;
       delete app.fof_oauth_linkingInProgress;
+      delete app.fof_oauth_linkingProvider;
     }
   }
 
@@ -80,16 +81,18 @@ export default class LinkStatus extends Component<IAttrs, IState> {
           )}
 
           {!provider.linked() && !provider.orphaned() && (
-            <LogInButton
-              className={className}
-              icon={provider.icon()}
-              path={`/auth/${provider.name()}?linkTo=${user.id()}`}
-              loading={this.state.loading}
-            >
-              {app.translator.trans(`fof-oauth.forum.log_in.with_${provider.name()}_button`, {
-                provider: app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`),
-              })}
-            </LogInButton>
+            <div onclick={() => (app.fof_oauth_linkingProvider = provider.name())}>
+              <LogInButton
+                className={className}
+                icon={provider.icon()}
+                path={`/auth/${provider.name()}?linkTo=${user.id()}`}
+                loading={this.state.loading}
+              >
+                {app.translator.trans(`fof-oauth.forum.log_in.with_${provider.name()}_button`, {
+                  provider: app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`),
+                })}
+              </LogInButton>
+            </div>
           )}
         </div>
       </li>
