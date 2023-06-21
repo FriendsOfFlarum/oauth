@@ -61,6 +61,44 @@ export default function () {
     }
   });
 
+  ForumApplication.prototype.linkingComplete = async function () {
+    try {
+      app.fof_oauth_linkingInProgress = true;
+      m.redraw();
+
+      // Refresh the list of providers
+      const newProviders = await this.store.find('linked-accounts');
+
+      // The store will contain an old version of the login provider (unlinked) that has
+      // another ID than the new one (linked). We need to delete that one from the store
+      // so that the UI gets updated correctly.
+
+      // Find the old provider (one that has the same name as one of the new providers & has providerIdentifier===null)
+      const oldProvider = this.store
+        .all('linked-accounts')
+        // Find the providers that have not yet been linked (providerIdentifier is null)
+        .filter((p) => p.providerIdentifier() === null)
+        // Match it with one of the newly fetched providers by name
+        .find((p) => newProviders.some((np) => np.name() === p.name()));
+
+      if (oldProvider) {
+        delete this.store.data['linked-accounts'][oldProvider.id()];
+      } else {
+        window.location.reload();
+        return;
+      }
+
+      // Refresh the session user
+      await this.store.find('users', app.session.user.id());
+
+      app.fof_oauth_linkingInProgress = false;
+      m.redraw();
+    } catch (error) {
+      app.fof_oauth_linkingInProgress = false;
+      m.redraw();
+    }
+  };
+
   extend(LogInModal.prototype, 'onbeforeupdate', function (vnode) {
     if (app.fof_oauth_loginInProgress) {
       this.loading = true;
