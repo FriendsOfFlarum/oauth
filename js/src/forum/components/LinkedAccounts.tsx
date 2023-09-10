@@ -1,5 +1,8 @@
 import app from 'flarum/forum/app';
 import Component from 'flarum/common/Component';
+import FieldSet from 'flarum/common/components/FieldSet';
+import listItems from 'flarum/common/helpers/listItems';
+import ItemList from 'flarum/common/utils/ItemList';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 
 import type Mithril from 'mithril';
@@ -7,7 +10,6 @@ import type User from 'flarum/common/models/User';
 
 import LinkedAccount from '../models/LinkedAccount';
 import LinkStatus from './LinkStatus';
-import ItemList from 'flarum/common/utils/ItemList';
 
 interface IAttrs {
   user: User;
@@ -26,31 +28,22 @@ export default class LinkedAccounts extends Component<IAttrs, IState> {
 
   oncreate(vnode: Mithril.VnodeDOM<IAttrs, this>): void {
     super.oncreate(vnode);
-
     this.loadLinkedAccounts();
   }
 
   view(vnode: Mithril.Vnode<IAttrs, this>) {
-    const user = this.attrs.user;
-
     const linkedAccounts = app.store.all<LinkedAccount>('linked-accounts');
 
     return (
-      <div className="LinkedAccounts">
-        <fieldset>
-          <legend>{app.translator.trans('fof-oauth.forum.user.settings.linked-account.label')}</legend>
-          <p className="helpText">{app.translator.trans('fof-oauth.forum.user.settings.linked-account.help')}</p>
+      <FieldSet label={app.translator.trans('fof-oauth.forum.user.settings.linked-account.label')}>
+        <p className="helpText">{app.translator.trans('fof-oauth.forum.user.settings.linked-account.help')}</p>
 
-          {this.state.loadingAdditional && <LoadingIndicator containerClassName="LinkedAccounts-Loading" />}
-          {this.state.errorLoadingAdditional && (
-            <p className="LinkedAccounts-LinkedStatus" role="status">
-              {app.translator.trans('fof-oauth.forum.user.settings.error_loading_additional')}
-            </p>
-          )}
-
-          {linkedAccounts.length > 0 && <ul className="LinkedAccounts-List">{this.linkedAccountsItems(linkedAccounts, user).toArray()}</ul>}
-        </fieldset>
-      </div>
+        {this.state.loadingAdditional ? (
+          <LoadingIndicator containerClassName="LinkedAccounts-Loading" />
+        ) : (
+          <ul className="LinkedAccounts-List">{listItems(this.linkedAccountsItems(linkedAccounts, this.attrs.user).toArray())}</ul>
+        )}
+      </FieldSet>
     );
   }
 
