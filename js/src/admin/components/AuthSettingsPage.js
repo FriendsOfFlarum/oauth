@@ -27,6 +27,28 @@ export default class AuthSettingsPage extends ExtensionPage {
               label: app.translator.trans('fof-oauth.admin.settings.update_email_from_provider_label'),
               help: app.translator.trans('fof-oauth.admin.settings.update_email_from_provider_help'),
             })}
+            {this.buildSettingComponent({
+              type: 'boolean',
+              setting: 'fof-oauth.fullscreenPopup',
+              label: app.translator.trans('fof-oauth.admin.settings.fullscreen_popup_label'),
+              help: app.translator.trans('fof-oauth.admin.settings.fullscreen_popup_help'),
+            })}
+            {this.buildSettingComponent({
+              type: 'number',
+              setting: 'fof-oauth.popupWidth',
+              label: app.translator.trans('fof-oauth.admin.settings.popup_width_label'),
+              help: app.translator.trans('fof-oauth.admin.settings.popup_width_help'),
+              placeholder: 580,
+              min: 0,
+            })}
+            {this.buildSettingComponent({
+              type: 'number',
+              setting: 'fof-oauth.popupHeight',
+              label: app.translator.trans('fof-oauth.admin.settings.popup_height_label'),
+              help: app.translator.trans('fof-oauth.admin.settings.popup_height_help'),
+              placeholder: 400,
+              min: 0,
+            })}
 
             <hr />
 
