@@ -56,7 +56,13 @@ return [
     (new Extend\Settings())
         ->default('fof-oauth.only_icons', false)
         ->default('fof-oauth.update_email_from_provider', true)
-        ->serializeToForum('fof-oauth.only_icons', 'fof-oauth.only_icons', 'boolVal'),
+        ->serializeToForum('fof-oauth.only_icons', 'fof-oauth.only_icons', 'boolVal')
+        ->default('fof-oauth.popupWidth', 580)
+        ->default('fof-oauth.popupHeight', 400)
+        ->default('fof-oauth.fullscreenPopup', true)
+        ->serializeToForum('fof-oauth.popupWidth', 'fof-oauth.popupWidth', 'intval')
+        ->serializeToForum('fof-oauth.popupHeight', 'fof-oauth.popupHeight', 'intval')
+        ->serializeToForum('fof-oauth.fullscreenPopup', 'fof-oauth.fullscreenPopup', 'boolVal'),
 
     (new Extend\Event())
         ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class),
