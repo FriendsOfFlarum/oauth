@@ -38,6 +38,7 @@ export default class AuthSettingsPage extends ExtensionPage {
               setting: 'fof-oauth.popupWidth',
               label: app.translator.trans('fof-oauth.admin.settings.popup_width_label'),
               help: app.translator.trans('fof-oauth.admin.settings.popup_width_help'),
+              placeholder: 580,
               min: 0,
             })}
             {this.buildSettingComponent({
@@ -45,6 +46,7 @@ export default class AuthSettingsPage extends ExtensionPage {
               setting: 'fof-oauth.popupHeight',
               label: app.translator.trans('fof-oauth.admin.settings.popup_height_label'),
               help: app.translator.trans('fof-oauth.admin.settings.popup_height_help'),
+              placeholder: 400,
               min: 0,
             })}
 
