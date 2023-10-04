@@ -18,7 +18,6 @@ export default class ProviderInfo extends Component<IProviderInfoAttrs> {
           <p className="LinkedAccountsList-item-title">{provider.name()}</p>
           <p className="helpText">{app.translator.trans('fof-oauth.forum.user.settings.linked-account.orphaned-account')}</p>
           {this.renderDates(provider)}
-          {/* Any other content for the orphaned state can be added here */}
         </div>
       );
     }
@@ -32,11 +31,9 @@ export default class ProviderInfo extends Component<IProviderInfoAttrs> {
       );
     }
 
-    // Assuming not linked state means neither orphaned nor linked
     return (
       <div>
         <p className="LinkedAccountsList-item-title">{app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`)}</p>
-        {/* Any content for the not linked state can be added here */}
       </div>
     );
   }
