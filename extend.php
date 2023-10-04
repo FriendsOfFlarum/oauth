@@ -74,6 +74,7 @@ return [
         ->attributes(function (CurrentUserSerializer $serializer, User $user, array $attributes) {
             $session = $serializer->getRequest()->getAttribute('session');
             $attributes['loginProvider'] = $session->get(AbstractOAuthController::SESSION_OAUTH2PROVIDER);
+
             return $attributes;
-        })
+        }),
 ];
