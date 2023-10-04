@@ -11,9 +11,12 @@
 
 namespace FoF\OAuth;
 
+use Flarum\Api\Serializer\CurrentUserSerializer;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
+use Flarum\User\User;
+use FoF\Extend\Controllers\AbstractOAuthController;
 use FoF\Extend\Events\OAuthLoginSuccessful;
 
 return [
@@ -66,4 +69,12 @@ return [
 
     (new Extend\Event())
         ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class),
+
+    (new Extend\ApiSerializer(CurrentUserSerializer::class))
+        ->attributes(function (CurrentUserSerializer $serializer, User $user, array $attributes) {
+            $session = $serializer->getRequest()->getAttribute('session');
+            $attributes['loginProvider'] = $session->get(AbstractOAuthController::SESSION_OAUTH2PROVIDER);
+
+            return $attributes;
+        }),
 ];
