@@ -22,6 +22,7 @@ class ProviderSerializer extends AbstractSerializer
 
     /**
      * @param \FoF\OAuth\LoginProviderStatus $provider
+     *
      * @return array
      */
     public function getDefaultAttributes($provider): array

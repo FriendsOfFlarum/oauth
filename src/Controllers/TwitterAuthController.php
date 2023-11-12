@@ -157,8 +157,8 @@ class TwitterAuthController implements RequestHandlerInterface
     /**
      * Link the currently authenticated user to the OAuth account.
      *
-     * @param FlarumUser    $user
-     * @param User          $resourceOwner
+     * @param FlarumUser $user
+     * @param User       $resourceOwner
      *
      * @return HtmlResponse
      */
