@@ -73,7 +73,10 @@ return [
     (new Extend\ApiSerializer(CurrentUserSerializer::class))
         ->attributes(function (CurrentUserSerializer $serializer, User $user, array $attributes) {
             $session = $serializer->getRequest()->getAttribute('session');
-            $attributes['loginProvider'] = $session?->get(AbstractOAuthController::SESSION_OAUTH2PROVIDER);
+
+            if ($session) {
+                $attributes['loginProvider'] = $session->get(AbstractOAuthController::SESSION_OAUTH2PROVIDER);
+            }
 
             return $attributes;
         }),
