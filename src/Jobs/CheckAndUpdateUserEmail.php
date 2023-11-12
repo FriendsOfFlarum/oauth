@@ -59,14 +59,14 @@ class CheckAndUpdateUserEmail implements ShouldQueue
             return;
         }
 
-        /** @var User $user */
+        /** @var User|null $user */
         $user = User::find($provider->user_id);
 
-        if (!$user) {
+        if ($user === null) {
             return;
         }
 
-        if (!empty($this->providedEmail) && $user && $user->email !== $this->providedEmail) {
+        if (!empty($this->providedEmail) && $user->email !== $this->providedEmail) {
             $validator->setUser($user);
 
             $validator->assertValid([

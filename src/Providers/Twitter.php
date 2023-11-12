@@ -12,6 +12,7 @@
 namespace FoF\OAuth\Providers;
 
 use FoF\OAuth\Provider;
+use League\OAuth2\Client\Provider\AbstractProvider;
 
 class Twitter extends Provider
 {
@@ -36,5 +37,10 @@ class Twitter extends Provider
     public function excludeFromRoutePattern(): bool
     {
         return true;
+    }
+
+    public function provider(string $redirectUri): ?AbstractProvider
+    {
+        return null;
     }
 }

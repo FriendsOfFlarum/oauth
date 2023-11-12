@@ -20,6 +20,10 @@ class ProviderSerializer extends AbstractSerializer
      */
     protected $type = 'linked-accounts';
 
+    /**
+     * @param \FoF\OAuth\LoginProviderStatus $provider
+     * @return array
+     */
     public function getDefaultAttributes($provider): array
     {
         return [
