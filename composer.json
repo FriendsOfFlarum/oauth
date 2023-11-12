@@ -33,7 +33,7 @@
         "league/oauth2-facebook": "^2.2.0",
         "league/oauth2-github": "^3.1.0",
         "league/oauth2-google": "^4.0.1",
-        "omines/oauth2-gitlab": "^3.5.0",
+        "omines/oauth2-gitlab": "^3.3.0",
         "wohali/oauth2-discord-new": "^1.2.1",
         "league/oauth2-linkedin": "^5.1.2",
         "fof/extend": "^1.2.1"
@@ -76,6 +76,21 @@
         },
         "flagrow": {
             "discuss": "https://discuss.flarum.org/d/25182"
+        },
+        "flarum-cli": {
+            "modules": {
+                "githubActions": true
+            }
         }
+    },
+    "require-dev": {
+        "flarum/phpstan": "*"
+    },
+    "scripts": {
+        "analyse:phpstan": "phpstan analyse",
+        "clear-cache:phpstan": "phpstan clear-result-cache"
+    },
+    "scripts-descriptions": {
+        "analyse:phpstan": "Run static analysis"
     }
 }

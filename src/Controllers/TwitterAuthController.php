@@ -138,7 +138,7 @@ class TwitterAuthController implements RequestHandlerInterface
     {
         $email = $user->email;
 
-        if (!$email || empty($email)) {
+        if (empty($email)) {
             throw new AuthenticationException('invalid_email');
         }
 
@@ -157,8 +157,8 @@ class TwitterAuthController implements RequestHandlerInterface
     /**
      * Link the currently authenticated user to the OAuth account.
      *
-     * @param FlarumUser             $user
-     * @param ResourceOwnerInterface $resourceOwner
+     * @param FlarumUser $user
+     * @param User       $resourceOwner
      *
      * @return HtmlResponse
      */

@@ -47,7 +47,7 @@ class LoginProviderStatus
     public $linked;
 
     /**
-     * @var string|null
+     * @var int
      */
     public $identifier;
 

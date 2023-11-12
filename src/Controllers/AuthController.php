@@ -23,7 +23,7 @@ use Psr\Http\Message\ServerRequestInterface;
 class AuthController extends Controller
 {
     /**
-     * @var Provider
+     * @var ?Provider
      */
     protected $provider;
 

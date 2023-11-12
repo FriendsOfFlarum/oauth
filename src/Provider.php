@@ -48,10 +48,7 @@ abstract class Provider
 
     // Controller options
 
-    public function provider(string $redirectUri): AbstractProvider
-    {
-        //
-    }
+    abstract public function provider(string $redirectUri): ?AbstractProvider;
 
     public function options(): array
     {
@@ -75,9 +72,9 @@ abstract class Provider
         return $this->settings->get("fof-oauth.{$this->name()}.{$key}");
     }
 
-    protected function verifyEmail($email)
+    protected function verifyEmail(?string $email)
     {
-        if (!$email || empty($email)) {
+        if ($email === null || empty($email)) {
             throw new AuthenticationException('invalid_email');
         }
     }
