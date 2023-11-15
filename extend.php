@@ -34,10 +34,10 @@ return [
 
     (new Extend\Middleware('forum'))
         ->add(Middleware\ErrorHandler::class)
-        ->add(Middleware\ServerRequestMiddleware::class),
+        ->add(Middleware\BindRequest::class),
 
     (new Extend\Middleware('api'))
-        ->add(Middleware\ServerRequestMiddleware::class),
+        ->add(Middleware\BindRequest::class),
 
     (new Extend\Routes('forum'))
         ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),

@@ -17,7 +17,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class ServerRequestMiddleware implements MiddlewareInterface
+class BindRequest implements MiddlewareInterface
 {
     protected $container;
 
