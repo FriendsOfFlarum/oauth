@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth\Listeners;
 
 use Flarum\Http\RequestUtil;
@@ -15,16 +24,16 @@ class HandleLogout
      * @var Cache
      */
     protected $cache;
-    
+
     public function __construct(Cache $cache)
     {
         $this->cache = $cache;
     }
-    
+
     public function handle(LoggedOut $event)
     {
         $user = $event->user;
-        
+
         /** @var ServerRequestInterface|null $request */
         $request = resolve('fof-oauth-request');
 
@@ -35,7 +44,7 @@ class HandleLogout
                 /** @var Session $session */
                 $session = $request->getAttribute('session');
 
-                $this->cache->forget(AbstractOAuthController::SESSION_OAUTH2PROVIDER . '_' . $session->getId());
+                $this->cache->forget(AbstractOAuthController::SESSION_OAUTH2PROVIDER.'_'.$session->getId());
             }
         }
     }
