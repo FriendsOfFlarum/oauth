@@ -15,8 +15,7 @@ use Flarum\Api\Serializer\CurrentUserSerializer;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
-use Flarum\User\User;
-use FoF\Extend\Controllers\AbstractOAuthController;
+use Flarum\User\Event\LoggedOut;
 use FoF\Extend\Events\OAuthLoginSuccessful;
 
 return [
@@ -34,7 +33,11 @@ return [
     new Extend\Locales(__DIR__.'/resources/locale'),
 
     (new Extend\Middleware('forum'))
-        ->add(Middleware\ErrorHandler::class),
+        ->add(Middleware\ErrorHandler::class)
+        ->add(Middleware\ServerRequestMiddleware::class),
+
+    (new Extend\Middleware('api'))
+        ->add(Middleware\ServerRequestMiddleware::class),
 
     (new Extend\Routes('forum'))
         ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
@@ -68,16 +71,9 @@ return [
         ->serializeToForum('fof-oauth.fullscreenPopup', 'fof-oauth.fullscreenPopup', 'boolVal'),
 
     (new Extend\Event())
-        ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class),
+        ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class)
+        ->listen(LoggedOut::class, Listeners\HandleLogout::class),
 
     (new Extend\ApiSerializer(CurrentUserSerializer::class))
-        ->attributes(function (CurrentUserSerializer $serializer, User $user, array $attributes) {
-            $session = $serializer->getRequest()->getAttribute('session');
-
-            if ($session) {
-                $attributes['loginProvider'] = $session->get(AbstractOAuthController::SESSION_OAUTH2PROVIDER);
-            }
-
-            return $attributes;
-        }),
+        ->attributes(Api\CurrentUserAttributes::class),
 ];
