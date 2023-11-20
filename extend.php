@@ -73,7 +73,7 @@ return [
     (new Extend\Event())
         ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class)
         ->listen(LoggedOut::class, Listeners\HandleLogout::class)
-        ->listen(Saving::class, Listeners\ClearOAuthCache::class),
+        ->subscribe(Listeners\ClearOAuthCache::class),
 
     (new Extend\ApiSerializer(CurrentUserSerializer::class))
         ->attributes(Api\CurrentUserAttributes::class),
