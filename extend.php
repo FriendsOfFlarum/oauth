@@ -15,7 +15,6 @@ use Flarum\Api\Serializer\CurrentUserSerializer;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
-use Flarum\Settings\Event\Saving;
 use Flarum\User\Event\LoggedOut;
 use FoF\Extend\Events\OAuthLoginSuccessful;
 

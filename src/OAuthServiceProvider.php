@@ -21,8 +21,6 @@ class OAuthServiceProvider extends AbstractServiceProvider
 {
     public function register()
     {
-        
-
         $this->container->tag([
             Providers\Discord::class,
             Providers\Facebook::class,
@@ -40,15 +38,13 @@ class OAuthServiceProvider extends AbstractServiceProvider
 
             $collection->addRoute('GET', new OAuth2RoutePattern(), 'fof-oauth', $factory->toController(Controllers\AuthController::class));
         });
-
-        
     }
 
     public function boot()
     {
         /** @var Cache $cache */
         $cache = $this->container->make(Cache::class);
-        
+
         $this->container->singleton('fof-oauth.providers.forum', function () use ($cache) {
             $cacheKey = 'fof-oauth.providers.forum';
 

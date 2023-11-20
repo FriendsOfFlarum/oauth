@@ -11,9 +11,7 @@
 
 namespace FoF\OAuth\Listeners;
 
-use Flarum\Extension\Event\Disabled;
 use Flarum\Extension\Event\Disabling;
-use Flarum\Extension\Event\Enabled;
 use Flarum\Extension\Event\Enabling;
 use Flarum\Settings\Event\Saving;
 use Illuminate\Contracts\Cache\Store as Cache;
