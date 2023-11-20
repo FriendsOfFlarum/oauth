@@ -14,12 +14,16 @@ namespace FoF\OAuth;
 use Flarum\Foundation\AbstractServiceProvider;
 use Flarum\Http\RouteCollection;
 use Flarum\Http\RouteHandlerFactory;
+use Illuminate\Contracts\Cache\Store as Cache;
 use Illuminate\Contracts\Container\Container;
 
 class OAuthServiceProvider extends AbstractServiceProvider
 {
     public function register()
     {
+        /** @var Cache $cache */
+        $cache = $this->container->make(Cache::class);
+
         $this->container->tag([
             Providers\Discord::class,
             Providers\Facebook::class,
@@ -38,7 +42,47 @@ class OAuthServiceProvider extends AbstractServiceProvider
             $collection->addRoute('GET', new OAuth2RoutePattern(), 'fof-oauth', $factory->toController(Controllers\AuthController::class));
         });
 
-        $this->container->singleton('fof-oauth.providers.forum', $this->map(function (Provider $provider) {
+        $this->container->singleton('fof-oauth.providers.forum', function () use ($cache) {
+            $cacheKey = 'fof-oauth.providers.forum';
+
+            $data = $cache->get($cacheKey);
+            if ($data === null) {
+                $data = $this->mapProviders();
+                $cache->forever($cacheKey, $data);
+            }
+
+            return $data;
+        });
+
+        $this->container->singleton('fof-oauth.providers.admin', function () use ($cache) {
+            $cacheKey = 'fof-oauth.providers.admin';
+
+            $data = $cache->get($cacheKey);
+            if ($data === null) {
+                $data = $this->mapProviders(true);
+                $cache->forever($cacheKey, $data);
+            }
+
+            return $data;
+        });
+    }
+
+    protected function mapProviders(bool $admin = false): array
+    {
+        $providers = $this->container->tagged('fof-oauth.providers');
+
+        if ($admin) {
+            return array_map(function (Provider $provider) {
+                return [
+                    'name'   => $provider->name(),
+                    'icon'   => $provider->icon(),
+                    'link'   => $provider->link(),
+                    'fields' => $provider->fields(),
+                ];
+            }, iterator_to_array($providers));
+        }
+
+        return array_map(function (Provider $provider) {
             if (!$provider->enabled()) {
                 return null;
             }
@@ -48,26 +92,6 @@ class OAuthServiceProvider extends AbstractServiceProvider
                 'icon'     => $provider->icon(),
                 'priority' => $provider->priority(),
             ];
-        }));
-
-        $this->container->singleton('fof-oauth.providers.admin', $this->map(function (Provider $provider) {
-            return [
-                'name'   => $provider->name(),
-                'icon'   => $provider->icon(),
-                'link'   => $provider->link(),
-                'fields' => $provider->fields(),
-            ];
-        }));
-    }
-
-    protected function map(callable $cb)
-    {
-        return function () use ($cb) {
-            $providers = $this->container->tagged('fof-oauth.providers');
-
-            return array_map(function ($provider) use ($cb) {
-                return $cb($provider);
-            }, iterator_to_array($providers));
-        };
+        }, iterator_to_array($providers));
     }
 }
