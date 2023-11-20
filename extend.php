@@ -15,6 +15,7 @@ use Flarum\Api\Serializer\CurrentUserSerializer;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
+use Flarum\Settings\Event\Saving;
 use Flarum\User\Event\LoggedOut;
 use FoF\Extend\Events\OAuthLoginSuccessful;
 
@@ -50,8 +51,7 @@ return [
         ->register(OAuthServiceProvider::class),
 
     (new Extend\ApiSerializer(ForumSerializer::class))
-        ->attributes(function (ForumSerializer $serializer) {
-            $attributes = [];
+        ->attributes(function (ForumSerializer $serializer, $model, array $attributes): array {
             if ($serializer->getActor()->isGuest()) {
                 $attributes['fof-oauth'] = resolve('fof-oauth.providers.forum');
             }
@@ -72,7 +72,8 @@ return [
 
     (new Extend\Event())
         ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class)
-        ->listen(LoggedOut::class, Listeners\HandleLogout::class),
+        ->listen(LoggedOut::class, Listeners\HandleLogout::class)
+        ->listen(Saving::class, Listeners\ClearOAuthCache::class),
 
     (new Extend\ApiSerializer(CurrentUserSerializer::class))
         ->attributes(Api\CurrentUserAttributes::class),

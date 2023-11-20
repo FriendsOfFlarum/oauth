@@ -11,8 +11,10 @@
 
 namespace FoF\OAuth\Middleware;
 
+use Flarum\Foundation\Config;
 use Flarum\Foundation\ErrorHandling\Reporter;
 use FoF\OAuth\Errors\AuthenticationException;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\HtmlResponse;
@@ -34,15 +36,21 @@ class ErrorHandler implements MiddlewareInterface
      */
     protected $translator;
 
-    public function __construct(ViewFactory $view, TranslatorInterface $translator)
+    protected $debugMode;
+
+    protected $reporters;
+
+    public function __construct(ViewFactory $view, TranslatorInterface $translator, Config $config, Container $container)
     {
         $this->view = $view;
         $this->translator = $translator;
+        $this->debugMode = Arr::get($config, 'debug', true);
+        $this->reporters = $container->tagged(Reporter::class);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (Arr::get(resolve('flarum.config'), 'debug', true)) {
+        if ($this->debugMode) {
             return $handler->handle($request);
         }
 
@@ -71,10 +79,8 @@ class ErrorHandler implements MiddlewareInterface
 
     protected function report(AuthenticationException $e)
     {
-        $reporters = resolve('container')->tagged(Reporter::class);
-
         if ($e->shouldBeReported()) {
-            foreach ($reporters as $reporter) {
+            foreach ($this->reporters as $reporter) {
                 $reporter->report($e);
             }
         }
