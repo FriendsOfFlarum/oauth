@@ -5,6 +5,10 @@ fof-oauth:
     settings_accessibility_label: "{name} settings"
 
     settings:
+      advanced:
+        heading: Advanced
+        log-oauth-errors-label: Log OAuth errors
+        log-oauth-errors-help: If enabled, OAuth errors will be logged to the Flarum log. This may help with debugging OAuth issues, but may also contain sensitive information.
       only_icons_label: Only show the Log In Button icons (alternative layout)
       update_email_from_provider_label: Update email address from provider
       update_email_from_provider_help: If enabled, the user's email address will be updated to match the one provided by the OAuth provider on each login to the forum. Not all providers provide the updated email, in which case this setting will not have any effect with those providers.

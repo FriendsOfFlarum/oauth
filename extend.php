@@ -67,7 +67,8 @@ return [
         ->default('fof-oauth.fullscreenPopup', true)
         ->serializeToForum('fof-oauth.popupWidth', 'fof-oauth.popupWidth', 'intval')
         ->serializeToForum('fof-oauth.popupHeight', 'fof-oauth.popupHeight', 'intval')
-        ->serializeToForum('fof-oauth.fullscreenPopup', 'fof-oauth.fullscreenPopup', 'boolVal'),
+        ->serializeToForum('fof-oauth.fullscreenPopup', 'fof-oauth.fullscreenPopup', 'boolVal')
+        ->default('fof-oauth.log-oauth-errors', false),
 
     (new Extend\Event())
         ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class)
