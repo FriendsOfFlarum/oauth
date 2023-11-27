@@ -46,7 +46,7 @@ abstract class Controller extends AbstractOAuthController
 
     protected function getRouteName(): string
     {
-        return 'auth.' . $this->getProviderName();
+        return 'auth.'.$this->getProviderName();
     }
 
     protected function getIdentifier($user): string
@@ -63,7 +63,7 @@ abstract class Controller extends AbstractOAuthController
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        if (!(bool) (int) $this->settings->get('fof-oauth.' . $this->getProviderName())) {
+        if (!(bool) (int) $this->settings->get('fof-oauth.'.$this->getProviderName())) {
             throw new RouteNotFoundException();
         }
 
@@ -79,8 +79,8 @@ abstract class Controller extends AbstractOAuthController
                     'cookie_params' => $request->getCookieParams(),
                     'query_params'  => $request->getQueryParams(),
                     'parsed_body'   => $request->getParsedBody(),
-                    'code'    => $e->getCode(),
-                    'trace'   => $e->getTraceAsString(),
+                    'code'          => $e->getCode(),
+                    'trace'         => $e->getTraceAsString(),
                 ], JSON_PRETTY_PRINT);
 
                 $logger->error("[OAuth][{$this->getProviderName()}] {$e->getMessage()}: {$detail}");
