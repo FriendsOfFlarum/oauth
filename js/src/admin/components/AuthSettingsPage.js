@@ -54,6 +54,18 @@ export default class AuthSettingsPage extends ExtensionPage {
 
             {this.providerSettingsItems().toArray()}
 
+            <hr />
+
+            <div className="AuthSettingsPage--advanced">
+              <h4>{app.translator.trans('fof-oauth.admin.settings.advanced.heading')}</h4>
+              {this.buildSettingComponent({
+                type: 'boolean',
+                setting: 'fof-oauth.log-oauth-errors',
+                label: app.translator.trans('fof-oauth.admin.settings.advanced.log-oauth-errors-label'),
+                help: app.translator.trans('fof-oauth.admin.settings.advanced.log-oauth-errors-help'),
+              })}
+            </div>
+
             {this.submitButton()}
           </div>
         </div>
