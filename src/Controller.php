@@ -80,7 +80,7 @@ abstract class Controller extends AbstractOAuthController
                     'query_params'  => $request->getQueryParams(),
                     'parsed_body'   => $request->getParsedBody(),
                     'code'          => $e->getCode(),
-                    'trace'         => $e->getTraceAsString(),
+                    'trace'         => $e->getTraceAsString()
                 ], JSON_PRETTY_PRINT);
 
                 $logger->error("[OAuth][{$this->getProviderName()}] {$e->getMessage()}: {$detail}");
