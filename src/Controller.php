@@ -37,7 +37,7 @@ abstract class Controller extends AbstractOAuthController
         SettingsRepositoryInterface $settings,
         UrlGenerator $url,
         Dispatcher $events,
-        CacheStore $cache,
+        CacheStore $cache
     ) {
         parent::__construct($response, $settings, $url, $events, $cache);
 
