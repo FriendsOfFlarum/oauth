@@ -32,7 +32,9 @@ class CurrentUserAttributes
     {
         $session = $serializer->getRequest()->getAttribute('session');
 
-        $attributes['loginProvider'] = $this->cache->get(AbstractOAuthController::SESSION_OAUTH2PROVIDER.'_'.$session->getId());
+        if ($session !== null) {
+            $attributes['loginProvider'] = $this->cache->get(AbstractOAuthController::SESSION_OAUTH2PROVIDER.'_'.$session->getId());
+        }
 
         return $attributes;
     }
