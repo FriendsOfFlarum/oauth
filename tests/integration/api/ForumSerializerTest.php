@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth\Tests\integration\api;
 
 use Flarum\Extend;
@@ -12,7 +21,7 @@ class ForumSerializerTest extends TestCase
         $this->extension('fof-oauth');
 
         $this->extend(
-            (new Extend\Csrf)->exemptRoute('login')
+            (new Extend\Csrf())->exemptRoute('login')
         );
     }
 
@@ -57,13 +66,13 @@ class ForumSerializerTest extends TestCase
             $this->request('POST', '/login', [
                 'json' => [
                     'identification' => 'admin',
-                    'password' => 'password'
-                ]
+                    'password'       => 'password',
+                ],
             ])
         );
 
         $this->assertEquals(200, $login->getStatusCode());
-        
+
         $response = $this->send(
             $this->request('GET', '/admin', ['cookiesFrom' => $login])
         );
