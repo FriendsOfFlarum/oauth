@@ -33,6 +33,7 @@ class Google extends Provider
         return [
             'client_id'     => 'required',
             'client_secret' => 'required',
+            'hosted_domain' => ''
         ];
     }
 
@@ -43,9 +44,20 @@ class Google extends Provider
             'clientSecret'   => $this->getSetting('client_secret'),
             'redirectUri'    => $redirectUri,
             'approvalPrompt' => 'force',
-            'hostedDomain'   => null,
+            'hostedDomain'   => $this->getHostedDomain(),
             'accessType'     => 'offline',
         ]);
+    }
+
+    /**
+     * @return string|null
+     */
+    protected function getHostedDomain()
+    {
+        $hostedDomain = $this->getSetting('hosted_domain');
+
+        // Return null if $hostedDomain is an empty string
+        return $hostedDomain !== '' ? $hostedDomain : null;
     }
 
     public function suggestions(Registration $registration, $user, string $token)

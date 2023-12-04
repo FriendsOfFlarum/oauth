@@ -58,6 +58,7 @@ fof-oauth:
 
           client_id_label: => fof-oauth.ref.settings.client_id
           client_secret_label: => fof-oauth.ref.settings.client_secret
+          hosted_domain_label: Hosted Domain (G suite/Google Apps for Business, optional)
 
         linkedin:
           description: Create an application at {link}.
