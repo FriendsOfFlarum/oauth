@@ -33,7 +33,7 @@ class Google extends Provider
         return [
             'client_id'     => 'required',
             'client_secret' => 'required',
-            'hosted_domain' => ''
+            'hosted_domain' => '',
         ];
     }
 
