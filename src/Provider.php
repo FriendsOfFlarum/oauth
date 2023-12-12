@@ -69,7 +69,7 @@ abstract class Provider
 
     protected function getSetting($key): string
     {
-        return $this->settings->get("fof-oauth.{$this->name()}.{$key}");
+        return $this->settings->get("fof-oauth.{$this->name()}.{$key}") ?? '';
     }
 
     protected function verifyEmail(?string $email)
