@@ -35,7 +35,6 @@
         "league/oauth2-google": "^4.0.1",
         "omines/oauth2-gitlab": "^3.3.0",
         "wohali/oauth2-discord-new": "^1.2.1",
-        "league/oauth2-linkedin": "^5.1.2",
         "fof/extend": "^1.3.3"
     },
     "replace": {
