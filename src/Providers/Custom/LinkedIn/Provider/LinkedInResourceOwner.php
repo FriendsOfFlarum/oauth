@@ -1,27 +1,35 @@
-<?php 
+<?php
+
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace FoF\OAuth\Providers\Custom\LinkedIn\Provider;
 
 use League\OAuth2\Client\Tool\ArrayAccessorTrait;
 
 /**
- * @property array $response
+ * @property array  $response
  * @property string $uid
  */
 class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResourceOwner
 {
-
     use ArrayAccessorTrait;
 
     /**
-     * Raw response
+     * Raw response.
      *
      * @var array
      */
     protected $response = [];
 
     /**
-     * Sorted profile pictures
+     * Sorted profile pictures.
      *
      * @var array
      */
@@ -35,9 +43,9 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
     /**
      * Creates new resource owner.
      *
-     * @param array  $response
+     * @param array $response
      */
-    public function __construct(array $response = array())
+    public function __construct(array $response = [])
     {
         $this->response = $response;
         $this->setSortedProfilePictures();
@@ -54,7 +62,7 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
     }
 
     /**
-     * Get user first name
+     * Get user first name.
      *
      * @return string|null
      */
@@ -64,7 +72,7 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
     }
 
     /**
-     * Get user user id
+     * Get user user id.
      *
      * @return string|null
      */
@@ -74,9 +82,10 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
     }
 
     /**
-     * Get specific image by size
+     * Get specific image by size.
      *
-     * @param integer $size
+     * @param int $size
+     *
      * @return array|null
      */
     public function getImageBySize($size)
@@ -89,7 +98,7 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
     }
 
     /**
-     * Get available user image sizes
+     * Get available user image sizes.
      *
      * @return array
      */
@@ -101,7 +110,7 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
     }
 
     /**
-     * Get user image url
+     * Get user image url.
      *
      * @return string|null
      */
@@ -114,7 +123,7 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
     }
 
     /**
-     * Get user last name
+     * Get user last name.
      *
      * @return string|null
      */
@@ -134,7 +143,7 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
     }
 
     /**
-     * Get user url
+     * Get user url.
      *
      * @return string|null
      */
@@ -146,7 +155,7 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
     }
 
     /**
-     * Get user email, if available
+     * Get user email, if available.
      *
      * @return string|null
      */
@@ -170,13 +179,13 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
                 return
                     isset($element['data']['com.linkedin.digitalmedia.mediaartifact.StillImage'])
                     && strtoupper($element['authorizationMethod']) === 'PUBLIC'
-                    && isset($element['identifiers'][0]['identifier'])
-                ;
+                    && isset($element['identifiers'][0]['identifier']);
             });
             // order images by width, LinkedIn profile pictures are always squares, so that should be good enough
             usort($pictures, function ($elementA, $elementB) {
                 $wA = $elementA['data']['com.linkedin.digitalmedia.mediaartifact.StillImage']['storageSize']['width'];
                 $wB = $elementB['data']['com.linkedin.digitalmedia.mediaartifact.StillImage']['storageSize']['width'];
+
                 return $wA - $wB;
             });
             $pictures = array_map(function ($element) {
@@ -184,9 +193,10 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
                 $url = $element['identifiers'][0]['identifier'];
                 $type = $element['identifiers'][0]['mediaType'];
                 $width = $element['data']['com.linkedin.digitalmedia.mediaartifact.StillImage']['storageSize']['width'];
+
                 return [
-                    'width' => $width,
-                    'url' => $url,
+                    'width'       => $width,
+                    'url'         => $url,
                     'contentType' => $type,
                 ];
             }, $pictures);

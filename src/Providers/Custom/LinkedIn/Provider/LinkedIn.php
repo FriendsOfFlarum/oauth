@@ -1,8 +1,16 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth\Providers\Custom\LinkedIn\Provider;
 
-use Exception;
 use FoF\OAuth\Providers\Custom\LinkedIn\Provider\Exception\LinkedInAccessDeniedException;
 use FoF\OAuth\Providers\Custom\LinkedIn\Token\LinkedInAccessToken;
 use InvalidArgumentException;
@@ -17,32 +25,33 @@ class LinkedIn extends \League\OAuth2\Client\Provider\AbstractProvider
     use BearerAuthorizationTrait;
 
     /**
-     * Default scopes
+     * Default scopes.
      *
      * @var array
      */
     public $defaultScopes = ['openid', 'profile', 'email'];
 
     /**
-     * Requested fields in scope, seeded with default values
+     * Requested fields in scope, seeded with default values.
      *
      * @var array
+     *
      * @see https://developer.linkedin.com/docs/fields/basic-profile
      */
     protected $fields = [
-        'sub', 'name', 'given_name', 'family_name', 'picture', 'locale', 'email', 'email_verified'
+        'sub', 'name', 'given_name', 'family_name', 'picture', 'locale', 'email', 'email_verified',
     ];
 
     /**
      * Constructs an OAuth 2.0 service provider.
      *
-     * @param array $options An array of options to set on this provider.
-     *     Options include `clientId`, `clientSecret`, `redirectUri`, and `state`.
-     *     Individual providers may introduce more options, as needed.
+     * @param array $options       An array of options to set on this provider.
+     *                             Options include `clientId`, `clientSecret`, `redirectUri`, and `state`.
+     *                             Individual providers may introduce more options, as needed.
      * @param array $collaborators An array of collaborators that may be used to
-     *     override this provider's default behavior. Collaborators include
-     *     `grantFactory`, `requestFactory`, and `httpClient`.
-     *     Individual providers may introduce more collaborators, as needed.
+     *                             override this provider's default behavior. Collaborators include
+     *                             `grantFactory`, `requestFactory`, and `httpClient`.
+     *                             Individual providers may introduce more collaborators, as needed.
      */
     public function __construct(array $options = [], array $collaborators = [])
     {
@@ -53,15 +62,15 @@ class LinkedIn extends \League\OAuth2\Client\Provider\AbstractProvider
         parent::__construct($options, $collaborators);
     }
 
-
     /**
      * Creates an access token from a response.
      *
      * The grant that was used to fetch the response can be used to provide
      * additional context.
      *
-     * @param array $response
+     * @param array         $response
      * @param AbstractGrant $grant
+     *
      * @return AccessTokenInterface
      */
     protected function createAccessToken(array $response, AbstractGrant $grant)
@@ -87,7 +96,7 @@ class LinkedIn extends \League\OAuth2\Client\Provider\AbstractProvider
     }
 
     /**
-     * Get authorization url to begin OAuth flow
+     * Get authorization url to begin OAuth flow.
      *
      * @return string
      */
@@ -97,7 +106,7 @@ class LinkedIn extends \League\OAuth2\Client\Provider\AbstractProvider
     }
 
     /**
-     * Get access token url to retrieve token
+     * Get access token url to retrieve token.
      *
      * @return string
      */
@@ -107,7 +116,7 @@ class LinkedIn extends \League\OAuth2\Client\Provider\AbstractProvider
     }
 
     /**
-     * Get provider url to fetch user details
+     * Get provider url to fetch user details.
      *
      * @param AccessToken $token
      *
@@ -135,9 +144,12 @@ class LinkedIn extends \League\OAuth2\Client\Provider\AbstractProvider
      * Check a provider response for errors.
      *
      * @param ResponseInterface $response
-     * @param array $data Parsed response data
-     * @return void
+     * @param array             $data     Parsed response data
+     *
      * @throws IdentityProviderException
+     *
+     * @return void
+     *
      * @see https://developer.linkedin.com/docs/guide/v2/error-handling
      */
     protected function checkResponse(ResponseInterface $response, $data)
@@ -157,9 +169,12 @@ class LinkedIn extends \League\OAuth2\Client\Provider\AbstractProvider
      * Check a provider response for unauthorized errors.
      *
      * @param ResponseInterface $response
-     * @param array $data Parsed response data
-     * @return void
+     * @param array             $data     Parsed response data
+     *
      * @throws LinkedInAccessDeniedException
+     *
+     * @return void
+     *
      * @see https://developer.linkedin.com/docs/guide/v2/error-handling
      */
     protected function checkResponseUnauthorized(ResponseInterface $response, $data)
@@ -176,8 +191,9 @@ class LinkedIn extends \League\OAuth2\Client\Provider\AbstractProvider
     /**
      * Generate a user object from a successful user details request.
      *
-     * @param array $response
+     * @param array       $response
      * @param AccessToken $token
+     *
      * @return LinkedInResourceOwner
      */
     protected function createResourceOwner(array $response, AccessToken $token)
