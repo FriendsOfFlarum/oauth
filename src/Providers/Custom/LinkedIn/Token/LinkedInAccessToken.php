@@ -11,6 +11,8 @@
 
 namespace FoF\OAuth\Providers\Custom\LinkedIn\Token;
 
+use InvalidArgumentException;
+
 class LinkedInAccessToken extends \League\OAuth2\Client\Token\AccessToken
 {
     /**

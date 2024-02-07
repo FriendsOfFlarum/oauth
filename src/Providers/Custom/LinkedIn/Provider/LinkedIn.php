@@ -13,6 +13,7 @@ namespace FoF\OAuth\Providers\Custom\LinkedIn\Provider;
 
 use FoF\OAuth\Providers\Custom\LinkedIn\Provider\Exception\LinkedInAccessDeniedException;
 use FoF\OAuth\Providers\Custom\LinkedIn\Token\LinkedInAccessToken;
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use League\OAuth2\Client\Grant\AbstractGrant;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
@@ -71,7 +72,7 @@ class LinkedIn extends \League\OAuth2\Client\Provider\AbstractProvider
      * @param array         $response
      * @param AbstractGrant $grant
      *
-     * @return AccessTokenInterface
+     * @return LinkedInAccessToken
      */
     protected function createAccessToken(array $response, AbstractGrant $grant)
     {
@@ -182,7 +183,7 @@ class LinkedIn extends \League\OAuth2\Client\Provider\AbstractProvider
         if (isset($data['status']) && $data['status'] === 403) {
             throw new LinkedInAccessDeniedException(
                 isset($data['message']) ? $data['message'] : $response->getReasonPhrase(),
-                isset($data['status']) ? $data['status'] : $response->getStatusCode(),
+                Arr::get($data, 'status', $response->getStatusCode()),
                 $response
             );
         }

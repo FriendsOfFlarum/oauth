@@ -38,7 +38,7 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
     /**
      * @var string|null
      */
-    private $email;
+    protected $email;
 
     /**
      * Creates new resource owner.
