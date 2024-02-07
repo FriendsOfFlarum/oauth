@@ -14,8 +14,8 @@ namespace FoF\OAuth\Providers;
 use Flarum\Forum\Auth\Registration;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Provider;
+use FoF\OAuth\Providers\Custom\LinkedIn\Provider\LinkedIn as LinkedInProvider;
 use League\OAuth2\Client\Provider\AbstractProvider;
-use League\OAuth2\Client\Provider\LinkedIn as LinkedInProvider;
 
 class LinkedIn extends Provider
 {
