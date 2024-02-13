@@ -4,6 +4,9 @@ fof-oauth:
     configure_button_label: Configure with FoF OAuth
     settings_accessibility_label: "{name} settings"
 
+    permissions:
+      moderate_user_providers: Moderate user's linked accounts
+
     settings:
       advanced:
         heading: Advanced

@@ -7,7 +7,7 @@ import type Mithril from 'mithril';
 
 export default function addLinkedAccountsToUserSecurityPage() {
   extend(UserSecurityPage.prototype, 'settingsItems', function (items: ItemList<Mithril.Children>) {
-    if (this.user !== app.session.user) {
+    if (this.user !== app.session.user && !app.forum.attribute('fofOauthModerate')) {
       return;
     }
 

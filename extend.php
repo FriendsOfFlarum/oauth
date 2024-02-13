@@ -43,20 +43,14 @@ return [
         ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
 
     (new Extend\Routes('api'))
-        ->get('/linked-accounts', 'users.provider.list', Api\Controllers\ListProvidersController::class)
+        ->get('/users/{id}/linked-accounts', 'users.provider.list', Api\Controllers\ListProvidersController::class)
         ->delete('/linked-accounts/{id}', 'users.provider.delete', Api\Controllers\DeleteProviderLinkController::class),
 
     (new Extend\ServiceProvider())
         ->register(OAuthServiceProvider::class),
 
     (new Extend\ApiSerializer(ForumSerializer::class))
-        ->attributes(function (ForumSerializer $serializer, $model, array $attributes): array {
-            if ($serializer->getActor()->isGuest()) {
-                $attributes['fof-oauth'] = resolve('fof-oauth.providers.forum');
-            }
-
-            return $attributes;
-        }),
+        ->attributes(Api\AddForumAttributes::class),
 
     (new Extend\Settings())
         ->default('fof-oauth.only_icons', false)

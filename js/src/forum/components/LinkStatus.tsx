@@ -8,7 +8,7 @@ import User from 'flarum/common/models/User';
 import ProviderInfo from './ProviderInfo';
 import extractText from 'flarum/common/utils/extractText';
 
-interface IAttrs {
+interface IAttrs extends ComponentAttrs {
   provider: LinkedAccount;
   user: User;
 }
@@ -18,7 +18,7 @@ export default class LinkStatus extends Component<IAttrs> {
     loading: false,
   };
 
-  onbeforeupdate(vnode: Mithril.Vnode<ComponentAttrs, this>) {
+  onbeforeupdate(vnode: Mithril.Vnode<IAttrs, this>) {
     super.onbeforeupdate(vnode);
     if (app.fof_oauth_linkingInProgress && app.fof_oauth_linkingProvider === this.attrs.provider.name()) {
       this.state.loading = true;
@@ -29,7 +29,7 @@ export default class LinkStatus extends Component<IAttrs> {
     }
   }
 
-  view(vnode: Mithril.Vnode<ComponentAttrs, this>): Mithril.Children {
+  view(vnode: Mithril.Vnode<IAttrs, this>): Mithril.Children {
     return (
       <div className={`LinkedAccounts-Account LinkedAccounts-Account--${this.attrs.provider.name()}`}>
         {this.iconView()}
@@ -70,7 +70,7 @@ export default class LinkStatus extends Component<IAttrs> {
           </Button>
         </div>
       );
-    } else if (!provider.orphaned()) {
+    } else if (!provider.orphaned() && (user.id() === app.session.user?.id() || !app.forum.attribute<boolean>('fofOauthModerate'))) {
       return (
         <div className="LinkedAccountsList-item-actions">
           <Button
@@ -101,7 +101,7 @@ export default class LinkStatus extends Component<IAttrs> {
     ) {
       this.state.loading = true;
       await provider.delete();
-      await app.store.find<LinkedAccount[]>('linked-accounts', {});
+      await app.store.find<LinkedAccount[]>('users/' + this.attrs.user.id() + '/linked-accounts', {});
       this.state.loading = false;
       m.redraw();
     }

@@ -12,17 +12,43 @@
 namespace FoF\OAuth\Tests\integration\api;
 
 use Flarum\Extend;
+use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
 
 class ForumSerializerTest extends TestCase
 {
+    use RetrievesAuthorizedUsers;
+
     public function setUp(): void
     {
+        parent::setUp();
+
         $this->extension('fof-oauth');
 
         $this->extend(
             (new Extend\Csrf())->exemptRoute('login')
         );
+
+        $this->prepareDatabase([
+            'users' => [
+                $this->normalUser(),
+                ['id' => 3, 'username' => 'moderator', 'is_email_confirmed' => true],
+            ],
+            'group_user' => [
+                ['user_id' => 3, 'group_id' => 4],
+            ],
+            'group_permission' => [
+                ['permission' => 'moderateUserProviders', 'group_id' => 4],
+            ],
+        ]);
+    }
+
+    public function authorizedUserProvider()
+    {
+        return [
+            [1],
+            [3],
+        ];
     }
 
     /**
@@ -39,15 +65,18 @@ class ForumSerializerTest extends TestCase
         $body = json_decode($response->getBody(), true);
 
         $this->assertArrayHasKey('fof-oauth', $body['data']['attributes']);
+        $this->assertArrayNotHasKey('fofOauthModerate', $body['data']['attributes']);
     }
 
     /**
+     * @dataProvider authorizedUserProvider
+     *
      * @test
      */
-    public function it_does_not_include_providers_in_forum_attributes_for_logged_in_users()
+    public function it_does_not_include_providers_in_forum_attributes_for_logged_in_users(int $userId)
     {
         $response = $this->send(
-            $this->request('GET', '/api', ['authenticatedAs' => 1])
+            $this->request('GET', '/api', ['authenticatedAs' => $userId])
         );
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -55,6 +84,26 @@ class ForumSerializerTest extends TestCase
         $body = json_decode($response->getBody()->getContents(), true);
 
         $this->assertArrayNotHasKey('fof-oauth', $body['data']['attributes']);
+        $this->assertArrayHasKey('fofOauthModerate', $body['data']['attributes']);
+        $this->assertTrue($body['data']['attributes']['fofOauthModerate']);
+    }
+
+    /**
+     * @test
+     */
+    public function normal_user_does_not_have_moderate_flag()
+    {
+        $response = $this->send(
+            $this->request('GET', '/api', ['authenticatedAs' => 2])
+        );
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $body = json_decode($response->getBody()->getContents(), true);
+
+        $this->assertArrayNotHasKey('fof-oauth', $body['data']['attributes']);
+        $this->assertArrayHasKey('fofOauthModerate', $body['data']['attributes']);
+        $this->assertFalse($body['data']['attributes']['fofOauthModerate']);
     }
 
     /**

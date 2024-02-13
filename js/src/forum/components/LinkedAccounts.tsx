@@ -58,7 +58,7 @@ export default class LinkedAccounts extends Component<IAttrs, IState> {
   }
 
   async loadLinkedAccounts() {
-    await app.store.find<LinkedAccount[]>('linked-accounts', {});
+    await app.store.find<LinkedAccount[]>('users/' + this.attrs.user.id() + '/linked-accounts', {});
     this.state.loadingAdditional = false;
     m.redraw();
   }
