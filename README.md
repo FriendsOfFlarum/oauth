@@ -17,6 +17,10 @@ By default these providers are included:
 - LinkedIn
 - Twitter
 
+### Permissions
+
+This extension provides the ability to view the status of linked OAuth providers (intended for admin and/or moderator use). In order for this to function correctly, you must also set the permission `Moderate Access Tokens` to at least the same group as you require for `Moderate user's linked accounts`.
+
 ### Additional providers
 
 Additional OAuth providers are available for this extension. Here's a handy list of known extensions, let us know if you know of any more and we'll get them added!

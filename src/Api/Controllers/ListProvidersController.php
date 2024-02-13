@@ -46,25 +46,32 @@ class ListProvidersController extends AbstractListController
     protected function data(ServerRequestInterface $request, Document $document)
     {
         $actor = RequestUtil::getActor($request);
+        $actor->assertRegistered();
+
+        $user = $this->users->findOrFail(Arr::get($request->getQueryParams(), 'id'));
+
+        if ($actor->id !== $user->id) {
+            $actor->assertCan('moderateUserProviders');
+        }
 
         $providers = $this->getProviders();
 
-        $loginProviders = $this->getUserProviders($actor, $providers);
+        $loginProviders = $this->getUserProviders($user, $providers);
 
         $data = new Collection();
 
-        $providers->each(function (array $provider) use ($loginProviders, &$data, $actor) {
+        $providers->each(function (array $provider) use ($loginProviders, &$data, $user) {
             $loginProvider = $loginProviders->where('provider', Arr::get($provider, 'name'))->first();
             $data->add(LoginProviderStatus::build(
                 Arr::get($provider, 'name'),
                 Arr::get($provider, 'icon'),
                 Arr::get($provider, 'priority'),
-                $actor,
+                $user,
                 $loginProvider
             ));
         });
 
-        $this->getOrphanedUserProviders($actor, $providers)->each(function (LoginProvider $loginProvider) use (&$data) {
+        $this->getOrphanedUserProviders($user, $providers)->each(function (LoginProvider $loginProvider) use (&$data) {
             $data->add(LoginProviderStatus::build(
                 $loginProvider->provider,
                 'fas fa-question',

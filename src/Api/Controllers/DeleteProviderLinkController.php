@@ -12,9 +12,9 @@
 namespace FoF\OAuth\Api\Controllers;
 
 use Flarum\Api\Controller\AbstractDeleteController;
-use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
 use Flarum\User\LoginProvider;
+use Flarum\User\UserRepository;
 use FoF\OAuth\Events\UnlinkingFromProvider;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;
@@ -28,9 +28,15 @@ class DeleteProviderLinkController extends AbstractDeleteController
      */
     protected $events;
 
-    public function __construct(Dispatcher $events)
+    /**
+     * @var UserRepository
+     */
+    protected $users;
+
+    public function __construct(Dispatcher $events, UserRepository $users)
     {
         $this->events = $events;
+        $this->users = $users;
     }
 
     /**
@@ -45,11 +51,13 @@ class DeleteProviderLinkController extends AbstractDeleteController
 
         $provider = LoginProvider::findOrFail($id);
 
-        if ($provider->user_id !== $actor->id) {
-            throw new ValidationException(['provider' => 'This provider does not belong to you.']);
+        $user = $this->users->findOrFail($provider->user_id);
+
+        if ($user->id !== $actor->id) {
+            $actor->assertCan('moderateUserProviders');
         }
 
-        $this->events->dispatch(new UnlinkingFromProvider($actor, $provider));
+        $this->events->dispatch(new UnlinkingFromProvider($user, $provider, $actor));
 
         $provider->delete();
 
