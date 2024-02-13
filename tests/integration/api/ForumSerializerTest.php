@@ -18,11 +18,11 @@ use Flarum\Testing\integration\TestCase;
 class ForumSerializerTest extends TestCase
 {
     use RetrievesAuthorizedUsers;
-    
+
     public function setUp(): void
     {
         parent::setUp();
-        
+
         $this->extension('fof-oauth');
 
         $this->extend(
@@ -32,13 +32,13 @@ class ForumSerializerTest extends TestCase
         $this->prepareDatabase([
             'users' => [
                 $this->normalUser(),
-                ['id' => 3, 'username' => 'moderator', 'is_email_confirmed' => true]
+                ['id' => 3, 'username' => 'moderator', 'is_email_confirmed' => true],
             ],
             'group_user' => [
-                ['user_id' => 3, 'group_id' => 4]
+                ['user_id' => 3, 'group_id' => 4],
             ],
             'group_permission' => [
-                ['permission' => 'moderateUserProviders', 'group_id' => 4]
+                ['permission' => 'moderateUserProviders', 'group_id' => 4],
             ],
         ]);
     }
@@ -70,7 +70,7 @@ class ForumSerializerTest extends TestCase
 
     /**
      * @dataProvider authorizedUserProvider
-     * 
+     *
      * @test
      */
     public function it_does_not_include_providers_in_forum_attributes_for_logged_in_users(int $userId)
