@@ -4,6 +4,8 @@ import extendLoginSignup from './extenders/extendLoginSignup';
 
 export { default as extend } from './extend';
 
+export * from './components';
+
 app.initializers.add('fof/oauth', () => {
   extendLoginSignup();
   addLinkedAccountsToUserSecurityPage();

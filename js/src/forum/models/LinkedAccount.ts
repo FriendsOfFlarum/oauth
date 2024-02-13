@@ -28,6 +28,7 @@ export default class LinkedAccount extends Model {
   providerIdentifier() {
     return Model.attribute<string>('providerIdentifier').call(this);
   }
+
   firstLogin() {
     return Model.attribute('firstLogin', Model.transformDate).call(this);
   }
