@@ -48,7 +48,8 @@ class ListProvidersController extends AbstractListController
         $actor = RequestUtil::getActor($request);
         $actor->assertRegistered();
 
-        $user = $this->users->findOrFail(Arr::get($request->getQueryParams(), 'id'));
+        // If no id is provided, we're looking at the current user.
+        $user = $this->users->findOrFail(Arr::get($request->getQueryParams(), 'id', $actor->id));
 
         if ($actor->id !== $user->id) {
             $actor->assertCan('moderateUserProviders');

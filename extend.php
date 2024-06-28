@@ -44,6 +44,7 @@ return [
 
     (new Extend\Routes('api'))
         ->get('/users/{id}/linked-accounts', 'users.provider.list', Api\Controllers\ListProvidersController::class)
+        ->get('/linked-accounts', 'user.provider.list', Api\Controllers\ListProvidersController::class)
         ->delete('/linked-accounts/{id}', 'users.provider.delete', Api\Controllers\DeleteProviderLinkController::class),
 
     (new Extend\ServiceProvider())
