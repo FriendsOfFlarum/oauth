@@ -2,6 +2,7 @@ import app from 'flarum/forum/app';
 import Component, { ComponentAttrs } from 'flarum/common/Component';
 import icon from 'flarum/common/helpers/icon';
 import Button from 'flarum/common/components/Button';
+import Link from 'flarum/common/components/Link';
 import type Mithril from 'mithril';
 import LinkedAccount from '../models/LinkedAccount';
 import User from 'flarum/common/models/User';
@@ -73,16 +74,17 @@ export default class LinkStatus extends Component<IAttrs> {
     } else if (!provider.orphaned() && (user.id() === app.session.user?.id() || !app.forum.attribute<boolean>('fofOauthModerate'))) {
       return (
         <div className="LinkedAccountsList-item-actions">
-          <Button
+          <Link
             className={`Button FoFLogInButton LogInButton--${provider.name()}`}
             icon={provider.icon()}
-            path={`/auth/${provider.name()}?linkTo=${user.id()}`}
+            href={`${app.forum.attribute('baseUrl')}/auth/${provider.name()}?linkTo=${user.id()}`}
             loading={this.state.loading}
+            external={true}
           >
             {app.translator.trans(`fof-oauth.forum.log_in.with_${provider.name()}_button`, {
               provider: app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`),
             })}
-          </Button>
+          </Link>
         </div>
       );
     }
