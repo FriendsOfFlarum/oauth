@@ -61,6 +61,17 @@ export default class ProviderInfo extends Component<IProviderInfoAttrs> {
       90
     );
 
+    items.add(
+      'identification',
+      <LabelValue
+        label={app.translator.trans('fof-oauth.forum.user.settings.linked-account.identification-label', {
+          provider: app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`),
+        })}
+        value={provider.providerIdentifier()}
+      />,
+      80
+    );
+
     return items;
   }
 }

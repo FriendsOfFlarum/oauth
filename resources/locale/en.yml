@@ -89,6 +89,7 @@ fof-oauth:
           label: Linked accounts
           last-used-label: Last used
           link-created-label: Link created
+          identification-label: "{provider} ID"
           orphaned-account: You have signed in through this provider previously, but this forum has disabled sign-in with this method since.
           help: These linked accounts allow you to sign into the forum using other providers.
           identifier-label: "{provider} ID"
