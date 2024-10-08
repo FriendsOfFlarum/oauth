@@ -16,6 +16,8 @@ use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
 use Flarum\User\Event\LoggedOut;
+use Flarum\User\Filter\UserFilterer;
+use Flarum\User\Search\UserSearcher;
 use FoF\Extend\Events\OAuthLoginSuccessful;
 
 return [
@@ -72,4 +74,10 @@ return [
 
     (new Extend\ApiSerializer(CurrentUserSerializer::class))
         ->attributes(Api\CurrentUserAttributes::class),
+
+    (new Extend\Filter(UserFilterer::class))
+        ->addFilter(Query\SsoIdFilterGambit::class),
+
+    (new Extend\SimpleFlarumSearch(UserSearcher::class))
+        ->addGambit(Query\SsoIdFilterGambit::class),
 ];
