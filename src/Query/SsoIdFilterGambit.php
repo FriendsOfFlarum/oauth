@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth\Query;
 
 use Flarum\Filter\FilterInterface;
@@ -15,7 +24,7 @@ class SsoIdFilterGambit extends AbstractRegexGambit implements FilterInterface
 
     public function apply(SearchState $search, $bit)
     {
-        if (! $search->getActor()->hasPermission('fof-oauth.admin.permissions.moderate_user_providers')) {
+        if (!$search->getActor()->hasPermission('fof-oauth.admin.permissions.moderate_user_providers')) {
             return false;
         }
 
@@ -39,7 +48,7 @@ class SsoIdFilterGambit extends AbstractRegexGambit implements FilterInterface
 
     public function filter(FilterState $filterState, $filterValue, bool $negate)
     {
-        if (! $filterState->getActor()->hasPermission('fof-oauth.admin.permissions.moderate_user_providers')) {
+        if (!$filterState->getActor()->hasPermission('fof-oauth.admin.permissions.moderate_user_providers')) {
             return;
         }
 
