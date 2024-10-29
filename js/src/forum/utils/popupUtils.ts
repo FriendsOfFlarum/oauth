@@ -3,7 +3,7 @@ import type ForumApplication from 'flarum/forum/ForumApplication';
 export function openOAuthPopup(app: ForumApplication, attrs: Record<string, any>) {
   const fullscreen = app.forum.attribute('fof-oauth.fullscreenPopup');
   if (fullscreen) {
-    window.open(app.forum.attribute('baseUrl') + attrs.path, 'logInPopup', 'fullscreen=yes');
+    window.open(app.forum.attribute<string>('baseUrl') + attrs.path, 'logInPopup', 'fullscreen=yes');
   } else {
     const defaultWidth = 580;
     const defaultHeight = 400;
