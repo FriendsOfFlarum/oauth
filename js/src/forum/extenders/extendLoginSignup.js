@@ -7,37 +7,13 @@ import Tooltip from 'flarum/common/components/Tooltip';
 import LogInModal from 'flarum/forum/components/LogInModal';
 import SignUpModal from 'flarum/forum/components/SignUpModal';
 import ForumApplication from 'flarum/forum/ForumApplication';
+import { openOAuthPopup } from '../utils/popupUtils';
 
 export default function () {
   extend(LogInButton, 'initAttrs', function (returnedValue, attrs) {
-    const fullscreen = app.forum.attribute('fof-oauth.fullscreenPopup');
-
-    if (fullscreen) {
-      attrs.onclick = function () {
-        window.open(app.forum.attribute('baseUrl') + attrs.path, 'logInPopup', 'fullscreen=yes');
-      };
-    } else {
-      // Default values
-      const defaultWidth = 580;
-      const defaultHeight = 400;
-
-      const width = app.forum.attribute('fof-oauth.popupWidth') || defaultWidth;
-      const height = app.forum.attribute('fof-oauth.popupHeight') || defaultHeight;
-
-      const $window = $(window);
-
-      attrs.onclick = function () {
-        window.open(
-          app.forum.attribute('baseUrl') + attrs.path,
-          'logInPopup',
-          `width=${width},` +
-            `height=${height},` +
-            `top=${$window.height() / 2 - height / 2},` +
-            `left=${$window.width() / 2 - width / 2},` +
-            'status=no,scrollbars=yes,resizable=no'
-        );
-      };
-    }
+    attrs.onclick = function () {
+      openOAuthPopup(app, attrs);
+    };
   });
 
   extend(LogInButtons.prototype, 'items', function (items) {
