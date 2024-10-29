@@ -18,7 +18,7 @@ export function openOAuthPopup(app: ForumApplication, attrs: Record<string, any>
     const left = windowWidth / 2 - width / 2;
 
     window.open(
-      app.forum.attribute('baseUrl') + attrs.path,
+      app.forum.attribute<string>('baseUrl') + attrs.path,
       'logInPopup',
       `width=${width},` + `height=${height},` + `top=${top},` + `left=${left},` + 'status=no,scrollbars=yes,resizable=no'
     );
