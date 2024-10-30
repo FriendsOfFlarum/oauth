@@ -31,7 +31,7 @@ export default class LinkedAccounts extends Component<IAttrs, IState> {
     this.loadLinkedAccounts();
   }
 
-  view(vnode: Mithril.Vnode<IAttrs, this>) {
+  view() {
     const linkedAccounts = app.store.all<LinkedAccount>('linked-accounts');
 
     return (
