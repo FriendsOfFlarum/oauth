@@ -9,14 +9,17 @@ import SignUpModal from 'flarum/forum/components/SignUpModal';
 import ForumApplication from 'flarum/forum/ForumApplication';
 import { openOAuthPopup } from '../utils/popupUtils';
 
+import type Mithril from 'mithril';
+import type ItemList from 'flarum/common/utils/ItemList';
+
 export default function () {
-  extend(LogInButton, 'initAttrs', function (returnedValue, attrs) {
+  extend(LogInButton, 'initAttrs', function (_returnedValue, attrs) {
     attrs.onclick = function () {
       openOAuthPopup(app, attrs);
     };
   });
 
-  extend(LogInButtons.prototype, 'items', function (items) {
+  extend(LogInButtons.prototype, 'items', function (items: ItemList<Mithril.Children>) {
     const onlyIcons = !!app.forum.attribute('fof-oauth.only_icons');
     const buttons = app.forum.attribute('fof-oauth').filter(Boolean);
     const googleButton = buttons.splice(buttons.indexOf(buttons.find((b) => b.name === 'google')), 1);
@@ -89,14 +92,19 @@ export default function () {
         .find((p) => newProviders.some((np) => np.name() === p.name()));
 
       if (oldProvider) {
+        // @ts-ignore
         delete this.store.data['linked-accounts'][oldProvider.id()];
       } else {
         window.location.reload();
         return;
       }
 
+      const userId = app.session?.user?.id();
+
+      if (!userId) throw new Error('User ID not available');
+
       // Refresh the session user
-      await this.store.find('users', app.session.user.id());
+      await this.store.find('users', userId);
 
       app.fof_oauth_linkingInProgress = false;
       m.redraw();
@@ -106,19 +114,21 @@ export default function () {
     }
   };
 
-  extend(LogInModal.prototype, 'onbeforeupdate', function (vnode) {
+  extend(LogInModal.prototype, 'onbeforeupdate', function () {
     if (app.fof_oauth_loginInProgress) {
+      // @ts-ignore
       this.loading = true;
     }
   });
 
-  extend(SignUpModal.prototype, 'onbeforeupdate', function (vnode) {
+  extend(SignUpModal.prototype, 'onbeforeupdate', function () {
     if (app.fof_oauth_loginInProgress) {
+      // @ts-ignore
       this.loading = true;
     }
   });
 
-  extend(SignUpModal.prototype, 'fields', function (items) {
+  extend(SignUpModal.prototype, 'fields', function (items: ItemList<unknown>) {
     // If a suggested username was not provided by the OAuth service, display some help text to the user.
     if (!!this.attrs.token && !!!this.attrs.username) {
       items.add(
@@ -129,7 +139,5 @@ export default function () {
         35
       );
     }
-
-    return items;
   });
 }
