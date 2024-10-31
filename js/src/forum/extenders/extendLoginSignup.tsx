@@ -12,6 +12,12 @@ import { openOAuthPopup } from '../utils/popupUtils';
 import type Mithril from 'mithril';
 import type ItemList from 'flarum/common/utils/ItemList';
 
+export type OAuthProvider = {
+  name: string;
+  icon: string;
+  priority: number;
+} | null;
+
 export default function () {
   extend(LogInButton, 'initAttrs', function (_returnedValue, attrs) {
     attrs.onclick = function () {
@@ -21,14 +27,13 @@ export default function () {
 
   extend(LogInButtons.prototype, 'items', function (items: ItemList<Mithril.Children>) {
     const onlyIcons = !!app.forum.attribute('fof-oauth.only_icons');
-    const buttons = app.forum.attribute('fof-oauth').filter(Boolean);
-    const googleButton = buttons.splice(buttons.indexOf(buttons.find((b) => b.name === 'google')), 1);
+    const enabledOAuthProviders = app.forum.attribute<OAuthProvider[]>('fof-oauth').filter(Boolean);
 
-    buttons.concat(googleButton).forEach(({ name, icon, priority }) => {
+    enabledOAuthProviders.forEach(({ name, icon, priority }) => {
       let className = `Button FoFLogInButton LogInButton--${name}`;
 
       // Google branding does not allow inline icon, so we'll keep the full button
-      if (onlyIcons && name !== 'google') {
+      if (onlyIcons) {
         className += ' Button--icon';
       }
 
