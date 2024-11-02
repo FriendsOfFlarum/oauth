@@ -22,17 +22,17 @@ use FoF\Extend\Events\OAuthLoginSuccessful;
 
 return [
     (new Extend\Frontend('forum'))
-        ->js(__DIR__.'/js/dist/forum.js')
-        ->css(__DIR__.'/resources/less/forum.less'),
+        ->js(__DIR__ . '/js/dist/forum.js')
+        ->css(__DIR__ . '/resources/less/forum.less'),
 
     (new Extend\Frontend('admin'))
-        ->js(__DIR__.'/js/dist/admin.js')
-        ->css(__DIR__.'/resources/less/admin.less')
+        ->js(__DIR__ . '/js/dist/admin.js')
+        ->css(__DIR__ . '/resources/less/admin.less')
         ->content(function (Document $document) {
             $document->payload['fof-oauth'] = resolve('fof-oauth.providers.admin');
         }),
 
-    new Extend\Locales(__DIR__.'/resources/locale'),
+    new Extend\Locales(__DIR__ . '/resources/locale'),
 
     (new Extend\Middleware('forum'))
         ->add(Middleware\ErrorHandler::class)
@@ -80,4 +80,12 @@ return [
 
     (new Extend\SimpleFlarumSearch(UserSearcher::class))
         ->addGambit(Query\SsoIdFilterGambit::class),
+
+    (new Extend\Conditional())
+        ->whenExtensionEnabled('flarum-gdpr', fn() => [
+            (new Extend\ApiSerializer(ForumSerializer::class))
+                ->attribute('passwordlessSignUp', function (ForumSerializer $serializer) {
+                    return !$serializer->getActor()->isGuest() && $serializer->getActor()->loginProviders()->count() > 0;
+                }),
+        ]),
 ];
