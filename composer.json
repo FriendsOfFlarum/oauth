@@ -28,6 +28,7 @@
         }
     ],
     "require": {
+        "php": "^7.4 || ^8.0",
         "flarum/core": "^1.8.1",
         "league/oauth1-client": "^1.10.1",
         "league/oauth2-facebook": "^2.2.0",
@@ -71,7 +72,10 @@
                 "name": "fas fa-sign-in-alt",
                 "backgroundColor": "#e74c3c",
                 "color": "#fff"
-            }
+            },
+            "optional-dependencies": [
+                "flarum/gdpr"
+            ]
         },
         "flagrow": {
             "discuss": "https://discuss.flarum.org/d/25182"

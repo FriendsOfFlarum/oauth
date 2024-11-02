@@ -80,4 +80,12 @@ return [
 
     (new Extend\SimpleFlarumSearch(UserSearcher::class))
         ->addGambit(Query\SsoIdFilterGambit::class),
+
+    (new Extend\Conditional())
+        ->whenExtensionEnabled('flarum-gdpr', fn () => [
+            (new Extend\ApiSerializer(ForumSerializer::class))
+                ->attribute('passwordlessSignUp', function (ForumSerializer $serializer) {
+                    return !$serializer->getActor()->isGuest() && $serializer->getActor()->loginProviders()->count() > 0;
+                }),
+        ]),
 ];
