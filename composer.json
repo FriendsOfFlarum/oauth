@@ -72,7 +72,10 @@
                 "name": "fas fa-sign-in-alt",
                 "backgroundColor": "#e74c3c",
                 "color": "#fff"
-            }
+            },
+            "optional-dependencies": [
+                "flarum/gdpr"
+            ]
         },
         "flagrow": {
             "discuss": "https://discuss.flarum.org/d/25182"
