@@ -30,7 +30,7 @@ export default class LinkStatus extends Component<IAttrs> {
     }
   }
 
-  view(vnode: Mithril.Vnode<IAttrs, this>): Mithril.Children {
+  view(): Mithril.Children {
     return (
       <div className={`LinkedAccounts-Account LinkedAccounts-Account--${this.attrs.provider.name()}`}>
         {this.iconView()}
