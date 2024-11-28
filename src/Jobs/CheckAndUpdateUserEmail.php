@@ -77,10 +77,9 @@ class CheckAndUpdateUserEmail implements ShouldQueue
             $user->changeEmail($this->providedEmail);
 
             $user->save();
-
-			foreach ($user->releaseEvents() as $event) {
-				$events->dispatch($event);
-			}
+            foreach ($user->releaseEvents() as $event) {
+                $events->dispatch($event);
+            }
         }
     }
 }
