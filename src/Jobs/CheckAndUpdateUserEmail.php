@@ -76,6 +76,7 @@ class CheckAndUpdateUserEmail implements ShouldQueue
             $user->changeEmail($this->providedEmail);
 
             $user->save();
+            $user->releaseEvents();
         }
     }
 }
