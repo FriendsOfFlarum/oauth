@@ -15,6 +15,7 @@ use Flarum\User\LoginProvider;
 use Flarum\User\User;
 use Flarum\User\UserValidator;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
 
@@ -51,7 +52,7 @@ class CheckAndUpdateUserEmail implements ShouldQueue
         $this->providedEmail = $providedEmail;
     }
 
-    public function handle(UserValidator $validator)
+    public function handle(UserValidator $validator, Dispatcher $events)
     {
         $provider = LoginProvider::where('provider', $this->providerName)->where('identifier', $this->identifier)->first();
 
@@ -76,7 +77,9 @@ class CheckAndUpdateUserEmail implements ShouldQueue
             $user->changeEmail($this->providedEmail);
 
             $user->save();
-            $user->releaseEvents();
+            foreach ($user->releaseEvents() as $event) {
+                $events->dispatch($event);
+            }
         }
     }
 }
