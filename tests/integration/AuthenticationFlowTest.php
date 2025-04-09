@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth\Tests\integration;
 
 use Dflydev\FigCookies\SetCookies;
@@ -14,6 +23,7 @@ use Psr\Http\Message\ResponseInterface;
 class AuthenticationFlowTest extends TestCase
 {
     use RetrievesAuthorizedUsers;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -24,14 +34,14 @@ class AuthenticationFlowTest extends TestCase
             'users' => [
                 $this->normalUser(),
                 [
-                    'id' => 3, 'username' => 'Seboubeach',
+                    'id'                 => 3, 'username' => 'Seboubeach',
                     'is_email_confirmed' => 1, 'email' => 'Seboubeach1@machine.local',
-                    'joined_at' => '2021-01-01 00:00:00'
+                    'joined_at'          => '2021-01-01 00:00:00',
                 ],
                 [
-                    'id' => 4, 'username' => 'Hephoica',
+                    'id'                 => 4, 'username' => 'Hephoica',
                     'is_email_confirmed' => 1, 'email' => 'Hephoica@machine.local',
-                    'joined_at' => '2021-01-01 00:00:00'
+                    'joined_at'          => '2021-01-01 00:00:00',
                 ],
             ],
             'login_providers' => [
@@ -39,7 +49,7 @@ class AuthenticationFlowTest extends TestCase
             ],
             'group_permission' => [
                 ['permission' => 'user.editOwnNickname', 'group_id' => 4],
-            ]
+            ],
         ]);
 
         $this->setting('fof-oauth.gitlab.client_id', 'test');
@@ -59,8 +69,8 @@ class AuthenticationFlowTest extends TestCase
 
         $request = $this->request('GET', '/auth/gitlab')
             ->withQueryParams([
-                'code' => 'code:123456',
-                'state' => $query['state']
+                'code'  => 'code:123456',
+                'state' => $query['state'],
             ])
             ->withCookieParams($this->toRequestCookies($response));
 
@@ -104,7 +114,6 @@ class AuthenticationFlowTest extends TestCase
         $this->assertEquals($value, $user['attributes']['loginProvider']);
     }
 
-
     private function mockProvider(string $identifier, string $email): void
     {
         $container = $this->app()->getContainer();
@@ -112,10 +121,10 @@ class AuthenticationFlowTest extends TestCase
         $mockProvider = $this->getMockBuilder(Gitlab::class)
             ->setConstructorArgs([
                 'options' => [
-                    'clientId' => 'test',
+                    'clientId'     => 'test',
                     'clientSecret' => 'test',
-                    'redirectUri' => 'http://localhost/auth/gitlab',
-                ]
+                    'redirectUri'  => 'http://localhost/auth/gitlab',
+                ],
             ])
             ->onlyMethods(['getAccessToken', 'getResourceOwner'])
             ->getMock();
@@ -130,7 +139,7 @@ class AuthenticationFlowTest extends TestCase
 
         $mockFofProvider = $this->getMockBuilder(\FoF\OAuth\Providers\GitLab::class)
             ->setConstructorArgs([
-                'settings' => $container->make(SettingsRepositoryInterface::class)
+                'settings' => $container->make(SettingsRepositoryInterface::class),
             ])
             ->onlyMethods(['provider'])
             ->getMock();
