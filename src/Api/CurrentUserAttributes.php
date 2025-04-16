@@ -41,8 +41,7 @@ class CurrentUserAttributes
                 $loginProvider = LoginProvider::query()
                     ->where('user_id', $user->id)
                     ->orderBy('last_login_at', 'desc')
-                    ->pluck('provider')
-                    ->first();
+                    ->value('provider');
 
                 $loginProvider = $loginProvider ?: false;
                 $this->cache->forever(AbstractOAuthController::SESSION_OAUTH2PROVIDER.'_'.$session->getId(), $loginProvider);
