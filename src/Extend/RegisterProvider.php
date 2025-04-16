@@ -26,7 +26,7 @@ class RegisterProvider implements ExtenderInterface
         $this->provider = $provider;
     }
 
-    public function extend(Container $container, Extension $extension = null)
+    public function extend(Container $container, ?Extension $extension = null)
     {
         $provider = $container->make($this->provider);
 
