@@ -12,6 +12,7 @@
 namespace FoF\OAuth\Api;
 
 use Flarum\Api\Serializer\CurrentUserSerializer;
+use Flarum\User\LoginProvider;
 use Flarum\User\User;
 use FoF\Extend\Controllers\AbstractOAuthController;
 use Illuminate\Contracts\Cache\Store as Cache;
@@ -33,7 +34,22 @@ class CurrentUserAttributes
         $session = $serializer->getRequest()->getAttribute('session');
 
         if ($session !== null) {
-            $attributes['loginProvider'] = $this->cache->get(AbstractOAuthController::SESSION_OAUTH2PROVIDER.'_'.$session->getId());
+            $loginProvider = $this->cache->get(AbstractOAuthController::SESSION_OAUTH2PROVIDER.'_'.$session->getId());
+
+            if ($loginProvider === null) {
+                // This solution is not optimal, if someone uses multiple login providers at the same time, this could be lead to wrong results
+                $loginProvider = LoginProvider::query()
+                    ->where('user_id', $user->id)
+                    ->orderBy('last_login_at', 'desc')
+                    ->pluck('provider')
+                    ->first();
+
+                $loginProvider = $loginProvider ?: false;
+                $this->cache->forever(AbstractOAuthController::SESSION_OAUTH2PROVIDER.'_'.$session->getId(), $loginProvider);
+            }
+
+            // We don't want return false when the provider is not set, map it back to null
+            $attributes['loginProvider'] = $loginProvider ?: null;
         }
 
         return $attributes;
