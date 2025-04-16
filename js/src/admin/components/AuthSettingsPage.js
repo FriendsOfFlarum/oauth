@@ -155,7 +155,7 @@ export default class AuthSettingsPage extends ExtensionPage {
 
   getAvailableGroups() {
     const groups = app.store.all('groups');
-    return groups.filter((group) => group.id() !== '2'); // Exclude the "Guests" group
+    return groups.filter((group) => !['2', '3'].includes(group.id())); // Exclude the "Guests" and "Members" groups
   }
 
   customProviderSettings(name) {
