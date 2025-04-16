@@ -26,7 +26,7 @@ class CurrentUserAttributesTest extends TestCase
         parent::setUp();
 
         $this->extend(
-            (new Extend\Csrf)->exemptRoute('login')
+            (new Extend\Csrf())->exemptRoute('login')
         );
 
         $this->extension('fof-oauth');
@@ -42,18 +42,18 @@ class CurrentUserAttributesTest extends TestCase
             ],
             'login_providers' => [
                 [
-                    'id' => 1, 
-                    'user_id' => 3, 
-                    'provider' => 'gitlab', 
-                    'identifier' => '123456',
-                    'last_login_at' => '2023-01-01 00:00:00'
+                    'id'            => 1,
+                    'user_id'       => 3,
+                    'provider'      => 'gitlab',
+                    'identifier'    => '123456',
+                    'last_login_at' => '2023-01-01 00:00:00',
                 ],
                 [
-                    'id' => 2, 
-                    'user_id' => 3, 
-                    'provider' => 'github', 
-                    'identifier' => '654321',
-                    'last_login_at' => '2023-01-02 00:00:00'
+                    'id'            => 2,
+                    'user_id'       => 3,
+                    'provider'      => 'github',
+                    'identifier'    => '654321',
+                    'last_login_at' => '2023-01-02 00:00:00',
                 ],
             ],
         ]);
