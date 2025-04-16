@@ -68,7 +68,7 @@ class OAuthServiceProvider extends AbstractServiceProvider
         $this->container->singleton('fof-oauth.providers.admin', function () use ($cache, $config) {
             // If we're in debug mode, don't cache the providers, but directly return them.
             if ($config->inDebugMode()) {
-                return $this->mapProviders();
+                return $this->mapProviders(true);
             }
 
             $cacheKey = 'fof-oauth.providers.admin';
