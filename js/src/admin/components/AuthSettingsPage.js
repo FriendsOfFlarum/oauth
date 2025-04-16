@@ -167,32 +167,30 @@ export default class AuthSettingsPage extends ExtensionPage {
       <div className="Form-group">
         <label>{app.translator.trans('fof-oauth.admin.settings.providers.group_label')}</label>
         <div className="helpText">{app.translator.trans('fof-oauth.admin.settings.providers.group_help')}</div>
-        
+
         {(() => {
           const groupId = this.setting(`fof-oauth.${name}.group`)();
           const selectedGroup = groupId ? app.store.getById('groups', groupId) : null;
           const icons = {
-            1: 'fas fa-check',  // Admins
-            3: 'fas fa-user',   // Members
-            4: 'fas fa-map-pin' // Mods
+            1: 'fas fa-check', // Admins
+            3: 'fas fa-user', // Members
+            4: 'fas fa-map-pin', // Mods
           };
-          
+
           return (
-            <Dropdown 
-              label={selectedGroup 
-                ? [icon(selectedGroup.icon() || icons[selectedGroup.id()]), '\t', selectedGroup.namePlural()] 
-                : app.translator.trans('fof-oauth.admin.settings.providers.no_group_label')}
+            <Dropdown
+              label={
+                selectedGroup
+                  ? [icon(selectedGroup.icon() || icons[selectedGroup.id()]), '\t', selectedGroup.namePlural()]
+                  : app.translator.trans('fof-oauth.admin.settings.providers.no_group_label')
+              }
               buttonClassName="Button"
               disabled={!this.setting(`fof-oauth.${name}`)()}
             >
-              <Button
-                icon="fas fa-times"
-                onclick={() => this.setting(`fof-oauth.${name}.group`)('')}
-                active={!groupId}
-              >
+              <Button icon="fas fa-times" onclick={() => this.setting(`fof-oauth.${name}.group`)('')} active={!groupId}>
                 {app.translator.trans('fof-oauth.admin.settings.providers.no_group_label')}
               </Button>
-              
+
               {this.getAvailableGroups().map((group) => (
                 <Button
                   icon={group.icon() || icons[group.id()]}
