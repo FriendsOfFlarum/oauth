@@ -1,5 +1,6 @@
 import app from 'flarum/admin/app';
 import Button from 'flarum/common/components/Button';
+import Dropdown from 'flarum/common/components/Dropdown';
 import ExtensionPage from 'flarum/admin/components/ExtensionPage';
 import icon from 'flarum/common/helpers/icon';
 import ItemList from 'flarum/common/utils/ItemList';
@@ -152,8 +153,59 @@ export default class AuthSettingsPage extends ExtensionPage {
     return items;
   }
 
+  getAvailableGroups() {
+    const groups = app.store.all('groups');
+    return groups.filter((group) => group.id() !== '2'); // Exclude the "Guests" group
+  }
+
   customProviderSettings(name) {
     const items = new ItemList();
+
+    // Add group selection dropdown
+    items.add(
+      'group',
+      <div className="Form-group">
+        <label>{app.translator.trans('fof-oauth.admin.settings.providers.group_label')}</label>
+        <div className="helpText">{app.translator.trans('fof-oauth.admin.settings.providers.group_help')}</div>
+
+        {(() => {
+          const groupId = this.setting(`fof-oauth.${name}.group`)();
+          const selectedGroup = groupId ? app.store.getById('groups', groupId) : null;
+          const icons = {
+            1: 'fas fa-check', // Admins
+            3: 'fas fa-user', // Members
+            4: 'fas fa-map-pin', // Mods
+          };
+
+          return (
+            <Dropdown
+              label={
+                selectedGroup
+                  ? [icon(selectedGroup.icon() || icons[selectedGroup.id()]), '\t', selectedGroup.namePlural()]
+                  : app.translator.trans('fof-oauth.admin.settings.providers.no_group_label')
+              }
+              buttonClassName="Button"
+              disabled={!this.setting(`fof-oauth.${name}`)()}
+            >
+              <Button icon="fas fa-times" onclick={() => this.setting(`fof-oauth.${name}.group`)('')} active={!groupId}>
+                {app.translator.trans('fof-oauth.admin.settings.providers.no_group_label')}
+              </Button>
+
+              {this.getAvailableGroups().map((group) => (
+                <Button
+                  icon={group.icon() || icons[group.id()]}
+                  onclick={() => this.setting(`fof-oauth.${name}.group`)(group.id())}
+                  active={groupId === group.id()}
+                  key={group.id()}
+                >
+                  {group.namePlural()}
+                </Button>
+              ))}
+            </Dropdown>
+          );
+        })()}
+      </div>
+    );
 
     return items;
   }
