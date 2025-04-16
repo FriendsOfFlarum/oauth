@@ -38,10 +38,10 @@ class AssignGroupToUser
     {
         $provider = $event->provider;
         $user = $event->user;
-        
+
         // Get the group ID for this provider
         $groupId = $this->settings->get("fof-oauth.{$provider}.group");
-        
+
         // If a group is specified, assign it to the user
         if ($groupId && is_numeric($groupId)) {
             $user->afterSave(function (User $user) use ($groupId) {
