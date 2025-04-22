@@ -16,9 +16,24 @@ use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 
 class SettingSuggestions
 {
+    /**
+     * @var string|null
+     */
     public $provider;
+
+    /**
+     * @var Registration
+     */
     public $registration;
+
+    /**
+     * @var ResourceOwnerInterface
+     */
     public $resourceOwner;
+
+    /**
+     * @var string|null
+     */
     public $token;
 
     public function __construct(string $provider, Registration $registration, ResourceOwnerInterface $resourceOwner, ?string $token = null)
