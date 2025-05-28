@@ -11,14 +11,13 @@
 
 namespace FoF\OAuth\Api;
 
+use Flarum\Api\Context;
+use Flarum\Api\Schema;
 use Flarum\User\LoginProvider;
 use Flarum\User\User;
 use FoF\Extend\Controllers\AbstractOAuthController;
 use FoF\OAuth\Api\Resource\ProviderResource;
 use Illuminate\Contracts\Cache\Store as Cache;
-
-use Flarum\Api\Context;
-use Flarum\Api\Schema;
 
 class AddUserAttributes
 {

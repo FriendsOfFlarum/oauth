@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of fof/oauth.
+ *
+ * Copyright (c) FriendsOfFlarum.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FoF\OAuth\Api\Resource;
 
 use Flarum\Api\Context;
@@ -7,13 +16,10 @@ use Flarum\Api\Endpoint;
 use Flarum\Api\Resource\AbstractDatabaseResource;
 use Flarum\Api\Schema;
 use Flarum\User\LoginProvider;
-use Flarum\User\UserRepository;
 use FoF\OAuth\Events\UnlinkingFromProvider;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Laminas\Diactoros\Response\EmptyResponse;
-
-use FoF\OAuth\Api\Action;
 
 class ProviderResource extends AbstractDatabaseResource
 {
