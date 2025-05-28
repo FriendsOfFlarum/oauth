@@ -83,12 +83,6 @@ return [
     (new Extend\ApiSerializer(CurrentUserSerializer::class))
         ->attributes(Api\CurrentUserAttributes::class),
 
-    (new Extend\Filter(UserFilterer::class))
-        ->addFilter(Query\SsoIdFilterGambit::class),
-
-    (new Extend\SimpleFlarumSearch(UserSearcher::class))
-        ->addGambit(Query\SsoIdFilterGambit::class),
-
     (new Extend\Conditional())
         ->whenExtensionEnabled('flarum-gdpr', fn () => [
             // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
@@ -97,4 +91,6 @@ return [
                     return !$serializer->getActor()->isGuest() && $serializer->getActor()->loginProviders()->count() > 0;
                 }),
         ]),
+    (new Extend\SearchDriver(\Flarum\Search\Database\DatabaseSearchDriver::class))
+        ->addFilter(UserSearcher::class, Query\SsoIdFilter::class),
 ];
