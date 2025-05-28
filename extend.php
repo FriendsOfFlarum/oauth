@@ -12,12 +12,10 @@
 namespace FoF\OAuth;
 
 use Flarum\Api\Resource;
-use Flarum\Api\Endpoint;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
 use Flarum\User\Event\LoggedOut;
 use Flarum\User\Event\RegisteringFromProvider;
-use Flarum\User\Filter\UserFilterer;
 use Flarum\User\Search\UserSearcher;
 use FoF\Extend\Events\OAuthLoginSuccessful;
 
@@ -45,7 +43,7 @@ return [
     (new Extend\Routes('forum'))
         ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
 
-    (new Extend\ApiResource(Api\Resource\ProviderResource::class)),
+    new Extend\ApiResource(Api\Resource\ProviderResource::class),
 
     (new Extend\ServiceProvider())
         ->register(OAuthServiceProvider::class),
@@ -73,9 +71,9 @@ return [
         ->listen(LoggedOut::class, Listeners\HandleLogout::class)
         ->subscribe(Listeners\ClearOAuthCache::class),
 
-//    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
-//    (new Extend\ApiSerializer(CurrentUserSerializer::class))
-//        ->attributes(Api\CurrentUserAttributes::class),
+    //    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
+    //    (new Extend\ApiSerializer(CurrentUserSerializer::class))
+    //        ->attributes(Api\CurrentUserAttributes::class),
 
     (new Extend\Conditional())
         ->whenExtensionEnabled('flarum-gdpr', fn () => [

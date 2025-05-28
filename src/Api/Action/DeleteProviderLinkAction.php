@@ -12,15 +12,10 @@
 namespace FoF\OAuth\Api\Action;
 
 use Flarum\Api\Context;
-use Flarum\Api\Controller\AbstractDeleteController;
-use Flarum\Http\RequestUtil;
 use Flarum\User\LoginProvider;
 use Flarum\User\UserRepository;
 use FoF\OAuth\Events\UnlinkingFromProvider;
 use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Support\Arr;
-use Laminas\Diactoros\Response\EmptyResponse;
-use Psr\Http\Message\ServerRequestInterface;
 
 class DeleteProviderLinkAction
 {
