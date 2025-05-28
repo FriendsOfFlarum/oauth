@@ -11,18 +11,23 @@
 
 namespace FoF\OAuth\Api;
 
-use Flarum\Api\Serializer\ForumSerializer;
+use Flarum\Api\Context;
+use Flarum\Api\Schema;
 
 class AddForumAttributes
 {
-    public function __invoke(ForumSerializer $serializer, $model, array $attributes): array
+    public function __invoke(): array
     {
-        if ($serializer->getActor()->isGuest()) {
-            $attributes['fof-oauth'] = resolve('fof-oauth.providers.forum');
-        } else {
-            $attributes['fofOauthModerate'] = $serializer->getActor()->can('moderateUserProviders');
-        }
+        return [
+            // This attribute is used to display the OAuth providers on the login page
+            Schema\Str::make('fof-oauth')
+                ->visible(fn ($model, Context $context) => $context->getActor()->isGuest())
+                ->get(fn () => resolve('fof-oauth.providers.forum')),
 
-        return $attributes;
+            // This attribute is used to check if the user can moderate OAuth providers
+            Schema\Boolean::make('fofOauthModerate')
+                ->hidden(fn ($model, Context $context) => $context->getActor()->isGuest())
+                ->get(fn ($model, Context $context) => $context->getActor()->can('moderateUserProviders')),
+        ];
     }
 }

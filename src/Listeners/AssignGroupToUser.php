@@ -11,7 +11,6 @@
 
 namespace FoF\OAuth\Listeners;
 
-use Flarum\Group\Group;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\Event\RegisteringFromProvider;
 use Flarum\User\User;

@@ -3,7 +3,6 @@ import Component from 'flarum/common/Component';
 import type LinkedAccount from '../models/LinkedAccount';
 import type Mithril from 'mithril';
 import humanTime from 'flarum/common/helpers/humanTime';
-import LabelValue from 'flarum/common/components/LabelValue';
 import ItemList from 'flarum/common/utils/ItemList';
 
 interface IProviderInfoAttrs {
@@ -11,6 +10,10 @@ interface IProviderInfoAttrs {
 }
 
 export default class ProviderInfo extends Component<IProviderInfoAttrs> {
+  oncreate(vnode: Mithril.VnodeDOM<IProviderInfoAttrs, this>) {
+    super.oncreate(vnode);
+  }
+
   view(vnode: Mithril.Vnode<IProviderInfoAttrs, this>): Mithril.Children {
     const { provider } = this.attrs;
 
@@ -41,6 +44,8 @@ export default class ProviderInfo extends Component<IProviderInfoAttrs> {
   }
 
   providerInfoItems(provider: LinkedAccount): ItemList<Mithril.Children> {
+    const LabelValue = flarum.reg.get('core', 'common/components/LabelValue');
+
     const items = new ItemList<Mithril.Children>();
 
     items.add(
