@@ -20,6 +20,10 @@ use Flarum\User\Event\RegisteringFromProvider;
 use Flarum\User\Filter\UserFilterer;
 use Flarum\User\Search\UserSearcher;
 use FoF\Extend\Events\OAuthLoginSuccessful;
+use Flarum\Api\Context;
+use Flarum\Api\Endpoint;
+use Flarum\Api\Resource;
+use Flarum\Api\Schema;
 
 return [
     (new Extend\Frontend('forum'))
@@ -53,6 +57,7 @@ return [
     (new Extend\ServiceProvider())
         ->register(OAuthServiceProvider::class),
 
+    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
     (new Extend\ApiSerializer(ForumSerializer::class))
         ->attributes(Api\AddForumAttributes::class),
 
@@ -74,6 +79,7 @@ return [
         ->listen(LoggedOut::class, Listeners\HandleLogout::class)
         ->subscribe(Listeners\ClearOAuthCache::class),
 
+    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
     (new Extend\ApiSerializer(CurrentUserSerializer::class))
         ->attributes(Api\CurrentUserAttributes::class),
 
@@ -85,6 +91,7 @@ return [
 
     (new Extend\Conditional())
         ->whenExtensionEnabled('flarum-gdpr', fn () => [
+            // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
             (new Extend\ApiSerializer(ForumSerializer::class))
                 ->attribute('passwordlessSignUp', function (ForumSerializer $serializer) {
                     return !$serializer->getActor()->isGuest() && $serializer->getActor()->loginProviders()->count() > 0;
