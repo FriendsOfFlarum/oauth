@@ -71,7 +71,6 @@ class ProviderResource extends AbstractDatabaseResource
 
                     return 'N/A';
                 })
-                ->response(fn () => new EmptyResponse(204)),
         ];
     }
 
