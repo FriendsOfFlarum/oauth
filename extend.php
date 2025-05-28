@@ -11,8 +11,8 @@
 
 namespace FoF\OAuth;
 
-use Flarum\Api\Serializer\CurrentUserSerializer;
-use Flarum\Api\Serializer\ForumSerializer;
+use Flarum\Api\Resource;
+use Flarum\Api\Endpoint;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
 use Flarum\User\Event\LoggedOut;
@@ -20,10 +20,6 @@ use Flarum\User\Event\RegisteringFromProvider;
 use Flarum\User\Filter\UserFilterer;
 use Flarum\User\Search\UserSearcher;
 use FoF\Extend\Events\OAuthLoginSuccessful;
-use Flarum\Api\Context;
-use Flarum\Api\Endpoint;
-use Flarum\Api\Resource;
-use Flarum\Api\Schema;
 
 return [
     (new Extend\Frontend('forum'))
@@ -49,17 +45,15 @@ return [
     (new Extend\Routes('forum'))
         ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
 
-    (new Extend\Routes('api'))
-        ->get('/users/{id}/linked-accounts', 'users.provider.list', Api\Controllers\ListProvidersController::class)
-        ->get('/linked-accounts', 'user.provider.list', Api\Controllers\ListProvidersController::class)
-        ->delete('/linked-accounts/{id}', 'users.provider.delete', Api\Controllers\DeleteProviderLinkController::class),
+    (new Extend\ApiResource(Api\Resource\ProviderResource::class)),
 
     (new Extend\ServiceProvider())
         ->register(OAuthServiceProvider::class),
 
-    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
-    (new Extend\ApiSerializer(ForumSerializer::class))
-        ->attributes(Api\AddForumAttributes::class),
+    (new Extend\ApiResource(Resource\ForumResource::class))
+        ->fields(Api\AddForumAttributes::class),
+    (new Extend\ApiResource(Resource\UserResource::class))
+        ->fields(Api\AddUserAttributes::class),
 
     (new Extend\Settings())
         ->default('fof-oauth.only_icons', false)
@@ -79,9 +73,9 @@ return [
         ->listen(LoggedOut::class, Listeners\HandleLogout::class)
         ->subscribe(Listeners\ClearOAuthCache::class),
 
-    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
-    (new Extend\ApiSerializer(CurrentUserSerializer::class))
-        ->attributes(Api\CurrentUserAttributes::class),
+//    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
+//    (new Extend\ApiSerializer(CurrentUserSerializer::class))
+//        ->attributes(Api\CurrentUserAttributes::class),
 
     (new Extend\Conditional())
         ->whenExtensionEnabled('flarum-gdpr', fn () => [

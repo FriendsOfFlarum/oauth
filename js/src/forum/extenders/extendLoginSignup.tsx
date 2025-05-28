@@ -4,9 +4,6 @@ import LogInButtons from 'flarum/forum/components/LogInButtons';
 import LogInButton from 'flarum/forum/components/LogInButton';
 import extractText from 'flarum/common/utils/extractText';
 import Tooltip from 'flarum/common/components/Tooltip';
-import LogInModal from 'flarum/forum/components/LogInModal';
-import SignUpModal from 'flarum/forum/components/SignUpModal';
-import ForumApplication from 'flarum/forum/ForumApplication';
 import { openOAuthPopup } from '../utils/popupUtils';
 
 import type LinkedAccount from '../models/LinkedAccount';
@@ -71,7 +68,7 @@ export default function () {
     vdom.attrs.className += ' FoFLogInButtons--icons';
   });
 
-  extend(ForumApplication.prototype, 'authenticationComplete', function (_, payload) {
+  extend('flarum/forum/ForumApplication', 'authenticationComplete', function (_, payload) {
     if (payload.loggedIn) {
       app.fof_oauth_loginInProgress = true;
       // This will automatically be reset, as authenticationComplete also triggers a window reload.
@@ -80,7 +77,7 @@ export default function () {
     }
   });
 
-  ForumApplication.prototype.linkingComplete = async function () {
+  override('flarum/forum/ForumApplication', 'authenticationComplete', async function () {
     try {
       app.fof_oauth_linkingInProgress = true;
       m.redraw();
@@ -124,23 +121,23 @@ export default function () {
       app.fof_oauth_linkingInProgress = false;
       m.redraw();
     }
-  };
+  });
 
-  extend(LogInModal.prototype, 'onbeforeupdate', function () {
+  extend('flarum/forum/components/LogInModal', 'onbeforeupdate', function () {
     if (app.fof_oauth_loginInProgress) {
       // @ts-ignore
       this.loading = true;
     }
   });
 
-  extend(SignUpModal.prototype, 'onbeforeupdate', function () {
+  extend('flarum/forum/components/SignUpModal', 'onbeforeupdate', function () {
     if (app.fof_oauth_loginInProgress) {
       // @ts-ignore
       this.loading = true;
     }
   });
 
-  extend(SignUpModal.prototype, 'fields', function (items: ItemList<unknown>) {
+  extend('flarum/forum/components/SignUpModal', 'fields', function (items: ItemList<unknown>) {
     // If a suggested username was not provided by the OAuth service, display some help text to the user.
     if (!!this.attrs.token && !this.attrs.username) {
       items.add(

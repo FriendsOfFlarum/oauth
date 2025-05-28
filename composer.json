@@ -36,7 +36,7 @@
         "league/oauth2-google": "^4.0.1",
         "omines/oauth2-gitlab": "^3.3.0",
         "wohali/oauth2-discord-new": "^1.2.1",
-        "fof/extend": "^2.0.0"
+        "fof/extend": "@dev"
     },
     "replace": {
         "flarum/auth-facebook": "*",
@@ -113,5 +113,9 @@
         "psr-4": {
             "FoF\\OAuth\\Tests\\": "tests/"
         }
-    }
+    },
+    "repositories": [{
+            "type": "path",
+            "url": "../fof-extend"
+        }]
 }

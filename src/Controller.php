@@ -86,7 +86,7 @@ abstract class Controller extends AbstractOAuthController
                 $logger->error("[OAuth][{$this->getProviderName()}] {$e->getMessage()}: {$detail}");
             }
 
-            if ($e->getMessage() === 'Invalid state' || $e instanceof IdentityProviderException) {
+            if ($e instanceof IdentityProviderException || $e->getMessage() === 'Invalid state') {
                 throw new AuthenticationException($e->getMessage());
             }
 

@@ -1,12 +1,12 @@
 import app from 'flarum/forum/app';
 import Component, { ComponentAttrs } from 'flarum/common/Component';
-import icon from 'flarum/common/helpers/icon';
 import Button from 'flarum/common/components/Button';
 import type Mithril from 'mithril';
 import LinkedAccount from '../models/LinkedAccount';
 import User from 'flarum/common/models/User';
 import ProviderInfo from './ProviderInfo';
 import extractText from 'flarum/common/utils/extractText';
+import Icon from 'flarum/common/components/Icon';
 import LogInButton from 'flarum/forum/components/LogInButton';
 
 export interface ILinkStatusAttrs extends ComponentAttrs {
@@ -47,7 +47,7 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
   iconView() {
     return (
       <div className="LinkedAccountsList-item-icon">
-        {icon(this.attrs.provider.icon(), { className: `Provider-Icon Provider-Icon--${this.attrs.provider.name()}` })}
+        <Icon name={this.attrs.provider.icon()} className={`Provider-Icon Provider-Icon--${this.attrs.provider.name()}`} />
       </div>
     );
   }

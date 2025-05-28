@@ -2,7 +2,7 @@ import app from 'flarum/admin/app';
 import Button from 'flarum/common/components/Button';
 import Dropdown from 'flarum/common/components/Dropdown';
 import ExtensionPage from 'flarum/admin/components/ExtensionPage';
-import icon from 'flarum/common/helpers/icon';
+import Icon from 'flarum/common/components/Icon';
 import ItemList from 'flarum/common/utils/ItemList';
 
 export default class AuthSettingsPage extends ExtensionPage {
@@ -98,7 +98,7 @@ export default class AuthSettingsPage extends ExtensionPage {
               setting: `fof-oauth.${name}`,
               label: (
                 <div>
-                  {icon(provider.icon)}
+                  <Icon name={provider.icon} />
                   <span>{app.translator.trans(`fof-oauth.lib.providers.${name}`)}</span>
                 </div>
               ),
@@ -112,7 +112,7 @@ export default class AuthSettingsPage extends ExtensionPage {
                   name,
                 })}
               >
-                {icon(`fas fa-cog`)}
+                <Icon name="fas fa-cog" />
               </Button>
             }
           </div>
@@ -187,7 +187,7 @@ export default class AuthSettingsPage extends ExtensionPage {
             <Dropdown
               label={
                 selectedGroup
-                  ? [icon(selectedGroup.icon() || icons[selectedGroup.id()]), '\t', selectedGroup.namePlural()]
+                  ? [<Icon name={selectedGroup.icon() || icons[selectedGroup.id()]} />, '\t', selectedGroup.namePlural()]
                   : app.translator.trans('fof-oauth.admin.settings.providers.no_group_label')
               }
               buttonClassName="Button"

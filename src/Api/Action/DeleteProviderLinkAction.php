@@ -9,8 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace FoF\OAuth\Api\Controllers;
+namespace FoF\OAuth\Api\Action;
 
+use Flarum\Api\Context;
 use Flarum\Api\Controller\AbstractDeleteController;
 use Flarum\Http\RequestUtil;
 use Flarum\User\LoginProvider;
@@ -21,17 +22,10 @@ use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Psr\Http\Message\ServerRequestInterface;
 
-class DeleteProviderLinkController extends AbstractDeleteController
+class DeleteProviderLinkAction
 {
-    /**
-     * @var Dispatcher
-     */
-    protected $events;
-
-    /**
-     * @var UserRepository
-     */
-    protected $users;
+    protected Dispatcher $events;
+    protected UserRepository $users;
 
     public function __construct(Dispatcher $events, UserRepository $users)
     {
@@ -39,18 +33,9 @@ class DeleteProviderLinkController extends AbstractDeleteController
         $this->users = $users;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function delete(ServerRequestInterface $request)
+    public function __invoke(LoginProvider $provider, Context $context)
     {
-        $actor = RequestUtil::getActor($request);
-        $id = Arr::get($request->getQueryParams(), 'id');
-
-        $actor->assertRegistered();
-
-        $provider = LoginProvider::findOrFail($id);
-
+        $actor = $context->getActor();
         $user = $this->users->findOrFail($provider->user_id);
 
         if ($user->id !== $actor->id) {
@@ -60,7 +45,5 @@ class DeleteProviderLinkController extends AbstractDeleteController
         $this->events->dispatch(new UnlinkingFromProvider($user, $provider, $actor));
 
         $provider->delete();
-
-        return new EmptyResponse(204);
     }
 }
