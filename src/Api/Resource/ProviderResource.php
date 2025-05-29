@@ -17,9 +17,12 @@ use Flarum\Api\Resource\AbstractDatabaseResource;
 use Flarum\Api\Schema;
 use Flarum\User\LoginProvider;
 use FoF\OAuth\Events\UnlinkingFromProvider;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Laminas\Diactoros\Response\EmptyResponse;
+use Tobyz\JsonApiServer\Exception\NotFoundException;
+use Tobyz\JsonApiServer\Pagination\Pagination;
 
 class ProviderResource extends AbstractDatabaseResource
 {
@@ -57,21 +60,68 @@ class ProviderResource extends AbstractDatabaseResource
                     $user = $provider->user;
 
                     return $user !== null && ($user->id === $actor->id || $actor->can('moderateUserProviders'));
-                })
-                ->after(function (Context $context) {
-                    $provider = $context->model;
-
+                }),
+            Endpoint\Index::make('users.provider.index')
+                ->authenticated()
+                ->query(function ($query, ?Pagination $pagination, Context $context, array $filters, ?array $sort, int $offset, ?int $limit): Context {
                     $actor = $context->getActor();
-                    $user = $provider->user;
+                    $userId = (int) Arr::get($filters, 'user', $actor->id);
 
-                    // Dispatch the unlinking event
-                    resolve('events')->dispatch(
-                        new UnlinkingFromProvider($user, $provider, $actor)
-                    );
+                    if ($userId !== $actor->id && !$actor->can('moderateUserProviders')) {
+                        throw new NotFoundException();
+                    }
 
-                    return 'N/A';
+                    return $context
+                        ->withQuery(
+                            $query->where('user_id', $userId)
+                        )
+                        ->withInternal('user_id', $userId);
                 })
         ];
+    }
+
+    public function results($query, \Tobyz\JsonApiServer\Context $context): iterable
+    {
+        /** @var Builder $query */
+        /** @var Context $context */
+
+        $userId = $context->internal('user_id');
+        $providers = $query->get();
+
+        return static::addFakeProviders($providers, $userId);
+    }
+
+    public static function addFakeProviders(Collection $providers, int $userId): Collection
+    {
+        // All available OAuth providers
+        $availableProviders = static::getProviders();
+
+        // Add fake providers for those that are not linked
+        $availableProviders->each(function ($provider) use ($userId, &$providers) {
+            if (!$providers->contains('provider', $provider['name'])) {
+                $fakeProvider = new LoginProvider([
+                    'provider' => $provider['name'],
+                ]);
+                $fakeProvider->icon = $provider['icon'] ?? null;
+                $fakeProvider->priority = $provider['priority'] ?? 0;
+                $fakeProvider->user_id = $userId;
+
+                $providers->push($fakeProvider);
+            }
+        });
+
+        return $providers;
+    }
+
+    public function deleted($model, \Tobyz\JsonApiServer\Context $context): void
+    {
+        /** @var LoginProvider $model */
+
+        $this->events->dispatch(
+            new UnlinkingFromProvider($model->user, $model, $context->getActor())
+        );
+
+        parent::deleted($model, $context);
     }
 
     public function fields(): array

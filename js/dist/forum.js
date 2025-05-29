@@ -282,8 +282,10 @@ class LinkedAccounts extends (flarum_common_Component__WEBPACK_IMPORTED_MODULE_2
     return items;
   }
   async loadLinkedAccounts() {
-    await flarum_forum_app__WEBPACK_IMPORTED_MODULE_1___default().store.find('users/' + this.attrs.user.id(), {
-      include: 'linkedAccounts'
+    await flarum_forum_app__WEBPACK_IMPORTED_MODULE_1___default().store.find('linked-accounts', {
+      filter: {
+        userId: this.attrs.user.id()
+      }
     });
     // await app.store.find<LinkedAccount[]>('users/' + this.attrs.user.id() + '/linked-accounts', {});
     this.state.loadingAdditional = false;
@@ -411,12 +413,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var flarum_common_models_User__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! flarum/common/models/User */ "flarum/common/models/User");
 /* harmony import */ var flarum_common_models_User__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(flarum_common_models_User__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _models_LinkedAccount__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./models/LinkedAccount */ "./src/forum/models/LinkedAccount.ts");
+/* harmony import */ var _query_SsoGambit__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./query/SsoGambit */ "./src/forum/query/SsoGambit.tsx");
+
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ([new (flarum_common_extenders__WEBPACK_IMPORTED_MODULE_0___default().Model)((flarum_common_models_User__WEBPACK_IMPORTED_MODULE_1___default())) //
 .attribute('loginProvider'), new (flarum_common_extenders__WEBPACK_IMPORTED_MODULE_0___default().Store)() //
-.add('linked-accounts', _models_LinkedAccount__WEBPACK_IMPORTED_MODULE_2__["default"])]);
+.add('linked-accounts', _models_LinkedAccount__WEBPACK_IMPORTED_MODULE_2__["default"]), new (flarum_common_extenders__WEBPACK_IMPORTED_MODULE_0___default().Search)() //
+.gambit('users', _query_SsoGambit__WEBPACK_IMPORTED_MODULE_3__["default"])]);
 
 /***/ }),
 
@@ -677,6 +682,41 @@ flarum.reg.add('fof-oauth', 'forum/models/LinkedAccount', LinkedAccount);
 
 /***/ }),
 
+/***/ "./src/forum/query/SsoGambit.tsx":
+/*!***************************************!*\
+  !*** ./src/forum/query/SsoGambit.tsx ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ SsoGambit)
+/* harmony export */ });
+/* harmony import */ var flarum_forum_app__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! flarum/forum/app */ "flarum/forum/app");
+/* harmony import */ var flarum_forum_app__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(flarum_forum_app__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var flarum_common_query_IGambit__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! flarum/common/query/IGambit */ "flarum/common/query/IGambit");
+/* harmony import */ var flarum_common_query_IGambit__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(flarum_common_query_IGambit__WEBPACK_IMPORTED_MODULE_1__);
+
+
+class SsoGambit extends flarum_common_query_IGambit__WEBPACK_IMPORTED_MODULE_1__.KeyValueGambit {
+  key() {
+    return flarum_forum_app__WEBPACK_IMPORTED_MODULE_0___default().translator.trans('fof-oauth.lib.gambits.sso.key', {}, true);
+  }
+  hint() {
+    return flarum_forum_app__WEBPACK_IMPORTED_MODULE_0___default().translator.trans('fof-oauth.lib.gambits.sso.hint', {}, true);
+  }
+  filterKey() {
+    return 'sso';
+  }
+  enabled() {
+    return !!flarum_forum_app__WEBPACK_IMPORTED_MODULE_0___default().forum.attribute('fofOauthModerate');
+  }
+}
+flarum.reg.add('fof-oauth', 'forum/query/SsoGambit', SsoGambit);
+
+/***/ }),
+
 /***/ "./src/forum/utils/index.ts":
 /*!**********************************!*\
   !*** ./src/forum/utils/index.ts ***!
@@ -869,6 +909,17 @@ module.exports = flarum.reg.get('core', 'common/helpers/listItems');
 
 "use strict";
 module.exports = flarum.reg.get('core', 'common/models/User');
+
+/***/ }),
+
+/***/ "flarum/common/query/IGambit":
+/*!*****************************************************************!*\
+  !*** external "flarum.reg.get('core', 'common/query/IGambit')" ***!
+  \*****************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = flarum.reg.get('core', 'common/query/IGambit');
 
 /***/ }),
 

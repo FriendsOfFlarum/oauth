@@ -11,9 +11,12 @@
 
 namespace FoF\OAuth;
 
+use Flarum\Api\Context;
 use Flarum\Api\Resource;
+use Flarum\Api\Schema;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
+use Flarum\Search\Database\DatabaseSearchDriver;
 use Flarum\User\Event\LoggedOut;
 use Flarum\User\Event\RegisteringFromProvider;
 use Flarum\User\Search\UserSearcher;
@@ -77,12 +80,12 @@ return [
 
     (new Extend\Conditional())
         ->whenExtensionEnabled('flarum-gdpr', fn () => [
-            // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
-            (new Extend\ApiSerializer(ForumSerializer::class))
-                ->attribute('passwordlessSignUp', function (ForumSerializer $serializer) {
-                    return !$serializer->getActor()->isGuest() && $serializer->getActor()->loginProviders()->count() > 0;
-                }),
+            (new Extend\ApiResource(Resource\ForumResource::class))
+                ->fields(fn () => [
+                    Schema\Str::make('passwordlessSignUp')
+                        ->get(fn ($model, Context $context) => !$context->getActor()->isGuest() && $context->getActor()->loginProviders()->count() > 0),
+                ]),
         ]),
-    (new Extend\SearchDriver(\Flarum\Search\Database\DatabaseSearchDriver::class))
+    (new Extend\SearchDriver(DatabaseSearchDriver::class))
         ->addFilter(UserSearcher::class, Query\SsoIdFilter::class),
 ];

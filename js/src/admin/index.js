@@ -5,4 +5,3 @@ import ConfigureWithOAuthButton from './components/ConfigureWithOAuthButton';
 export { default as extend } from './extend';
 
 export { AuthSettingsPage, ConfigureWithOAuthPage, ConfigureWithOAuthButton };
-
