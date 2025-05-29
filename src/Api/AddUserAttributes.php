@@ -50,7 +50,7 @@ class AddUserAttributes
                         $this->cache->forever(AbstractOAuthController::SESSION_OAUTH2PROVIDER.'_'.$session->getId(), $loginProvider);
                     }
 
-                    return $loginProvider;
+                    return $loginProvider ?: null;
                 }),
 
             // The include relationship does NOT include unlinked login providers, unlike the resource's index route.
