@@ -54,32 +54,12 @@ class AddUserAttributes
                     return $loginProvider;
                 }),
 
+            // The include relationship does NOT include unlinked login providers, unlike the resource's index route.
             Schema\Relationship\ToMany::make('linkedAccounts')
                 ->includable()
                 ->type('linked-accounts')
-                ->get(function (User $user, Context $context) {
-                    // User's providers
-                    $providers = $user->loginProviders;
-
-                    // All available OAuth providers
-                    $availableProviders = ProviderResource::getProviders();
-
-                    // Add fake providers for those that are not linked
-                    $availableProviders->each(function ($provider) use ($user, &$providers) {
-                        if (!$providers->contains('provider', $provider['name'])) {
-                            $fakeProvider = new LoginProvider([
-                                'provider' => $provider['name'],
-                            ]);
-                            $fakeProvider->icon = $provider['icon'] ?? null;
-                            $fakeProvider->priority = $provider['priority'] ?? 0;
-                            $fakeProvider->user_id = $user->id;
-
-                            $providers->push($fakeProvider);
-                        }
-                    });
-
-                    return $providers->all();
-                }),
+                ->visible(fn (User $user, Context $context) => !$context->getActor()->isGuest() && ($user->id === $context->getActor()->id || $context->getActor()->can('moderateUserProviders')))
+                ->get(fn (User $user, Context $context) => $user->loginProviders->all()),
         ];
     }
 }
