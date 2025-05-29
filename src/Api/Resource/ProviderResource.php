@@ -20,7 +20,6 @@ use FoF\OAuth\Events\UnlinkingFromProvider;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Laminas\Diactoros\Response\EmptyResponse;
 use Tobyz\JsonApiServer\Exception\NotFoundException;
 use Tobyz\JsonApiServer\Pagination\Pagination;
 
@@ -76,7 +75,7 @@ class ProviderResource extends AbstractDatabaseResource
                             $query->where('user_id', $userId)
                         )
                         ->withInternal('user_id', $userId);
-                })
+                }),
         ];
     }
 
@@ -84,7 +83,6 @@ class ProviderResource extends AbstractDatabaseResource
     {
         /** @var Builder $query */
         /** @var Context $context */
-
         $userId = $context->internal('user_id');
         $providers = $query->get();
 
@@ -116,7 +114,6 @@ class ProviderResource extends AbstractDatabaseResource
     public function deleted($model, \Tobyz\JsonApiServer\Context $context): void
     {
         /** @var LoginProvider $model */
-
         $this->events->dispatch(
             new UnlinkingFromProvider($model->user, $model, $context->getActor())
         );
