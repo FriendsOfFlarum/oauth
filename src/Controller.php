@@ -12,14 +12,9 @@
 namespace FoF\OAuth;
 
 use Exception;
-use Flarum\Forum\Auth\ResponseFactory;
 use Flarum\Http\Exception\RouteNotFoundException;
-use Flarum\Http\UrlGenerator;
-use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\Extend\Controllers\AbstractOAuthController;
 use FoF\OAuth\Errors\AuthenticationException;
-use Illuminate\Contracts\Cache\Store as CacheStore;
-use Illuminate\Contracts\Events\Dispatcher;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
