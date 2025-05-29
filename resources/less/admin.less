@@ -43,9 +43,13 @@
         margin-bottom 0.25s;
     overflow-y: hidden;
     overflow-x: visible;
+    padding: 0 5px 5px;
   }
 
   .Provider {
+    // Remove gap from Form component
+    margin-bottom: calc(-1 * var(--gap));
+
     &.disabled .Button--rounded {
       display: none;
 
@@ -59,7 +63,6 @@
       max-height: 2000px;
       margin-bottom: 25px;
       overflow-y: visible;
-      padding: 0 5px 5px;
     }
   }
 }
