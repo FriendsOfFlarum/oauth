@@ -27,23 +27,6 @@ use Psr\Log\LoggerInterface;
 
 abstract class Controller extends AbstractOAuthController
 {
-    /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
-
-    public function __construct(
-        ResponseFactory $response,
-        SettingsRepositoryInterface $settings,
-        UrlGenerator $url,
-        Dispatcher $events,
-        CacheStore $cache
-    ) {
-        parent::__construct($response, $settings, $url, $events, $cache);
-
-        $this->settings = $settings;
-    }
-
     protected function getRouteName(): string
     {
         return 'auth.'.$this->getProviderName();
