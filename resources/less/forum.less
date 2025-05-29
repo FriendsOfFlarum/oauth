@@ -101,29 +101,13 @@
   }
 }
 
-.SettingsPage {
-  .item-account {
-    .item-linkedAccounts {
-      display: block;
-    }
-  }
-}
-
-.LinkedAccounts-List {
+.LinkedAccountsList {
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.LinkedAccounts-Account {
-  display: flex;
-  padding: 16px 16px 16px 0;
-  background-color: var(--control-bg);
-  color: var(--control-color);
-  border-radius: @border-radius;
 
   .Provider-Icon {
     --font-size: 1.6rem;
@@ -134,34 +118,19 @@
     justify-content: center;
   }
 
-  legend {
-    font-weight: bold;
-  }
-
-  .Provider-Info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
   .FoFLogInButton {
     .Button-label {
       margin-left: 4px;
     }
   }
-}
-
-.LinkedAccountsList {
-  display: flex;
-  flex-direction: column;
-  border-radius: var(--border-radius);
-  overflow: hidden;
 
   &-item {
     display: flex;
     padding: 16px 16px 16px 0;
     background-color: var(--control-bg);
     color: var(--control-color);
+    border-radius: @border-radius;
+    align-items: center;
 
     &-icon {
       --font-size: 1.6rem;
@@ -174,6 +143,10 @@
 
     &-title {
       font-weight: bold;
+
+      &:not(:has(+ div))  {
+        margin: 0;
+      }
 
       &-sub {
         font-style: italic;
@@ -215,6 +188,10 @@
         padding: 8px;
         width: auto;
         min-width: calc(~"var(--font-size) + 4rem");
+
+        .icon {
+          width: auto;
+        }
       }
 
       &-actions {

@@ -153,7 +153,7 @@ class LinkStatus extends (flarum_common_Component__WEBPACK_IMPORTED_MODULE_2___d
   }
   view(vnode) {
     return m("div", {
-      className: "LinkedAccounts-Account LinkedAccounts-Account--".concat(this.attrs.provider.name())
+      className: "LinkedAccountsList-item LinkedAccountsList-item--".concat(this.attrs.provider.name())
     }, this.iconView(), this.statusView(), this.actionView());
   }
   iconView() {
@@ -268,7 +268,7 @@ class LinkedAccounts extends (flarum_common_Component__WEBPACK_IMPORTED_MODULE_2
     }, flarum_forum_app__WEBPACK_IMPORTED_MODULE_1___default().translator.trans('fof-oauth.forum.user.settings.linked-account.help')), this.state.loadingAdditional ? m((flarum_common_components_LoadingIndicator__WEBPACK_IMPORTED_MODULE_6___default()), {
       containerClassName: "LinkedAccounts-Loading"
     }) : m("ul", {
-      className: "LinkedAccounts-List"
+      className: "LinkedAccountsList"
     }, flarum_common_helpers_listItems__WEBPACK_IMPORTED_MODULE_4___default()(this.linkedAccountsItems(linkedAccounts, this.attrs.user).toArray())));
   }
   linkedAccountsItems(linkedAccounts, user) {
@@ -333,14 +333,14 @@ class ProviderInfo extends (flarum_common_Component__WEBPACK_IMPORTED_MODULE_1__
       }, provider.name()), m("p", {
         className: "helpText"
       }, flarum_forum_app__WEBPACK_IMPORTED_MODULE_0___default().translator.trans('fof-oauth.forum.user.settings.linked-account.orphaned-account')), m("div", {
-        className: "LinkedAccountsList"
+        className: "LinkedAccountsList-item-data"
       }, this.providerInfoItems(provider).toArray()));
     }
     if (provider.linked()) {
       return m("div", null, m("p", {
         className: "LinkedAccountsList-item-title"
       }, flarum_forum_app__WEBPACK_IMPORTED_MODULE_0___default().translator.trans("fof-oauth.forum.providers.".concat(provider.name()))), m("div", {
-        className: "LinkedAccountsList"
+        className: "LinkedAccountsList-item-data"
       }, this.providerInfoItems(provider).toArray()));
     }
     return m("div", null, m("p", {
@@ -362,7 +362,7 @@ class ProviderInfo extends (flarum_common_Component__WEBPACK_IMPORTED_MODULE_1__
       label: flarum_forum_app__WEBPACK_IMPORTED_MODULE_0___default().translator.trans('fof-oauth.forum.user.settings.linked-account.identification-label', {
         provider: flarum_forum_app__WEBPACK_IMPORTED_MODULE_0___default().translator.trans("fof-oauth.forum.providers.".concat(provider.name()))
       }),
-      value: provider.providerIdentifier()
+      value: provider.identifier()
     }), 80);
     return items;
   }
@@ -668,14 +668,14 @@ class LinkedAccount extends (flarum_common_Model__WEBPACK_IMPORTED_MODULE_0___de
   identifier() {
     return flarum_common_Model__WEBPACK_IMPORTED_MODULE_0___default().attribute('identifier').call(this);
   }
-  providerIdentifier() {
-    return flarum_common_Model__WEBPACK_IMPORTED_MODULE_0___default().attribute('providerIdentifier').call(this);
-  }
   firstLogin() {
     return flarum_common_Model__WEBPACK_IMPORTED_MODULE_0___default().attribute('firstLogin', (flarum_common_Model__WEBPACK_IMPORTED_MODULE_0___default().transformDate)).call(this);
   }
   lastLogin() {
     return flarum_common_Model__WEBPACK_IMPORTED_MODULE_0___default().attribute('lastLogin', (flarum_common_Model__WEBPACK_IMPORTED_MODULE_0___default().transformDate)).call(this);
+  }
+  userId() {
+    return flarum_common_Model__WEBPACK_IMPORTED_MODULE_0___default().attribute('userId').call(this);
   }
 }
 flarum.reg.add('fof-oauth', 'forum/models/LinkedAccount', LinkedAccount);
