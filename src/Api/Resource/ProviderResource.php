@@ -127,6 +127,8 @@ class ProviderResource extends AbstractDatabaseResource
     public function fields(): array
     {
         return [
+            Schema\Str::make('userId')
+                ->get(fn (LoginProvider $loginProvider) => (string) $loginProvider->user_id),
             Schema\Str::make('name')
                 ->get(fn (LoginProvider $loginProvider) => $this->getProviderAttr($loginProvider->provider, 'name') ?? $loginProvider->provider),
             Schema\Str::make('icon')
@@ -137,10 +139,7 @@ class ProviderResource extends AbstractDatabaseResource
                 ->get(fn (LoginProvider $loginProvider) => $this->providers->firstWhere('name', $loginProvider->provider) === null),
             Schema\Boolean::make('linked')
                 ->get(fn (LoginProvider $loginProvider) => $loginProvider->exists),
-            Schema\Str::make('identifier')
-                ->property('id'),
-            Schema\Str::make('providerIdentifier')
-                ->property('identifier'),
+            Schema\Str::make('identifier'),
             Schema\DateTime::make('firstLogin')
                 ->property('created_at'),
             Schema\DateTime::make('lastLogin')

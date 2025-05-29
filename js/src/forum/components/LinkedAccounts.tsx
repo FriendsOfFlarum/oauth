@@ -41,7 +41,7 @@ export default class LinkedAccounts extends Component<IAttrs, IState> {
         {this.state.loadingAdditional ? (
           <LoadingIndicator containerClassName="LinkedAccounts-Loading" />
         ) : (
-          <ul className="LinkedAccounts-List">{listItems(this.linkedAccountsItems(linkedAccounts, this.attrs.user).toArray())}</ul>
+          <ul className="LinkedAccountsList">{listItems(this.linkedAccountsItems(linkedAccounts, this.attrs.user).toArray())}</ul>
         )}
       </FieldSet>
     );

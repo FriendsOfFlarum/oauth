@@ -36,7 +36,7 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
 
   view(): Mithril.Children {
     return (
-      <div className={`LinkedAccounts-Account LinkedAccounts-Account--${this.attrs.provider.name()}`}>
+      <div className={`LinkedAccountsList-item LinkedAccountsList-item--${this.attrs.provider.name()}`}>
         {this.iconView()}
         {this.statusView()}
         {this.actionView()}
