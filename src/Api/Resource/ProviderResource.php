@@ -100,8 +100,8 @@ class ProviderResource extends AbstractDatabaseResource
                 $fakeProvider = new LoginProvider([
                     'provider' => $provider['name'],
                 ]);
-                $fakeProvider->icon = $provider['icon'] ?? null;
-                $fakeProvider->priority = $provider['priority'] ?? 0;
+                $fakeProvider->setAttribute('icon', $provider['icon']);
+                $fakeProvider->setAttribute('priority', 250);
                 $fakeProvider->user_id = $userId;
 
                 $providers->push($fakeProvider);
@@ -151,7 +151,9 @@ class ProviderResource extends AbstractDatabaseResource
 
     public function getId(object $model, $context): string
     {
-        return $model->id ?? "{$model->user_id}-{$model->provider}";
+        /** @var LoginProvider $model */
+
+        return ((string) $model->id) ?: "{$model->user_id}-{$model->provider}";
     }
 
     protected function getProviderAttr(string $name, string $attr)

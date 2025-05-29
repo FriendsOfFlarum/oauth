@@ -36,11 +36,13 @@ class AuthenticationFlowTest extends TestCase
                 [
                     'id'                 => 3, 'username' => 'Seboubeach',
                     'is_email_confirmed' => 1, 'email' => 'Seboubeach1@machine.local',
+                    'password'           => '$2y$10$LO59tiT7uggl6Oe23o/O6.utnF6ipngYjvMvaxo1TciKqBttDNKim',
                     'joined_at'          => '2021-01-01 00:00:00',
                 ],
                 [
                     'id'                 => 4, 'username' => 'Hephoica',
                     'is_email_confirmed' => 1, 'email' => 'Hephoica@machine.local',
+                    'password'           => '$2y$10$LO59tiT7uggl6Oe23o/O6.utnF6ipngYjvMvaxo1TciKqBttDNKim',
                     'joined_at'          => '2021-01-01 00:00:00',
                 ],
             ],
