@@ -34,16 +34,14 @@ __webpack_require__.r(__webpack_exports__);
 class AuthSettingsPage extends (flarum_admin_components_ExtensionPage__WEBPACK_IMPORTED_MODULE_3___default()) {
   oninit(vnode) {
     super.oninit(vnode);
-    console.log('AuthSettingsPage initialized');
     this.showing = [];
   }
   content() {
-    console.log('Rendering AuthSettingsPage content');
     return [m("div", {
       className: "container"
     }, m("div", {
       className: "AuthSettingsPage"
-    }, m("div", {
+    }, m("form", {
       className: "Form"
     }, this.buildSettingComponent({
       type: 'boolean',
@@ -110,7 +108,8 @@ class AuthSettingsPage extends (flarum_admin_components_ExtensionPage__WEBPACK_I
       }, m((flarum_common_components_Icon__WEBPACK_IMPORTED_MODULE_4___default()), {
         name: "fas fa-cog"
       }))), m("div", {
-        className: "Provider--settings"
+        className: "Provider--settings",
+        inert: !showSettings
       }, m("div", null, m("p", null, flarum_admin_app__WEBPACK_IMPORTED_MODULE_0___default().translator.trans("fof-oauth.admin.settings.providers.".concat(name, ".description"), {
         link: m("a", {
           href: provider.link,
