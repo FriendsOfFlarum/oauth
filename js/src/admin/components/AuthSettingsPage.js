@@ -16,7 +16,7 @@ export default class AuthSettingsPage extends ExtensionPage {
     return (
       <div className="container">
         <div className="AuthSettingsPage">
-          <div className="Form">
+          <form className="Form">
             {this.buildSettingComponent({
               type: 'boolean',
               setting: 'fof-oauth.only_icons',
@@ -74,7 +74,7 @@ export default class AuthSettingsPage extends ExtensionPage {
             </div>
 
             {this.submitButton()}
-          </div>
+          </form>
         </div>
       </div>
     );
@@ -104,20 +104,18 @@ export default class AuthSettingsPage extends ExtensionPage {
               ),
             })}
 
-            {
-              <Button
-                className={`Button Button--rounded ${this.showing[name] && 'active'}`}
-                onclick={() => (this.showing[name] = !showSettings)}
-                aria-label={app.translator.trans('fof-oauth.admin.settings_accessibility_label', {
-                  name,
-                })}
-              >
-                <Icon name="fas fa-cog" />
-              </Button>
-            }
+            <Button
+              className={`Button Button--rounded ${this.showing[name] && 'active'}`}
+              onclick={() => (this.showing[name] = !showSettings)}
+              aria-label={app.translator.trans('fof-oauth.admin.settings_accessibility_label', {
+                name,
+              })}
+            >
+              <Icon name="fas fa-cog" />
+            </Button>
           </div>
 
-          <div className="Provider--settings">
+          <div className="Provider--settings" inert={!showSettings}>
             <div>
               <p>
                 {app.translator.trans(`fof-oauth.admin.settings.providers.${name}.description`, {
