@@ -12,14 +12,9 @@
 namespace FoF\OAuth;
 
 use Exception;
-use Flarum\Forum\Auth\ResponseFactory;
 use Flarum\Http\Exception\RouteNotFoundException;
-use Flarum\Http\UrlGenerator;
-use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\Extend\Controllers\AbstractOAuthController;
 use FoF\OAuth\Errors\AuthenticationException;
-use Illuminate\Contracts\Cache\Store as CacheStore;
-use Illuminate\Contracts\Events\Dispatcher;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -27,23 +22,6 @@ use Psr\Log\LoggerInterface;
 
 abstract class Controller extends AbstractOAuthController
 {
-    /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
-
-    public function __construct(
-        ResponseFactory $response,
-        SettingsRepositoryInterface $settings,
-        UrlGenerator $url,
-        Dispatcher $events,
-        CacheStore $cache
-    ) {
-        parent::__construct($response, $settings, $url, $events, $cache);
-
-        $this->settings = $settings;
-    }
-
     protected function getRouteName(): string
     {
         return 'auth.'.$this->getProviderName();
@@ -86,7 +64,7 @@ abstract class Controller extends AbstractOAuthController
                 $logger->error("[OAuth][{$this->getProviderName()}] {$e->getMessage()}: {$detail}");
             }
 
-            if ($e->getMessage() === 'Invalid state' || $e instanceof IdentityProviderException) {
+            if ($e instanceof IdentityProviderException || $e->getMessage() === 'Invalid state') {
                 throw new AuthenticationException($e->getMessage());
             }
 

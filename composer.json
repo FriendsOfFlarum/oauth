@@ -28,15 +28,15 @@
         }
     ],
     "require": {
-        "php": "^7.4 || ^8.0",
-        "flarum/core": "^1.8.1",
+        "php": "^8.2",
+        "flarum/core": "^2.0.0-beta",
         "league/oauth1-client": "^1.10.1",
         "league/oauth2-facebook": "^2.2.0",
         "league/oauth2-github": "^3.1.0",
         "league/oauth2-google": "^4.0.1",
         "omines/oauth2-gitlab": "^3.3.0",
         "wohali/oauth2-discord-new": "^1.2.1",
-        "fof/extend": "^1.3.3"
+        "fof/extend": "dev-ds/2.0"
     },
     "replace": {
         "flarum/auth-facebook": "*",
@@ -88,8 +88,8 @@
         }
     },
     "require-dev": {
-        "flarum/phpstan": "*",
-        "flarum/testing": "^1.0.0"
+        "flarum/phpstan": "^2.0.0-beta",
+        "flarum/testing": "^2.0.0-beta"
     },
     "scripts": {
         "analyse:phpstan": "phpstan analyse",

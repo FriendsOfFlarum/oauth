@@ -3,7 +3,6 @@ import Component from 'flarum/common/Component';
 import type LinkedAccount from '../models/LinkedAccount';
 import type Mithril from 'mithril';
 import humanTime from 'flarum/common/helpers/humanTime';
-import LabelValue from 'flarum/common/components/LabelValue';
 import ItemList from 'flarum/common/utils/ItemList';
 
 interface IProviderInfoAttrs {
@@ -11,6 +10,10 @@ interface IProviderInfoAttrs {
 }
 
 export default class ProviderInfo extends Component<IProviderInfoAttrs> {
+  oncreate(vnode: Mithril.VnodeDOM<IProviderInfoAttrs, this>) {
+    super.oncreate(vnode);
+  }
+
   view(vnode: Mithril.Vnode<IProviderInfoAttrs, this>): Mithril.Children {
     const { provider } = this.attrs;
 
@@ -19,7 +22,7 @@ export default class ProviderInfo extends Component<IProviderInfoAttrs> {
         <div>
           <p className="LinkedAccountsList-item-title">{provider.name()}</p>
           <p className="helpText">{app.translator.trans('fof-oauth.forum.user.settings.linked-account.orphaned-account')}</p>
-          <div className="LinkedAccountsList">{this.providerInfoItems(provider).toArray()}</div>
+          <div className="LinkedAccountsList-item-data">{this.providerInfoItems(provider).toArray()}</div>
         </div>
       );
     }
@@ -28,7 +31,7 @@ export default class ProviderInfo extends Component<IProviderInfoAttrs> {
       return (
         <div>
           <p className="LinkedAccountsList-item-title">{app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`)}</p>
-          <div className="LinkedAccountsList">{this.providerInfoItems(provider).toArray()}</div>
+          <div className="LinkedAccountsList-item-data">{this.providerInfoItems(provider).toArray()}</div>
         </div>
       );
     }
@@ -41,13 +44,15 @@ export default class ProviderInfo extends Component<IProviderInfoAttrs> {
   }
 
   providerInfoItems(provider: LinkedAccount): ItemList<Mithril.Children> {
+    const LabelValue = flarum.reg.get('core', 'common/components/LabelValue');
+
     const items = new ItemList<Mithril.Children>();
 
     items.add(
       'firstLogin',
       <LabelValue
         label={app.translator.trans('fof-oauth.forum.user.settings.linked-account.link-created-label')}
-        value={humanTime(provider.firstLogin())}
+        value={humanTime(provider.firstLogin()!)}
       />,
       100
     );
@@ -56,7 +61,7 @@ export default class ProviderInfo extends Component<IProviderInfoAttrs> {
       'lastLogin',
       <LabelValue
         label={app.translator.trans('fof-oauth.forum.user.settings.linked-account.last-used-label')}
-        value={humanTime(provider.lastLogin())}
+        value={humanTime(provider.lastLogin()!)}
       />,
       90
     );
@@ -67,7 +72,7 @@ export default class ProviderInfo extends Component<IProviderInfoAttrs> {
         label={app.translator.trans('fof-oauth.forum.user.settings.linked-account.identification-label', {
           provider: app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`),
         })}
-        value={provider.providerIdentifier()}
+        value={provider.identifier()}
       />,
       80
     );

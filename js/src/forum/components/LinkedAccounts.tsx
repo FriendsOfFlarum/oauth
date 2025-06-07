@@ -41,7 +41,7 @@ export default class LinkedAccounts extends Component<IAttrs, IState> {
         {this.state.loadingAdditional ? (
           <LoadingIndicator containerClassName="LinkedAccounts-Loading" />
         ) : (
-          <ul className="LinkedAccounts-List">{listItems(this.linkedAccountsItems(linkedAccounts, this.attrs.user).toArray())}</ul>
+          <ul className="LinkedAccountsList">{listItems(this.linkedAccountsItems(linkedAccounts, this.attrs.user).toArray())}</ul>
         )}
       </FieldSet>
     );
@@ -58,7 +58,8 @@ export default class LinkedAccounts extends Component<IAttrs, IState> {
   }
 
   async loadLinkedAccounts() {
-    await app.store.find<LinkedAccount[]>('users/' + this.attrs.user.id() + '/linked-accounts', {});
+    await app.store.find('linked-accounts', { filter: { userId: this.attrs.user.id() } });
+    // await app.store.find<LinkedAccount[]>('users/' + this.attrs.user.id() + '/linked-accounts', {});
     this.state.loadingAdditional = false;
     m.redraw();
   }

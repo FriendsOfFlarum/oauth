@@ -32,7 +32,7 @@ class ForumSerializerTest extends TestCase
         $this->prepareDatabase([
             'users' => [
                 $this->normalUser(),
-                ['id' => 3, 'username' => 'moderator', 'is_email_confirmed' => true],
+                ['id' => 3, 'username' => 'moderator', 'email' => 'noreply@example.com', 'password' => '$2y$10$LO59tiT7uggl6Oe23o/O6.utnF6ipngYjvMvaxo1TciKqBttDNKim', 'is_email_confirmed' => true],
             ],
             'group_user' => [
                 ['user_id' => 3, 'group_id' => 4],
@@ -43,7 +43,7 @@ class ForumSerializerTest extends TestCase
         ]);
     }
 
-    public function authorizedUserProvider()
+    public static function authorizedUserProvider(): array
     {
         return [
             [1],

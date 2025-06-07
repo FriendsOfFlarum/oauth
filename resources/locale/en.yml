@@ -127,6 +127,11 @@ fof-oauth:
       google: Google
       linkedin: LinkedIn
 
+    gambits:
+      sso:
+        key: sso
+        hint: a login provider
+
   ref:
     settings:
       app_id: App ID

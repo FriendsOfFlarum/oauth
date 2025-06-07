@@ -13,6 +13,7 @@ namespace FoF\OAuth\Middleware;
 
 use Flarum\Foundation\Config;
 use Flarum\Foundation\ErrorHandling\Reporter;
+use Flarum\Locale\TranslatorInterface;
 use FoF\OAuth\Errors\AuthenticationException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\View\Factory as ViewFactory;
@@ -22,7 +23,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ErrorHandler implements MiddlewareInterface
 {

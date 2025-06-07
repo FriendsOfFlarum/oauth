@@ -11,13 +11,14 @@
 
 namespace FoF\OAuth;
 
-use Flarum\Api\Serializer\CurrentUserSerializer;
-use Flarum\Api\Serializer\ForumSerializer;
+use Flarum\Api\Context;
+use Flarum\Api\Resource;
+use Flarum\Api\Schema;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
+use Flarum\Search\Database\DatabaseSearchDriver;
 use Flarum\User\Event\LoggedOut;
 use Flarum\User\Event\RegisteringFromProvider;
-use Flarum\User\Filter\UserFilterer;
 use Flarum\User\Search\UserSearcher;
 use FoF\Extend\Events\OAuthLoginSuccessful;
 
@@ -45,16 +46,15 @@ return [
     (new Extend\Routes('forum'))
         ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
 
-    (new Extend\Routes('api'))
-        ->get('/users/{id}/linked-accounts', 'users.provider.list', Api\Controllers\ListProvidersController::class)
-        ->get('/linked-accounts', 'user.provider.list', Api\Controllers\ListProvidersController::class)
-        ->delete('/linked-accounts/{id}', 'users.provider.delete', Api\Controllers\DeleteProviderLinkController::class),
+    new Extend\ApiResource(Api\Resource\ProviderResource::class),
 
     (new Extend\ServiceProvider())
         ->register(OAuthServiceProvider::class),
 
-    (new Extend\ApiSerializer(ForumSerializer::class))
-        ->attributes(Api\AddForumAttributes::class),
+    (new Extend\ApiResource(Resource\ForumResource::class))
+        ->fields(Api\AddForumAttributes::class),
+    (new Extend\ApiResource(Resource\UserResource::class))
+        ->fields(Api\AddUserAttributes::class),
 
     (new Extend\Settings())
         ->default('fof-oauth.only_icons', false)
@@ -74,20 +74,14 @@ return [
         ->listen(LoggedOut::class, Listeners\HandleLogout::class)
         ->subscribe(Listeners\ClearOAuthCache::class),
 
-    (new Extend\ApiSerializer(CurrentUserSerializer::class))
-        ->attributes(Api\CurrentUserAttributes::class),
-
-    (new Extend\Filter(UserFilterer::class))
-        ->addFilter(Query\SsoIdFilterGambit::class),
-
-    (new Extend\SimpleFlarumSearch(UserSearcher::class))
-        ->addGambit(Query\SsoIdFilterGambit::class),
-
     (new Extend\Conditional())
         ->whenExtensionEnabled('flarum-gdpr', fn () => [
-            (new Extend\ApiSerializer(ForumSerializer::class))
-                ->attribute('passwordlessSignUp', function (ForumSerializer $serializer) {
-                    return !$serializer->getActor()->isGuest() && $serializer->getActor()->loginProviders()->count() > 0;
-                }),
+            (new Extend\ApiResource(Resource\ForumResource::class))
+                ->fields(fn () => [
+                    Schema\Str::make('passwordlessSignUp')
+                        ->get(fn ($model, Context $context) => !$context->getActor()->isGuest() && $context->getActor()->loginProviders()->count() > 0),
+                ]),
         ]),
+    (new Extend\SearchDriver(DatabaseSearchDriver::class))
+        ->addFilter(UserSearcher::class, Query\SsoIdFilter::class),
 ];
