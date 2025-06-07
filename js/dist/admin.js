@@ -23,8 +23,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var flarum_admin_components_ExtensionPage__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(flarum_admin_components_ExtensionPage__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var flarum_common_components_Icon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! flarum/common/components/Icon */ "flarum/common/components/Icon");
 /* harmony import */ var flarum_common_components_Icon__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(flarum_common_components_Icon__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var flarum_common_utils_ItemList__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! flarum/common/utils/ItemList */ "flarum/common/utils/ItemList");
-/* harmony import */ var flarum_common_utils_ItemList__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(flarum_common_utils_ItemList__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var flarum_common_components_Badge__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! flarum/common/components/Badge */ "flarum/common/components/Badge");
+/* harmony import */ var flarum_common_components_Badge__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(flarum_common_components_Badge__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var flarum_common_utils_ItemList__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! flarum/common/utils/ItemList */ "flarum/common/utils/ItemList");
+/* harmony import */ var flarum_common_utils_ItemList__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(flarum_common_utils_ItemList__WEBPACK_IMPORTED_MODULE_6__);
+
 
 
 
@@ -81,7 +84,7 @@ class AuthSettingsPage extends (flarum_admin_components_ExtensionPage__WEBPACK_I
     })), this.submitButton())))];
   }
   providerSettingsItems() {
-    const items = new (flarum_common_utils_ItemList__WEBPACK_IMPORTED_MODULE_5___default())();
+    const items = new (flarum_common_utils_ItemList__WEBPACK_IMPORTED_MODULE_6___default())();
     flarum_admin_app__WEBPACK_IMPORTED_MODULE_0___default().data['fof-oauth'].map(provider => {
       const {
         name
@@ -89,6 +92,8 @@ class AuthSettingsPage extends (flarum_admin_components_ExtensionPage__WEBPACK_I
       const enabled = !!Number(this.setting("fof-oauth.".concat(name))());
       const showSettings = !!this.showing[name];
       const callbackUrl = "".concat(flarum_admin_app__WEBPACK_IMPORTED_MODULE_0___default().forum.attribute('baseUrl'), "/auth/").concat(name);
+      const groupId = this.setting("fof-oauth.".concat(name, ".group"))();
+      const selectedGroup = groupId ? flarum_admin_app__WEBPACK_IMPORTED_MODULE_0___default().store.getById('groups', groupId) : null;
       items.add("fof-oauth.".concat(name), m("div", {
         className: "Provider ".concat(enabled ? 'enabled' : 'disabled', " ").concat(showSettings && 'showing')
       }, m("div", {
@@ -99,7 +104,11 @@ class AuthSettingsPage extends (flarum_admin_components_ExtensionPage__WEBPACK_I
         label: m("div", null, m((flarum_common_components_Icon__WEBPACK_IMPORTED_MODULE_4___default()), {
           name: provider.icon
         }), m("span", null, flarum_admin_app__WEBPACK_IMPORTED_MODULE_0___default().translator.trans("fof-oauth.lib.providers.".concat(name))))
-      }), m((flarum_common_components_Button__WEBPACK_IMPORTED_MODULE_1___default()), {
+      }), enabled && selectedGroup && m("div", {
+        className: "Provider--group"
+      }, m((flarum_common_components_Badge__WEBPACK_IMPORTED_MODULE_5___default()), {
+        icon: selectedGroup.icon() || 'fas fa-user-group'
+      }), selectedGroup.namePlural()), m((flarum_common_components_Button__WEBPACK_IMPORTED_MODULE_1___default()), {
         className: "Button Button--rounded ".concat(this.showing[name] && 'active'),
         onclick: () => this.showing[name] = !showSettings,
         "aria-label": flarum_admin_app__WEBPACK_IMPORTED_MODULE_0___default().translator.trans('fof-oauth.admin.settings_accessibility_label', {
@@ -136,7 +145,7 @@ class AuthSettingsPage extends (flarum_admin_components_ExtensionPage__WEBPACK_I
     return groups.filter(group => !['2', '3'].includes(group.id())); // Exclude the "Guests" and "Members" groups
   }
   customProviderSettings(name) {
-    const items = new (flarum_common_utils_ItemList__WEBPACK_IMPORTED_MODULE_5___default())();
+    const items = new (flarum_common_utils_ItemList__WEBPACK_IMPORTED_MODULE_6___default())();
 
     // Add group selection dropdown
     items.add('group', m("div", {
@@ -317,6 +326,17 @@ module.exports = flarum.reg.get('core', 'admin/app');
 
 "use strict";
 module.exports = flarum.reg.get('core', 'admin/components/ExtensionPage');
+
+/***/ }),
+
+/***/ "flarum/common/components/Badge":
+/*!********************************************************************!*\
+  !*** external "flarum.reg.get('core', 'common/components/Badge')" ***!
+  \********************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = flarum.reg.get('core', 'common/components/Badge');
 
 /***/ }),
 

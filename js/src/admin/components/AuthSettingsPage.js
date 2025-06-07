@@ -3,6 +3,7 @@ import Button from 'flarum/common/components/Button';
 import Dropdown from 'flarum/common/components/Dropdown';
 import ExtensionPage from 'flarum/admin/components/ExtensionPage';
 import Icon from 'flarum/common/components/Icon';
+import Badge from 'flarum/common/components/Badge';
 import ItemList from 'flarum/common/utils/ItemList';
 
 export default class AuthSettingsPage extends ExtensionPage {
@@ -83,6 +84,9 @@ export default class AuthSettingsPage extends ExtensionPage {
       const showSettings = !!this.showing[name];
       const callbackUrl = `${app.forum.attribute('baseUrl')}/auth/${name}`;
 
+      const groupId = this.setting(`fof-oauth.${name}.group`)();
+      const selectedGroup = groupId ? app.store.getById('groups', groupId) : null;
+
       items.add(
         `fof-oauth.${name}`,
         <div className={`Provider ${enabled ? 'enabled' : 'disabled'} ${showSettings && 'showing'}`}>
@@ -97,6 +101,14 @@ export default class AuthSettingsPage extends ExtensionPage {
                 </div>
               ),
             })}
+
+            {enabled && selectedGroup && (
+              <div className="Provider--group">
+                {/*<Icon name={selectedGroup.icon() || 'fas fa-user-group'} />*/}
+                <Badge icon={selectedGroup.icon() || 'fas fa-user-group'} />
+                {selectedGroup.namePlural()}
+              </div>
+            )}
 
             <Button
               className={`Button Button--rounded ${this.showing[name] && 'active'}`}

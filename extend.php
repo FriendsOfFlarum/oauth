@@ -74,10 +74,6 @@ return [
         ->listen(LoggedOut::class, Listeners\HandleLogout::class)
         ->subscribe(Listeners\ClearOAuthCache::class),
 
-    //    // @TODO: Replace with the new implementation https://docs.flarum.org/2.x/extend/api#extending-api-resources
-    //    (new Extend\ApiSerializer(CurrentUserSerializer::class))
-    //        ->attributes(Api\CurrentUserAttributes::class),
-
     (new Extend\Conditional())
         ->whenExtensionEnabled('flarum-gdpr', fn () => [
             (new Extend\ApiResource(Resource\ForumResource::class))
