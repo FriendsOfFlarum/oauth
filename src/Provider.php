@@ -92,13 +92,14 @@ abstract class Provider
     {
         if (
             empty($url) ||
-            (int) $this->settings->get('fof-oauth.disable_avatars') ||
-            !filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN)
+            (int) $this->settings->get('fof-oauth.disable_avatars')
         ) {
             return;
         }
 
-        $registration->provideAvatar($url);
+        $registration->setPayload([
+           'avatarUrl' => $url,
+       ]);
     }
 
     // Set this value to `true` in your provider class if you wish to provide your own
