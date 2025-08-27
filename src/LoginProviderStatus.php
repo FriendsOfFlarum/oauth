@@ -66,7 +66,7 @@ class LoginProviderStatus
      */
     public $lastLogin;
 
-    public static function build(string $name, string $icon, int $priority, User $user, LoginProvider $provider = null, bool $orphaned = false)
+    public static function build(string $name, string $icon, int $priority, User $user, ?LoginProvider $provider = null, bool $orphaned = false)
     {
         $status = new self();
 
