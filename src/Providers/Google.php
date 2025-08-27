@@ -67,7 +67,8 @@ class Google extends Provider
         $registration
             ->provideTrustedEmail($email)
             ->suggestUsername($user->getName())
-            ->provideAvatar($user->getAvatar())
             ->setPayload($user->toArray());
+
+        $this->provideAvatar($registration, $user->getAvatar());
     }
 }
