@@ -98,8 +98,8 @@ abstract class Provider
         }
 
         $registration->setPayload([
-           'avatarUrl' => $url,
-       ]);
+            'avatarUrl' => $url,
+        ]);
     }
 
     // Set this value to `true` in your provider class if you wish to provide your own

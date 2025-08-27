@@ -78,7 +78,7 @@ class AssignToUser
 
     /**
      * Copied from Flarum 2.x, MIT licensed.
-     * https://github.com/flarum/framework/blob/a46ce07255219093fb6f77e16ea7c7108a5f61aa/framework/core/src/Api/Resource/UserResource.php#L432-L447
+     * https://github.com/flarum/framework/blob/a46ce07255219093fb6f77e16ea7c7108a5f61aa/framework/core/src/Api/Resource/UserResource.php#L432-L447.
      */
     private function retrieveAvatarFromUrl(string $url): ?string
     {
