@@ -14,6 +14,7 @@ namespace FoF\OAuth;
 use Flarum\Forum\Auth\Registration;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Errors\AuthenticationException;
+use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
 
 abstract class Provider
@@ -97,9 +98,10 @@ abstract class Provider
             return;
         }
 
-        $registration->setPayload([
-            'avatarUrl' => $url,
-        ]);
+        $payload = (array) ($registration->getPayload() ?? []);
+        Arr::set($payload, 'avatarUrl', $url);
+
+        $registration->setPayload($payload);
     }
 
     // Set this value to `true` in your provider class if you wish to provide your own

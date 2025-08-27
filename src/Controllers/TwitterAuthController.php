@@ -78,11 +78,7 @@ class TwitterAuthController implements RequestHandlerInterface
     public function work(ServerRequestInterface $request): ResponseInterface
     {
         $redirectUri = $this->url->to('forum')->route('auth.twitter');
-
-        /**
-         * @var \League\OAuth1\Client\Server\Twitter $server
-         */
-        $server = $this->twitter->provider($redirectUri);
+        $server = $this->twitter->server($redirectUri);
 
         /** @var Store $session */
         $session = $request->getAttribute('session');

@@ -65,7 +65,9 @@ class AssignToUser
 
         // Use our own custom fetching method instead of Flarum v1's (relies on allow_url_fopen being enabled).
         // TODO: Remove this for Flarum v2, which uses below Guzzle-based method and upgrades to Intervention Image v3.
-        if ($avatarUrl) {
+
+        // Check if avatars are allowed for consistency with AssignToUser listener.
+        if ($avatarUrl && !(int) $this->settings->get('fof-oauth.disable_avatars')) {
             $urlContents = $this->retrieveAvatarFromUrl($avatarUrl);
 
             if ($urlContents !== null) {
@@ -85,7 +87,7 @@ class AssignToUser
         $client = new Client();
 
         try {
-            $response = $client->get($url);
+            $response = $client->get($url, ['timeout' => 5]);
         } catch (\Exception $ignored) {
             return null;
         }
