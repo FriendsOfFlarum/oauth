@@ -64,8 +64,9 @@ class GitLab extends Provider
 
         $registration
             ->provideTrustedEmail($email)
-            ->provideAvatar($user->getAvatarUrl() ?: '')
             ->suggestUsername($user->getUsername() ?: '')
             ->setPayload($user->toArray());
+
+        $this->provideAvatar($registration, $user->getAvatarUrl());
     }
 }

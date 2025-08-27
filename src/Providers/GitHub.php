@@ -63,8 +63,9 @@ class GitHub extends Provider
         $registration
             ->provideTrustedEmail($email)
             ->suggestUsername($user->getNickname() ?: '')
-            ->provideAvatar(Arr::get($user->toArray(), 'avatar_url', ''))
             ->setPayload($user->toArray());
+
+        $this->provideAvatar($registration, Arr::get($user->toArray(), 'avatar_url'));
     }
 
     private function getEmailFromApi(string $token)

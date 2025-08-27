@@ -11,6 +11,8 @@
 
 namespace FoF\OAuth\Providers;
 
+use Flarum\Forum\Auth\Registration;
+use FoF\OAuth\Errors\AuthenticationException;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 
@@ -42,5 +44,33 @@ class Twitter extends Provider
     public function provider(string $redirectUri): ?AbstractProvider
     {
         return null;
+    }
+
+    public function server(string $redirectUri): \League\OAuth1\Client\Server\Twitter
+    {
+        return new \League\OAuth1\Client\Server\Twitter([
+            'identifier' => $this->getSetting('api_key'),
+            'secret' => $this->getSetting('api_secret'),
+            'callback_uri' => $redirectUri,
+        ]);
+    }
+
+    /**
+     * @throws AuthenticationException
+     */
+    public function suggestions(Registration $registration, $user, string $token)
+    {
+        $email = $user->email;
+
+        if (empty($email)) {
+            throw new AuthenticationException('invalid_email');
+        }
+
+        $registration
+            ->provideTrustedEmail($email)
+            ->suggestUsername($user->nickname ?: '')
+            ->setPayload(get_object_vars($user));
+
+        $this->provideAvatar($registration, str_replace('_normal', '', $user->imageUrl));
     }
 }
