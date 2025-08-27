@@ -21,6 +21,19 @@ By default these providers are included:
 
 This extension provides the ability to view the status of linked OAuth providers (intended for admin and/or moderator use). In order for this to function correctly, you must also set the permission `Moderate Access Tokens` to at least the same group as you require for `Moderate user's linked accounts`.
 
+### Group Assignment
+
+You can configure each OAuth provider to automatically assign users to a specific group when they register. This is useful for tracking which provider users signed up with or for granting specific permissions based on the authentication method.
+
+To configure group assignment:
+1. Go to the extension settings
+2. Enable the desired OAuth provider
+3. Click the settings icon for that provider
+4. Select a group from the "Assign Group" dropdown
+5. Save your changes
+
+Users who register through that provider will automatically be assigned to the selected group.
+
 ### Additional providers
 
 Additional OAuth providers are available for this extension. Here's a handy list of known extensions, let us know if you know of any more and we'll get them added!
@@ -29,7 +42,7 @@ Additional OAuth providers are available for this extension. Here's a handy list
 - [Apple](https://extiverse.com/extension/blomstra/oauth-apple)
 - [Slack](https://extiverse.com/extension/blomstra/oauth-slack)
 - [Line](https://extiverse.com/extension/ianm/oauth-line)
-- [Microsoft](https://github.com/imorland/flarum-ext-oauth-microsoft) *experimental
+- [Microsoft](https://flarum.org/extension/xrh0905/oauth-microsoft)
 - [Twitch](https://github.com/imorland/flarum-ext-oauth-twitch)
 - [Auth0](https://extiverse.com/extension/lodge104/flarum-ext-oauth-auth0)
 

@@ -14,6 +14,7 @@ namespace FoF\OAuth\Controllers;
 use Flarum\Forum\Auth\Registration;
 use Flarum\Http\Exception\RouteNotFoundException;
 use FoF\OAuth\Controller;
+use FoF\OAuth\Events\SettingSuggestions;
 use FoF\OAuth\Provider;
 use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
@@ -78,5 +79,9 @@ class AuthController extends Controller
     protected function setSuggestions(Registration $registration, $user, string $token)
     {
         $this->provider->suggestions($registration, $user, $token);
+
+        $this->events->dispatch(
+            new SettingSuggestions($this->getProviderName(), $registration, $user, $token)
+        );
     }
 }

@@ -12,6 +12,7 @@
 namespace FoF\OAuth;
 
 use Flarum\Foundation\AbstractServiceProvider;
+use Flarum\Foundation\Config;
 use Flarum\Http\RouteCollection;
 use Flarum\Http\RouteHandlerFactory;
 use Illuminate\Contracts\Cache\Store as Cache;
@@ -44,8 +45,15 @@ class OAuthServiceProvider extends AbstractServiceProvider
     {
         /** @var Cache $cache */
         $cache = $this->container->make(Cache::class);
+        /** @var Config $config */
+        $config = $this->container->make(Config::class);
 
-        $this->container->singleton('fof-oauth.providers.forum', function () use ($cache) {
+        $this->container->singleton('fof-oauth.providers.forum', function () use ($cache, $config) {
+            // If we're in debug mode, don't cache the providers, but directly return them.
+            if ($config->inDebugMode()) {
+                return $this->mapProviders();
+            }
+
             $cacheKey = 'fof-oauth.providers.forum';
 
             $data = $cache->get($cacheKey);
@@ -57,7 +65,12 @@ class OAuthServiceProvider extends AbstractServiceProvider
             return $data;
         });
 
-        $this->container->singleton('fof-oauth.providers.admin', function () use ($cache) {
+        $this->container->singleton('fof-oauth.providers.admin', function () use ($cache, $config) {
+            // If we're in debug mode, don't cache the providers, but directly return them.
+            if ($config->inDebugMode()) {
+                return $this->mapProviders(true);
+            }
+
             $cacheKey = 'fof-oauth.providers.admin';
 
             $data = $cache->get($cacheKey);

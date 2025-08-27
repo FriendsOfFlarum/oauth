@@ -16,6 +16,7 @@ use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use Flarum\Frontend\Document;
 use Flarum\User\Event\LoggedOut;
+use Flarum\User\Event\RegisteringFromProvider;
 use Flarum\User\Filter\UserFilterer;
 use Flarum\User\Search\UserSearcher;
 use FoF\Extend\Events\OAuthLoginSuccessful;
@@ -68,6 +69,7 @@ return [
         ->default('fof-oauth.log-oauth-errors', false),
 
     (new Extend\Event())
+        ->listen(RegisteringFromProvider::class, Listeners\AssignGroupToUser::class)
         ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class)
         ->listen(LoggedOut::class, Listeners\HandleLogout::class)
         ->subscribe(Listeners\ClearOAuthCache::class),
@@ -80,4 +82,12 @@ return [
 
     (new Extend\SimpleFlarumSearch(UserSearcher::class))
         ->addGambit(Query\SsoIdFilterGambit::class),
+
+    (new Extend\Conditional())
+        ->whenExtensionEnabled('flarum-gdpr', fn () => [
+            (new Extend\ApiSerializer(ForumSerializer::class))
+                ->attribute('passwordlessSignUp', function (ForumSerializer $serializer) {
+                    return !$serializer->getActor()->isGuest() && $serializer->getActor()->loginProviders()->count() > 0;
+                }),
+        ]),
 ];
