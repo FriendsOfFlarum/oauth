@@ -82,21 +82,23 @@ abstract class Provider
     /**
      * Provide the avatar to the registration if possible.
      * Ignores input URL if avatars are disabled or if `allow_url_fopen` is off.
+     *
      * @param Registration $registration
-     * @param string|null $url
+     * @param string|null  $url
+     *
      * @return void
      */
     protected function provideAvatar(Registration $registration, ?string $url): void
     {
-       if (
-           empty($url) ||
-           (int) $this->settings->get('fof-oauth.disable_avatars') ||
-           !filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN)
-       ) {
-           return;
-       }
+        if (
+            empty($url) ||
+            (int) $this->settings->get('fof-oauth.disable_avatars') ||
+            !filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN)
+        ) {
+            return;
+        }
 
-       $registration->provideAvatar($url);
+        $registration->provideAvatar($url);
     }
 
     // Set this value to `true` in your provider class if you wish to provide your own

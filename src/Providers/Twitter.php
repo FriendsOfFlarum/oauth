@@ -49,8 +49,8 @@ class Twitter extends Provider
     public function server(string $redirectUri): \League\OAuth1\Client\Server\Twitter
     {
         return new \League\OAuth1\Client\Server\Twitter([
-            'identifier' => $this->getSetting('api_key'),
-            'secret' => $this->getSetting('api_secret'),
+            'identifier'   => $this->getSetting('api_key'),
+            'secret'       => $this->getSetting('api_secret'),
             'callback_uri' => $redirectUri,
         ]);
     }
