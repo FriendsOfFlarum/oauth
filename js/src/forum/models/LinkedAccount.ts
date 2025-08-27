@@ -30,10 +30,10 @@ export default class LinkedAccount extends Model {
   }
 
   firstLogin() {
-    return Model.attribute('firstLogin', Model.transformDate).call(this);
+    return Model.attribute<Date, string>('firstLogin', Model.transformDate).call(this);
   }
 
   lastLogin() {
-    return Model.attribute('lastLogin', Model.transformDate).call(this);
+    return Model.attribute<Date, string>('lastLogin', Model.transformDate).call(this);
   }
 }
