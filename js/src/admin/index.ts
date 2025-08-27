@@ -19,5 +19,5 @@ app.initializers.add('fof/oauth', () => {
     );
 });
 
-// (Potentially) Needed for backwards compatibility
+// Needed for backwards compatibility
 export { AuthSettingsPage, ConfigureWithOAuthPage, ConfigureWithOAuthButton };
