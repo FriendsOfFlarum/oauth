@@ -13,7 +13,7 @@ export default class AuthSettingsPage extends ExtensionPage {
   }
 
   content() {
-    return [
+    return (
       <div className="container">
         <div className="AuthSettingsPage">
           <div className="Form">
@@ -70,8 +70,8 @@ export default class AuthSettingsPage extends ExtensionPage {
             {this.submitButton()}
           </div>
         </div>
-      </div>,
-    ];
+      </div>
+    );
   }
 
   providerSettingsItems() {
