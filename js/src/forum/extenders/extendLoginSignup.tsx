@@ -28,10 +28,10 @@ export default function () {
 
   extend(LogInButtons.prototype, 'items', function (items: ItemList<Mithril.Children>) {
     const onlyIcons = app.forum.attribute<boolean>('fof-oauth.only_icons');
-    const enabledOAuthProviders = app.forum.attribute<OAuthProvider[]>('fof-oauth').filter(Boolean);
+    const enabledOAuthProviders = app.forum.attribute<OAuthProvider[]>('fof-oauth')
+      .filter((provider): provider is NonNullable<OAuthProvider> => provider !== null);
 
     enabledOAuthProviders
-      .filter((provider): provider is NonNullable<OAuthProvider> => provider !== null)
       .forEach(({ name, icon, priority }) => {
         let className = `Button FoFLogInButton LogInButton--${name}`;
 
@@ -86,10 +86,7 @@ export default function () {
       m.redraw();
 
       // Refresh the list of providers
-      await this.store.find('linked-accounts');
-
-      // Get all linked accounts as an array
-      const newProviders = this.store.all('linked-accounts') as LinkedAccount[];
+      const newProviders = await this.store.find<LinkedAccount[]>('linked-accounts');
 
       // The store will contain an old version of the login provider (unlinked) that has
       // another ID than the new one (linked). We need to delete that one from the store
@@ -141,7 +138,7 @@ export default function () {
 
   extend(SignUpModal.prototype, 'fields', function (items: ItemList<unknown>) {
     // If a suggested username was not provided by the OAuth service, display some help text to the user.
-    if (!!this.attrs.token && !!!this.attrs.username) {
+    if (!!this.attrs.token && !this.attrs.username) {
       items.add(
         'username-help',
         <div>
