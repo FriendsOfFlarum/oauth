@@ -28,29 +28,29 @@ export default function () {
 
   extend(LogInButtons.prototype, 'items', function (items: ItemList<Mithril.Children>) {
     const onlyIcons = app.forum.attribute<boolean>('fof-oauth.only_icons');
-    const enabledOAuthProviders = app.forum.attribute<OAuthProvider[]>('fof-oauth')
+    const enabledOAuthProviders = app.forum
+      .attribute<OAuthProvider[]>('fof-oauth')
       .filter((provider): provider is NonNullable<OAuthProvider> => provider !== null);
 
-    enabledOAuthProviders
-      .forEach(({ name, icon, priority }) => {
-        let className = `Button FoFLogInButton LogInButton--${name}`;
+    enabledOAuthProviders.forEach(({ name, icon, priority }) => {
+      let className = `Button FoFLogInButton LogInButton--${name}`;
 
-        if (onlyIcons) {
-          className += ' Button--icon';
-        }
+      if (onlyIcons) {
+        className += ' Button--icon';
+      }
 
-        items.add(
-          name,
-          <div className={`LogInButtonContainer LogInButtonContainer--${name}`}>
-            <LogInButton className={className} icon={icon} path={`/auth/${name}`} disabled={app.fof_oauth_loginInProgress}>
-              {app.translator.trans(`fof-oauth.forum.log_in.with_${name}_button`, {
-                provider: app.translator.trans(`fof-oauth.forum.providers.${name}`),
-              })}
-            </LogInButton>
-          </div>,
-          priority
-        );
-      });
+      items.add(
+        name,
+        <div className={`LogInButtonContainer LogInButtonContainer--${name}`}>
+          <LogInButton className={className} icon={icon} path={`/auth/${name}`} disabled={app.fof_oauth_loginInProgress}>
+            {app.translator.trans(`fof-oauth.forum.log_in.with_${name}_button`, {
+              provider: app.translator.trans(`fof-oauth.forum.providers.${name}`),
+            })}
+          </LogInButton>
+        </div>,
+        priority
+      );
+    });
   });
 
   override(LogInButton.prototype, 'view', function (original, vnode: Mithril.VnodeDOM) {
@@ -88,21 +88,25 @@ export default function () {
       // Refresh the list of providers
       const newProviders = await this.store.find<LinkedAccount[]>('linked-accounts');
 
+      // Get the old IDs of the new providers (the one(s) that have just been linked)
+      const newProviderOldIds = newProviders.filter((p) => p.providerIdentifier() !== null).map((p) => `${app.session.user!.id()}-${p.name()}`);
+
       // The store will contain an old version of the login provider (unlinked) that has
       // another ID than the new one (linked). We need to delete that one from the store
       // so that the UI gets updated correctly.
 
-      // Find the old provider (one that has the same name as one of the new providers & has providerIdentifier===null)
-      const oldProvider = (this.store.all('linked-accounts') as LinkedAccount[])
-        // Find the providers that have not yet been linked (providerIdentifier is null)
-        .filter((p) => p.providerIdentifier() === null)
-        // Match it with one of the newly fetched providers by name
-        .find((p) => newProviders.some((np) => np.name() === p.name()));
+      // Find the old providers (match the old ID format: <userId>-<providerName>)
+      const oldProviders = newProviderOldIds
+        .map((oldId) => this.store.getById<LinkedAccount>('linked-accounts', oldId))
+        .filter((p): p is LinkedAccount => !!p);
 
-      if (oldProvider) {
-        // @ts-ignore
-        delete this.store.data['linked-accounts'][oldProvider.id()];
+      if (oldProviders.length) {
+        for (const oldProvider of oldProviders) {
+          // @ts-ignore
+          delete this.store.data['linked-accounts'][oldProvider.id()];
+        }
       } else {
+        // This may just be a signup/login flow, so reload the page to sign in the user.
         window.location.reload();
         return;
       }
