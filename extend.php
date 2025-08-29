@@ -69,7 +69,7 @@ return [
         ->default('fof-oauth.log-oauth-errors', false),
 
     (new Extend\Event())
-        ->listen(RegisteringFromProvider::class, Listeners\AssignGroupToUser::class)
+        ->listen(RegisteringFromProvider::class, Listeners\AssignToUser::class)
         ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class)
         ->listen(LoggedOut::class, Listeners\HandleLogout::class)
         ->subscribe(Listeners\ClearOAuthCache::class),

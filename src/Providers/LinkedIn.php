@@ -70,9 +70,6 @@ class LinkedIn extends Provider
         ->suggestUsername($user->getFirstName())
         ->setPayload($user->toArray());
 
-        $avatar = $user->getImageUrl();
-        if ($avatar) {
-            $registration->provideAvatar($avatar);
-        }
+        $this->provideAvatar($registration, $user->getImageUrl());
     }
 }

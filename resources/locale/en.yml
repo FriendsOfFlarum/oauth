@@ -15,6 +15,10 @@ fof-oauth:
       only_icons_label: Only show the Log In Button icons (alternative layout)
       update_email_from_provider_label: Update email address from provider
       update_email_from_provider_help: If enabled, the user's email address will be updated to match the one provided by the OAuth provider on each login to the forum. Not all providers provide the updated email, in which case this setting will not have any effect with those providers.
+      disable_avatars_label: Disable avatars from provider
+      disable_avatars_help: >
+        If enabled, the user's avatar will not be updated to match the provider's avatar on signup.
+        Note that this only affects future signups, and will not change the avatar of existing users.
       fullscreen_popup_label: Use Fullscreen Popup for OAuth
       fullscreen_popup_help: When enabled, the OAuth login will open in a fullscreen popup. If this is enabled, the width and height settings will be ignored.
       popup_width_label: OAuth Popup Width

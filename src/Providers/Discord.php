@@ -61,8 +61,9 @@ class Discord extends Provider
 
         $registration
             ->provideTrustedEmail($email)
-            ->provideAvatar($file)
             ->suggestUsername($user->getUsername() ?: '')
             ->setPayload($user->toArray());
+
+        $this->provideAvatar($registration, $file);
     }
 }

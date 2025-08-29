@@ -14,6 +14,7 @@ namespace FoF\OAuth;
 use Flarum\Forum\Auth\Registration;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Errors\AuthenticationException;
+use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
 
 abstract class Provider
@@ -77,6 +78,30 @@ abstract class Provider
         if ($email === null || empty($email)) {
             throw new AuthenticationException('invalid_email');
         }
+    }
+
+    /**
+     * Provide the avatar to the registration if possible.
+     * Ignores input URL if avatars are disabled or if `allow_url_fopen` is off.
+     *
+     * @param Registration $registration
+     * @param string|null  $url
+     *
+     * @return void
+     */
+    protected function provideAvatar(Registration $registration, ?string $url): void
+    {
+        if (
+            empty($url) ||
+            (int) $this->settings->get('fof-oauth.disable_avatars')
+        ) {
+            return;
+        }
+
+        $payload = (array) ($registration->getPayload() ?? []);
+        Arr::set($payload, 'avatarUrl', $url);
+
+        $registration->setPayload($payload);
     }
 
     // Set this value to `true` in your provider class if you wish to provide your own

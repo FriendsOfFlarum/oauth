@@ -25,7 +25,6 @@ use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use League\OAuth1\Client\Credentials\CredentialsException;
-use League\OAuth1\Client\Server\Twitter;
 use League\OAuth1\Client\Server\User;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -48,16 +47,19 @@ class TwitterAuthController implements RequestHandlerInterface
      */
     protected $url;
 
+    protected \FoF\OAuth\Providers\Twitter $twitter;
+
     /**
      * @param ResponseFactory             $response
      * @param SettingsRepositoryInterface $settings
      * @param UrlGenerator                $url
      */
-    public function __construct(ResponseFactory $response, SettingsRepositoryInterface $settings, UrlGenerator $url)
+    public function __construct(ResponseFactory $response, SettingsRepositoryInterface $settings, UrlGenerator $url, \FoF\OAuth\Providers\Twitter $twitter)
     {
         $this->response = $response;
         $this->settings = $settings;
         $this->url = $url;
+        $this->twitter = $twitter;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -76,12 +78,7 @@ class TwitterAuthController implements RequestHandlerInterface
     public function work(ServerRequestInterface $request): ResponseInterface
     {
         $redirectUri = $this->url->to('forum')->route('auth.twitter');
-
-        $server = new Twitter([
-            'identifier'   => $this->getSetting('api_key'),
-            'secret'       => $this->getSetting('api_secret'),
-            'callback_uri' => $redirectUri,
-        ]);
+        $server = $this->twitter->server($redirectUri);
 
         /** @var Store $session */
         $session = $request->getAttribute('session');
@@ -129,24 +126,9 @@ class TwitterAuthController implements RequestHandlerInterface
             'twitter',
             $user->uid,
             function (Registration $registration) use ($user) {
-                $this->setSuggestions($registration, $user);
+                $this->twitter->suggestions($registration, $user, '');
             }
         );
-    }
-
-    protected function setSuggestions(Registration $registration, User $user)
-    {
-        $email = $user->email;
-
-        if (empty($email)) {
-            throw new AuthenticationException('invalid_email');
-        }
-
-        $registration
-            ->provideTrustedEmail($email)
-            ->suggestUsername($user->nickname ?: '')
-            ->provideAvatar(str_replace('_normal', '', $user->imageUrl))
-            ->setPayload(get_object_vars($user));
     }
 
     protected function getSetting($key): ?string

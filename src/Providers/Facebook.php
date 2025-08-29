@@ -52,8 +52,9 @@ class Facebook extends Provider
 
         $registration
             ->provideTrustedEmail($email)
-            ->provideAvatar($user->getPictureUrl() ?: '')
             ->suggestUsername($user->getName() ?: '')
             ->setPayload($user->toArray());
+
+        $this->provideAvatar($registration, $user->getPictureUrl());
     }
 }
