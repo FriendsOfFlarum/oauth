@@ -9,17 +9,21 @@ import User from 'flarum/common/models/User';
 import ProviderInfo from './ProviderInfo';
 import extractText from 'flarum/common/utils/extractText';
 
-interface IAttrs extends ComponentAttrs {
+export interface ILinkStatusAttrs extends ComponentAttrs {
   provider: LinkedAccount;
   user: User;
 }
 
-export default class LinkStatus extends Component<IAttrs> {
+export interface LinkStatusState {
+  loading: boolean;
+}
+
+export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusState> {
   state = {
     loading: false,
   };
 
-  onbeforeupdate(vnode: Mithril.Vnode<IAttrs, this>) {
+  onbeforeupdate(vnode: Mithril.Vnode<ILinkStatusAttrs, this>) {
     super.onbeforeupdate(vnode);
     if (app.fof_oauth_linkingInProgress && app.fof_oauth_linkingProvider === this.attrs.provider.name()) {
       this.state.loading = true;
@@ -30,7 +34,7 @@ export default class LinkStatus extends Component<IAttrs> {
     }
   }
 
-  view(vnode: Mithril.Vnode<IAttrs, this>): Mithril.Children {
+  view(): Mithril.Children {
     return (
       <div className={`LinkedAccounts-Account LinkedAccounts-Account--${this.attrs.provider.name()}`}>
         {this.iconView()}

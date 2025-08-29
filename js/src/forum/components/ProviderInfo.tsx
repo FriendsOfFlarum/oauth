@@ -11,7 +11,7 @@ interface IProviderInfoAttrs {
 }
 
 export default class ProviderInfo extends Component<IProviderInfoAttrs> {
-  view(vnode: Mithril.Vnode<IProviderInfoAttrs, this>): Mithril.Children {
+  view(_vnode: Mithril.Vnode<IProviderInfoAttrs, this>): Mithril.Children {
     const { provider } = this.attrs;
 
     if (provider.orphaned()) {

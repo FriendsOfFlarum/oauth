@@ -3,20 +3,25 @@
   "version": "0.0.0",
   "private": true,
   "prettier": "@flarum/prettier-config",
-  "dependencies": {
+  "devDependencies": {
     "@flarum/prettier-config": "^1.0.0",
-    "flarum-tsconfig": "^1.0.2",
+    "flarum-tsconfig": "^1.0.3",
     "flarum-webpack-config": "^2.0.0",
+    "prettier": "^3.0.3",
+    "typescript-coverage-report": "^0.6.1",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "dev": "webpack --mode development --watch",
+    "analyze": "cross-env ANALYZER=true yarn run build",
     "build": "webpack --mode production",
+    "build-typings": "yarn run clean-typings && ([ -e src/@types ] && cp -r src/@types dist-typings/@types || true) && tsc && yarn run post-build-typings",
+    "check-typings": "tsc --noEmit --emitDeclarationOnly false",
+    "check-typings-coverage": "typescript-coverage-report",
+    "clean-typings": "npx rimraf dist-typings && mkdir dist-typings",
+    "dev": "webpack --mode development --watch",
     "format": "prettier --write src",
-    "format-check": "prettier --check src"
-  },
-  "devDependencies": {
-    "prettier": "^3.0.3"
+    "format-check": "prettier --check src",
+    "post-build-typings": "find dist-typings -type f -name '*.d.ts' -print0 | xargs -0 sed -i 's,../src/@types,@types,g'"
   }
 }

@@ -9,53 +9,65 @@ import SignUpModal from 'flarum/forum/components/SignUpModal';
 import ForumApplication from 'flarum/forum/ForumApplication';
 import { openOAuthPopup } from '../utils/popupUtils';
 
+import type LinkedAccount from '../models/LinkedAccount';
+import type Mithril from 'mithril';
+import type ItemList from 'flarum/common/utils/ItemList';
+
+export type OAuthProvider = {
+  name: string;
+  icon: string;
+  priority: number;
+} | null;
+
 export default function () {
-  extend(LogInButton, 'initAttrs', function (returnedValue, attrs) {
+  extend(LogInButton, 'initAttrs', function (_returnedValue, attrs) {
     attrs.onclick = function () {
       openOAuthPopup(app, attrs);
     };
   });
 
-  extend(LogInButtons.prototype, 'items', function (items) {
-    const onlyIcons = !!app.forum.attribute('fof-oauth.only_icons');
-    const buttons = app.forum.attribute('fof-oauth').filter(Boolean);
-    const googleButton = buttons.splice(buttons.indexOf(buttons.find((b) => b.name === 'google')), 1);
+  extend(LogInButtons.prototype, 'items', function (items: ItemList<Mithril.Children>) {
+    const onlyIcons = app.forum.attribute<boolean>('fof-oauth.only_icons');
+    const enabledOAuthProviders = app.forum.attribute<OAuthProvider[]>('fof-oauth')
+      .filter((provider): provider is NonNullable<OAuthProvider> => provider !== null);
 
-    buttons.concat(googleButton).forEach(({ name, icon, priority }) => {
-      let className = `Button FoFLogInButton LogInButton--${name}`;
+    enabledOAuthProviders
+      .forEach(({ name, icon, priority }) => {
+        let className = `Button FoFLogInButton LogInButton--${name}`;
 
-      // Google branding does not allow inline icon, so we'll keep the full button
-      if (onlyIcons && name !== 'google') {
-        className += ' Button--icon';
-      }
+        if (onlyIcons) {
+          className += ' Button--icon';
+        }
 
-      items.add(
-        name,
-        <div className={`LogInButtonContainer LogInButtonContainer--${name}`}>
-          <LogInButton className={className} icon={icon} path={`/auth/${name}`} disabled={app.fof_oauth_loginInProgress}>
-            {app.translator.trans(`fof-oauth.forum.log_in.with_${name}_button`, {
-              provider: app.translator.trans(`fof-oauth.forum.providers.${name}`),
-            })}
-          </LogInButton>
-        </div>,
-        priority
-      );
-    });
+        items.add(
+          name,
+          <div className={`LogInButtonContainer LogInButtonContainer--${name}`}>
+            <LogInButton className={className} icon={icon} path={`/auth/${name}`} disabled={app.fof_oauth_loginInProgress}>
+              {app.translator.trans(`fof-oauth.forum.log_in.with_${name}_button`, {
+                provider: app.translator.trans(`fof-oauth.forum.providers.${name}`),
+              })}
+            </LogInButton>
+          </div>,
+          priority
+        );
+      });
   });
 
-  override(LogInButton.prototype, 'view', function (orig, vnode) {
-    const onlyIcons = !!app.forum.attribute('fof-oauth.only_icons');
-    if (!onlyIcons) return orig(vnode);
+  override(LogInButton.prototype, 'view', function (original, vnode: Mithril.VnodeDOM) {
+    const onlyIcons = app.forum.attribute<boolean>('fof-oauth.only_icons');
+    if (!onlyIcons) return original(vnode);
 
-    const child = orig(vnode);
+    const child = original(vnode);
 
+    // @ts-ignore
     return <Tooltip text={extractText(child.children[1])}>{child}</Tooltip>;
   });
 
   extend(LogInButtons.prototype, 'view', function (vdom) {
-    const onlyIcons = !!app.forum.attribute('fof-oauth.only_icons');
+    const onlyIcons = app.forum.attribute<boolean>('fof-oauth.only_icons');
     if (!onlyIcons) return;
 
+    // @ts-ignore
     vdom.attrs.className += ' FoFLogInButtons--icons';
   });
 
@@ -74,29 +86,33 @@ export default function () {
       m.redraw();
 
       // Refresh the list of providers
-      const newProviders = await this.store.find('linked-accounts');
+      const newProviders = await this.store.find<LinkedAccount[]>('linked-accounts');
 
       // The store will contain an old version of the login provider (unlinked) that has
       // another ID than the new one (linked). We need to delete that one from the store
       // so that the UI gets updated correctly.
 
       // Find the old provider (one that has the same name as one of the new providers & has providerIdentifier===null)
-      const oldProvider = this.store
-        .all('linked-accounts')
+      const oldProvider = (this.store.all('linked-accounts') as LinkedAccount[])
         // Find the providers that have not yet been linked (providerIdentifier is null)
         .filter((p) => p.providerIdentifier() === null)
         // Match it with one of the newly fetched providers by name
         .find((p) => newProviders.some((np) => np.name() === p.name()));
 
       if (oldProvider) {
+        // @ts-ignore
         delete this.store.data['linked-accounts'][oldProvider.id()];
       } else {
         window.location.reload();
         return;
       }
 
+      const userId = app.session?.user?.id();
+
+      if (!userId) throw new Error('User ID not available');
+
       // Refresh the session user
-      await this.store.find('users', app.session.user.id());
+      await this.store.find('users', userId);
 
       app.fof_oauth_linkingInProgress = false;
       m.redraw();
@@ -106,21 +122,23 @@ export default function () {
     }
   };
 
-  extend(LogInModal.prototype, 'onbeforeupdate', function (vnode) {
+  extend(LogInModal.prototype, 'onbeforeupdate', function () {
     if (app.fof_oauth_loginInProgress) {
+      // @ts-ignore
       this.loading = true;
     }
   });
 
-  extend(SignUpModal.prototype, 'onbeforeupdate', function (vnode) {
+  extend(SignUpModal.prototype, 'onbeforeupdate', function () {
     if (app.fof_oauth_loginInProgress) {
+      // @ts-ignore
       this.loading = true;
     }
   });
 
-  extend(SignUpModal.prototype, 'fields', function (items) {
+  extend(SignUpModal.prototype, 'fields', function (items: ItemList<unknown>) {
     // If a suggested username was not provided by the OAuth service, display some help text to the user.
-    if (!!this.attrs.token && !!!this.attrs.username) {
+    if (!!this.attrs.token && !this.attrs.username) {
       items.add(
         'username-help',
         <div>
@@ -129,7 +147,5 @@ export default function () {
         35
       );
     }
-
-    return items;
   });
 }

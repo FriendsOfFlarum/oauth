@@ -3,6 +3,8 @@ import AuthSettingsPage from './components/AuthSettingsPage';
 import ConfigureWithOAuthPage from './components/ConfigureWithOAuthPage';
 import ConfigureWithOAuthButton from './components/ConfigureWithOAuthButton';
 
+export * from './components';
+
 app.initializers.add('fof/oauth', () => {
   app.extensionData
     .for('fof-oauth')
@@ -17,4 +19,5 @@ app.initializers.add('fof/oauth', () => {
     );
 });
 
+// Needed for backwards compatibility
 export { AuthSettingsPage, ConfigureWithOAuthPage, ConfigureWithOAuthButton };
