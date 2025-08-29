@@ -86,6 +86,9 @@ export default function () {
       m.redraw();
 
       // Refresh the list of providers
+      await this.store.find('linked-accounts');
+
+      // Get all linked accounts as an array
       const newProviders = this.store.all('linked-accounts') as LinkedAccount[];
 
       // The store will contain an old version of the login provider (unlinked) that has
