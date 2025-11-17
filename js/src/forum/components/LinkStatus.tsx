@@ -12,6 +12,7 @@ import LogInButton from 'flarum/forum/components/LogInButton';
 export interface ILinkStatusAttrs extends ComponentAttrs {
   provider: LinkedAccount;
   user: User;
+  refresh?: () => Promise<void>;
 }
 
 export interface LinkStatusState {
@@ -81,6 +82,7 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
           <LogInButton
             className={`Button FoFLogInButton LogInButton--${provider.name()}`}
             icon={provider.icon()}
+            provider={provider.name()}
             path={`/auth/${provider.name()}?linkTo=${user.id()}`}
             loading={this.state.loading}
           >
@@ -106,9 +108,8 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
     ) {
       this.state.loading = true;
       await provider.delete();
-      await app.store.find<LinkedAccount[]>('users/' + this.attrs.user.id() + '/linked-accounts', {});
+      await this.attrs.refresh?.();
       this.state.loading = false;
-      m.redraw();
     }
   }
 }

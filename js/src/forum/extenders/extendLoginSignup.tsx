@@ -19,15 +19,17 @@ export type OAuthProvider = {
 export default function () {
   extend(LogInButton, 'initAttrs', function (_returnedValue, attrs) {
     attrs.onclick = function () {
+      // Used to show a loading state in the Security page.
+      if (attrs.provider) app.fof_oauth_linkingProvider = attrs.provider;
+
       openOAuthPopup(app, attrs);
     };
   });
 
   extend(LogInButtons.prototype, 'items', function (items: ItemList<Mithril.Children>) {
     const onlyIcons = app.forum.attribute<boolean>('fof-oauth.only_icons');
-    const enabledOAuthProviders = app.forum
-      .attribute<OAuthProvider[]>('fof-oauth')
-      .filter((provider): provider is NonNullable<OAuthProvider> => provider !== null);
+    const enabledOAuthProviders =
+      app.forum.attribute<OAuthProvider[]>('fof-oauth')?.filter((provider): provider is NonNullable<OAuthProvider> => provider !== null) ?? [];
 
     enabledOAuthProviders.forEach(({ name, icon, priority }) => {
       let className = `Button FoFLogInButton LogInButton--${name}`;
@@ -68,7 +70,7 @@ export default function () {
     vdom.attrs.className += ' FoFLogInButtons--icons';
   });
 
-  extend('flarum/forum/ForumApplication', 'authenticationComplete', function (_, payload) {
+  extend(app, 'authenticationComplete', function (_, payload) {
     if (payload.loggedIn) {
       app.fof_oauth_loginInProgress = true;
       // This will automatically be reset, as authenticationComplete also triggers a window reload.
@@ -77,7 +79,7 @@ export default function () {
     }
   });
 
-  override('flarum/forum/ForumApplication', 'authenticationComplete', async function () {
+  app.linkingComplete = async function () {
     try {
       app.fof_oauth_linkingInProgress = true;
       m.redraw();
@@ -86,7 +88,7 @@ export default function () {
       const newProviders = await this.store.find<LinkedAccount[]>('linked-accounts');
 
       // Get the old IDs of the new providers (the one(s) that have just been linked)
-      const newProviderOldIds = newProviders.filter((p) => p.providerIdentifier() !== null).map((p) => `${app.session.user!.id()}-${p.name()}`);
+      const newProviderOldIds = newProviders.filter((p) => p.identifier() !== null).map((p) => `${app.session.user!.id()}-${p.name()}`);
 
       // The store will contain an old version of the login provider (unlinked) that has
       // another ID than the new one (linked). We need to delete that one from the store
@@ -118,10 +120,11 @@ export default function () {
       app.fof_oauth_linkingInProgress = false;
       m.redraw();
     } catch (error) {
+      console.error('An error occurred while refreshing linked accounts after OAuth linking:', error);
       app.fof_oauth_linkingInProgress = false;
       m.redraw();
     }
-  });
+  };
 
   extend('flarum/forum/components/LogInModal', 'onbeforeupdate', function () {
     if (app.fof_oauth_loginInProgress) {
