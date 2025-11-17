@@ -20,16 +20,6 @@ use League\OAuth2\Client\Provider\AbstractProvider;
 class LinkedIn extends Provider
 {
     /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
-
-    public function __construct(SettingsRepositoryInterface $settings)
-    {
-        $this->settings = $settings;
-    }
-
-    /**
      * @var LinkedInProvider
      */
     protected $provider;
