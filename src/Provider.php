@@ -19,7 +19,8 @@ use League\OAuth2\Client\Provider\AbstractProvider;
 abstract class Provider
 {
     public function __construct(
-        protected SettingsRepositoryInterface $settings)
+        protected SettingsRepositoryInterface $settings
+    )
     {
     }
 

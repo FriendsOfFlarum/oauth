@@ -16,8 +16,6 @@ use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\AvatarUploader;
 use Flarum\User\Event\RegisteringFromProvider;
 use Flarum\User\User;
-use GuzzleHttp\Client;
-use Illuminate\Support\Arr;
 use Intervention\Image\ImageManager;
 
 class AssignToUser
