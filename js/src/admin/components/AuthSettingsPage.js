@@ -128,26 +128,26 @@ export default class AuthSettingsPage extends ExtensionPage {
           </div>
 
           <div className="Provider--settings" inert={!showSettings}>
-            <div>
-              <p>
-                {app.translator.trans(`fof-oauth.admin.settings.providers.${name}.description`, {
-                  link: (
-                    <a href={provider.link} target="_blank">
-                      {provider.link}
-                    </a>
-                  ),
-                })}
-              </p>
-              <p>
-                {app.translator.trans(`fof-oauth.admin.settings.providers.callback_url_text`, {
-                  url: (
-                    <a href={callbackUrl} target="_blank">
-                      {callbackUrl}
-                    </a>
-                  ),
-                })}
-              </p>
+            <p>
+              {app.translator.trans(`fof-oauth.admin.settings.providers.${name}.description`, {
+                link: (
+                  <a href={provider.link} target="_blank">
+                    {provider.link}
+                  </a>
+                ),
+              })}
+            </p>
+            <p>
+              {app.translator.trans(`fof-oauth.admin.settings.providers.callback_url_text`, {
+                url: (
+                  <a href={callbackUrl} target="_blank">
+                    {callbackUrl}
+                  </a>
+                ),
+              })}
+            </p>
 
+            <div class="Form">
               {Object.keys(provider.fields).map((field) =>
                 this.buildSettingComponent({
                   type: 'string',
