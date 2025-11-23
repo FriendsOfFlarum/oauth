@@ -88,7 +88,7 @@ class OAuthServiceProvider extends AbstractServiceProvider
         $providers = $this->container->tagged('fof-oauth.providers');
 
         if ($admin) {
-            return array_map(function (Provider $provider) {
+            return array_map(static function (Provider $provider) {
                 return [
                     'name'   => $provider->name(),
                     'icon'   => $provider->icon(),
@@ -98,7 +98,7 @@ class OAuthServiceProvider extends AbstractServiceProvider
             }, iterator_to_array($providers));
         }
 
-        return array_map(function (Provider $provider) {
+        return array_map(static function (Provider $provider) {
             if (!$provider->enabled()) {
                 return null;
             }

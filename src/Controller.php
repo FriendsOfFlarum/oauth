@@ -12,6 +12,7 @@
 namespace FoF\OAuth;
 
 use Exception;
+use Flarum\Foundation\ValidationException;
 use Flarum\Http\Exception\RouteNotFoundException;
 use FoF\Extend\Controllers\AbstractOAuthController;
 use FoF\OAuth\Errors\AuthenticationException;
@@ -66,6 +67,11 @@ abstract class Controller extends AbstractOAuthController
 
             if ($e instanceof IdentityProviderException || $e->getMessage() === 'Invalid state') {
                 throw new AuthenticationException($e->getMessage());
+            }
+
+            // Re-throw validation exceptions as authentication exceptions to avoid 500 errors
+            if ($e instanceof ValidationException) {
+                throw new AuthenticationException($e->getMessage(), previous: $e);
             }
 
             throw $e;

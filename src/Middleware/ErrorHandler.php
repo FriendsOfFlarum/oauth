@@ -50,9 +50,8 @@ class ErrorHandler implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if ($this->debugMode) {
-            return $handler->handle($request);
-        }
+        // Previously, we would not use this custom error handler in debug mode to show the full exception.
+        // However, it doesn't seem to be working as expected, so we can just handle it ourselves.
 
         try {
             return $handler->handle($request);
@@ -62,11 +61,15 @@ class ErrorHandler implements MiddlewareInterface
 
             $this->report($exception);
 
+            if ($this->debugMode) {
+                resolve('log')->error($exception);
+            }
+
             return new HtmlResponse($view->render(), 401);
         }
     }
 
-    protected function getMessage(AuthenticationException $exception)
+    protected function getMessage(AuthenticationException $exception): string
     {
         $code = $exception->getShortCode();
         $key = "fof-oauth.forum.error.$code";
@@ -77,7 +80,7 @@ class ErrorHandler implements MiddlewareInterface
             : $translation;
     }
 
-    protected function report(AuthenticationException $e)
+    protected function report(AuthenticationException $e): void
     {
         if ($e->shouldBeReported()) {
             foreach ($this->reporters as $reporter) {
