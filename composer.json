@@ -29,15 +29,17 @@
     ],
     "require": {
         "php": "^8.2",
-        "flarum/core": "^2.0.0-beta",
+        "flarum/core": "^2.0.0",
         "league/oauth1-client": "^1.10.1",
         "league/oauth2-facebook": "^2.2.0",
         "league/oauth2-github": "^3.1.0",
         "league/oauth2-google": "^4.0.1",
         "omines/oauth2-gitlab": "^3.3.0",
         "wohali/oauth2-discord-new": "^1.2.1",
-        "fof/extend": "dev-ds/2.0"
+        "fof/extend": "^2.0.0"
     },
+    "minimum-stability": "beta",
+    "prefer-stable": true,
     "replace": {
         "flarum/auth-facebook": "*",
         "flarum/auth-github": "*",
