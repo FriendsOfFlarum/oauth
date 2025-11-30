@@ -26,44 +26,32 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class ErrorHandler implements MiddlewareInterface
 {
-    /**
-     * @var ViewFactory
-     */
-    protected $view;
+    protected bool $debugMode;
 
-    /**
-     * @var TranslatorInterface
-     */
-    protected $translator;
+    protected iterable $reporters;
 
-    protected $debugMode;
-
-    protected $reporters;
-
-    public function __construct(ViewFactory $view, TranslatorInterface $translator, Config $config, Container $container)
+    public function __construct(
+        protected ViewFactory $view,
+        protected TranslatorInterface $translator,
+        Config $config,
+        Container $container
+    )
     {
-        $this->view = $view;
-        $this->translator = $translator;
-        $this->debugMode = Arr::get($config, 'debug', true);
+        $this->debugMode = (bool) Arr::get($config, 'debug', true);
         $this->reporters = $container->tagged(Reporter::class);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Previously, we would not use this custom error handler in debug mode to show the full exception.
-        // However, it doesn't seem to be working as expected, so we can just handle it ourselves.
-
         try {
             return $handler->handle($request);
         } catch (AuthenticationException $exception) {
+            // Handle service and validation exceptions with proper error page.
             $view = $this->view->make('flarum.forum::error.default')
                 ->with('message', $this->getMessage($exception));
 
+            // This will log the error if it needs to be reported.
             $this->report($exception);
-
-            if ($this->debugMode) {
-                resolve('log')->error($exception);
-            }
 
             return new HtmlResponse($view->render(), 401);
         }

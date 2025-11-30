@@ -56,6 +56,6 @@ class AuthenticationException extends Exception implements KnownError
     {
         $code = $this->getShortCode();
 
-        return $code !== 'invalid_state' && $code !== 'bad_verification_code' && $code !== 'already_linked';
+        return !in_array($code, ['invalid_state', 'bad_verification_code', 'already_linked']);
     }
 }
