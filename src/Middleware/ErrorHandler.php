@@ -35,8 +35,7 @@ class ErrorHandler implements MiddlewareInterface
         protected TranslatorInterface $translator,
         Config $config,
         Container $container
-    )
-    {
+    ) {
         $this->debugMode = (bool) Arr::get($config, 'debug', true);
         $this->reporters = $container->tagged(Reporter::class);
     }
