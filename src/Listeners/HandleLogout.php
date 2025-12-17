@@ -20,17 +20,12 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class HandleLogout
 {
-    /**
-     * @var Cache
-     */
-    protected $cache;
-
-    public function __construct(Cache $cache)
-    {
-        $this->cache = $cache;
+    public function __construct(
+        protected Cache $cache
+    ) {
     }
 
-    public function handle(LoggedOut $event)
+    public function handle(LoggedOut $event): void
     {
         $user = $event->user;
 

@@ -19,11 +19,9 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class BindRequest implements MiddlewareInterface
 {
-    protected $container;
-
-    public function __construct(Container $container)
-    {
-        $this->container = $container;
+    public function __construct(
+        protected Container $container
+    ) {
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

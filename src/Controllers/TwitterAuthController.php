@@ -25,6 +25,7 @@ use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use League\OAuth1\Client\Credentials\CredentialsException;
+use League\OAuth1\Client\Credentials\TemporaryCredentials;
 use League\OAuth1\Client\Server\User;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -101,7 +102,7 @@ class TwitterAuthController implements RequestHandlerInterface
             return new RedirectResponse($authUrl);
         }
 
-        $temporaryCredentials = unserialize($session->get('temporary_credentials'));
+        $temporaryCredentials = unserialize($session->get('temporary_credentials'), ['allowed_classes' => [TemporaryCredentials::class]]);
 
         $tokenCredentials = $server->getTokenCredentials($temporaryCredentials, $oAuthToken, $oAuthVerifier);
 
@@ -131,7 +132,7 @@ class TwitterAuthController implements RequestHandlerInterface
         );
     }
 
-    protected function getSetting($key): ?string
+    protected function getSetting(string $key): ?string
     {
         return $this->settings->get("fof-oauth.twitter.{$key}");
     }

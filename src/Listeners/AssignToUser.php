@@ -16,8 +16,6 @@ use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\AvatarUploader;
 use Flarum\User\Event\RegisteringFromProvider;
 use Flarum\User\User;
-use GuzzleHttp\Client;
-use Illuminate\Support\Arr;
 use Intervention\Image\ImageManager;
 
 class AssignToUser
@@ -43,7 +41,7 @@ class AssignToUser
     /**
      * @param RegisteringFromProvider $event
      */
-    public function handle(RegisteringFromProvider $event)
+    public function handle(RegisteringFromProvider $event): void
     {
         $provider = $event->provider;
         $user = $event->user;
@@ -59,43 +57,5 @@ class AssignToUser
                 $user->groups()->attach($groupId);
             });
         }
-
-        // ===== Set Avatar =====
-        $avatarUrl = Arr::get($event->payload, 'avatarUrl');
-
-        // Use our own custom fetching method instead of Flarum v1's (relies on allow_url_fopen being enabled).
-        // TODO: Remove this for Flarum v2, which uses below Guzzle-based method and upgrades to Intervention Image v3.
-
-        // Check if avatars are allowed for consistency with AssignToUser listener.
-        if ($avatarUrl && !(int) $this->settings->get('fof-oauth.disable_avatars')) {
-            $urlContents = $this->retrieveAvatarFromUrl($avatarUrl);
-
-            if ($urlContents !== null) {
-                $image = $this->imageManager->make($urlContents);
-
-                $this->avatarUploader->upload($user, $image);
-            }
-        }
-    }
-
-    /**
-     * Copied from Flarum 2.x, MIT licensed.
-     * https://github.com/flarum/framework/blob/a46ce07255219093fb6f77e16ea7c7108a5f61aa/framework/core/src/Api/Resource/UserResource.php#L432-L447.
-     */
-    private function retrieveAvatarFromUrl(string $url): ?string
-    {
-        $client = new Client();
-
-        try {
-            $response = $client->get($url, ['timeout' => 5]);
-        } catch (\Exception $ignored) {
-            return null;
-        }
-
-        if ($response->getStatusCode() !== 200) {
-            return null;
-        }
-
-        return $response->getBody()->getContents();
     }
 }

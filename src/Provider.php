@@ -14,19 +14,13 @@ namespace FoF\OAuth;
 use Flarum\Forum\Auth\Registration;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Errors\AuthenticationException;
-use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
 
 abstract class Provider
 {
-    /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
-
-    public function __construct(SettingsRepositoryInterface $settings)
-    {
-        $this->settings = $settings;
+    public function __construct(
+        protected SettingsRepositoryInterface $settings
+    ) {
     }
 
     // Provider data
@@ -56,26 +50,29 @@ abstract class Provider
         return [];
     }
 
-    public function suggestions(Registration $registration, $user, string $token)
+    public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         //
     }
 
     // Helpers
 
-    public function enabled()
+    public function enabled(): bool
     {
-        return $this->settings->get("fof-oauth.{$this->name()}");
+        return (bool) $this->settings->get("fof-oauth.{$this->name()}");
     }
 
-    protected function getSetting($key): string
+    protected function getSetting(string $key): string
     {
         return $this->settings->get("fof-oauth.{$this->name()}.{$key}") ?? '';
     }
 
-    protected function verifyEmail(?string $email)
+    /**
+     * @throws AuthenticationException
+     */
+    protected function verifyEmail(?string $email): void
     {
-        if ($email === null || empty($email)) {
+        if (empty($email)) {
             throw new AuthenticationException('invalid_email');
         }
     }
@@ -98,10 +95,7 @@ abstract class Provider
             return;
         }
 
-        $payload = (array) ($registration->getPayload() ?? []);
-        Arr::set($payload, 'avatarUrl', $url);
-
-        $registration->setPayload($payload);
+        $registration->provideAvatar($url);
     }
 
     // Set this value to `true` in your provider class if you wish to provide your own

@@ -120,6 +120,7 @@ fof-oauth:
     error:
       bad_verification_code: Invalid or expired verification token. Please try again.
       invalid_state: Invalid state. Please try again.
+      already_linked: This account is already linked to another user.
 
   lib:
     providers:
@@ -130,6 +131,11 @@ fof-oauth:
       twitter: Twitter
       google: Google
       linkedin: LinkedIn
+
+    gambits:
+      sso:
+        key: sso
+        hint: a login provider
 
   ref:
     settings:

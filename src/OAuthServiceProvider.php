@@ -41,14 +41,15 @@ class OAuthServiceProvider extends AbstractServiceProvider
         });
     }
 
-    public function boot()
+    public function boot(): void
     {
-        /** @var Cache $cache */
-        $cache = $this->container->make(Cache::class);
-        /** @var Config $config */
-        $config = $this->container->make(Config::class);
+        // Register provider singletons after all extensions have registered their providers
+        $this->container->singleton('fof-oauth.providers.forum', function (Container $container) {
+            /** @var Cache $cache */
+            $cache = $container->make(Cache::class);
+            /** @var Config $config */
+            $config = $container->make(Config::class);
 
-        $this->container->singleton('fof-oauth.providers.forum', function () use ($cache, $config) {
             // If we're in debug mode, don't cache the providers, but directly return them.
             if ($config->inDebugMode()) {
                 return $this->mapProviders();
@@ -65,7 +66,12 @@ class OAuthServiceProvider extends AbstractServiceProvider
             return $data;
         });
 
-        $this->container->singleton('fof-oauth.providers.admin', function () use ($cache, $config) {
+        $this->container->singleton('fof-oauth.providers.admin', function (Container $container) {
+            /** @var Cache $cache */
+            $cache = $container->make(Cache::class);
+            /** @var Config $config */
+            $config = $container->make(Config::class);
+
             // If we're in debug mode, don't cache the providers, but directly return them.
             if ($config->inDebugMode()) {
                 return $this->mapProviders(true);
@@ -88,7 +94,7 @@ class OAuthServiceProvider extends AbstractServiceProvider
         $providers = $this->container->tagged('fof-oauth.providers');
 
         if ($admin) {
-            return array_map(function (Provider $provider) {
+            return array_map(static function (Provider $provider) {
                 return [
                     'name'   => $provider->name(),
                     'icon'   => $provider->icon(),
@@ -98,7 +104,7 @@ class OAuthServiceProvider extends AbstractServiceProvider
             }, iterator_to_array($providers));
         }
 
-        return array_map(function (Provider $provider) {
+        return array_map(static function (Provider $provider) {
             if (!$provider->enabled()) {
                 return null;
             }

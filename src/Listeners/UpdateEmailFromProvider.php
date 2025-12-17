@@ -34,7 +34,7 @@ class UpdateEmailFromProvider
         $this->bus = $bus;
     }
 
-    public function handle(OAuthLoginSuccessful $event)
+    public function handle(OAuthLoginSuccessful $event): void
     {
         if ((bool) $this->settings->get('fof-oauth.update_email_from_provider') && method_exists($event->userResource, 'getEmail')) {
             $this->bus->dispatch(new CheckAndUpdateUserEmail(

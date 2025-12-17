@@ -50,7 +50,7 @@ class Discord extends Provider
         return ['scope' => ['identify', 'email']];
     }
 
-    public function suggestions(Registration $registration, $user, string $token)
+    public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $this->verifyEmail($email = $user->getEmail());
 

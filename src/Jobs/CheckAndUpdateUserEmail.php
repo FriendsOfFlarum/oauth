@@ -52,7 +52,7 @@ class CheckAndUpdateUserEmail implements ShouldQueue
         $this->providedEmail = $providedEmail;
     }
 
-    public function handle(UserValidator $validator, Dispatcher $events)
+    public function handle(UserValidator $validator, Dispatcher $events): void
     {
         $provider = LoginProvider::where('provider', $this->providerName)->where('identifier', $this->identifier)->first();
 

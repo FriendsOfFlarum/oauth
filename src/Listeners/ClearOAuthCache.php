@@ -20,26 +20,24 @@ use Illuminate\Support\Str;
 
 class ClearOAuthCache
 {
-    protected $cache;
-
-    public function __construct(Cache $cache)
-    {
-        $this->cache = $cache;
+    public function __construct(
+        protected Cache $cache
+    ) {
     }
 
-    public function subscribe(Dispatcher $events)
+    public function subscribe(Dispatcher $events): void
     {
         $events->listen(Saving::class, [$this, 'settingsSaved']);
         $events->listen([Enabling::class, Disabling::class], [$this, 'clearOauthCache']);
     }
 
-    public function clearOauthCache()
+    public function clearOauthCache(): void
     {
         $this->cache->forget('fof-oauth.providers.forum');
         $this->cache->forget('fof-oauth.providers.admin');
     }
 
-    public function settingsSaved(Saving $event)
+    public function settingsSaved(Saving $event): void
     {
         foreach (array_keys($event->settings) as $key) {
             if (Str::startsWith($key, 'fof-oauth')) {

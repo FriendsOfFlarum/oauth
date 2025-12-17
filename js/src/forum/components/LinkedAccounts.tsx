@@ -32,7 +32,7 @@ export default class LinkedAccounts extends Component<IAttrs, IState> {
   }
 
   view(): Mithril.Children {
-    const linkedAccounts = app.store.all<LinkedAccount>('linked-accounts');
+    const linkedAccounts = app.store.all<LinkedAccount>('linked-accounts').sort((a, b) => a.name().localeCompare(b.name()));
 
     return (
       <FieldSet label={app.translator.trans('fof-oauth.forum.user.settings.linked-account.label')}>
@@ -41,7 +41,7 @@ export default class LinkedAccounts extends Component<IAttrs, IState> {
         {this.state.loadingAdditional ? (
           <LoadingIndicator containerClassName="LinkedAccounts-Loading" />
         ) : (
-          <ul className="LinkedAccounts-List">{listItems(this.linkedAccountsItems(linkedAccounts, this.attrs.user).toArray())}</ul>
+          <ul className="LinkedAccountsList">{listItems(this.linkedAccountsItems(linkedAccounts, this.attrs.user).toArray())}</ul>
         )}
       </FieldSet>
     );
@@ -51,14 +51,18 @@ export default class LinkedAccounts extends Component<IAttrs, IState> {
     const items = new ItemList<Mithril.Children>();
 
     linkedAccounts.forEach((linkedAccount) => {
-      items.add(linkedAccount.name(), <LinkStatus provider={linkedAccount} user={user} />, linkedAccount.priority());
+      items.add(
+        linkedAccount.name(),
+        <LinkStatus provider={linkedAccount} user={user} refresh={this.loadLinkedAccounts.bind(this)} />,
+        linkedAccount.priority()
+      );
     });
 
     return items;
   }
 
   async loadLinkedAccounts() {
-    await app.store.find<LinkedAccount[]>('users/' + this.attrs.user.id() + '/linked-accounts', {});
+    await app.store.find('linked-accounts', { filter: { userId: this.attrs.user.id() } });
     this.state.loadingAdditional = false;
     m.redraw();
   }

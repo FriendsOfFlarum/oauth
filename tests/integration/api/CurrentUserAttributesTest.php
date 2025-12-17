@@ -14,8 +14,11 @@ namespace FoF\OAuth\Tests\integration\api;
 use Flarum\Extend;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
+use Flarum\User\LoginProvider;
+use Flarum\User\User;
 use FoF\Extend\Controllers\AbstractOAuthController;
 use Illuminate\Contracts\Cache\Store as Cache;
+use PHPUnit\Framework\Attributes\Test;
 
 class CurrentUserAttributesTest extends TestCase
 {
@@ -32,7 +35,7 @@ class CurrentUserAttributesTest extends TestCase
         $this->extension('fof-oauth');
 
         $this->prepareDatabase([
-            'users' => [
+            User::class => [
                 $this->normalUser(),
                 [
                     'id'                 => 3, 'username' => 'oauth_user', 'password' => '$2y$10$LO59tiT7uggl6Oe23o/O6.utnF6ipngYjvMvaxo1TciKqBttDNKim',
@@ -40,7 +43,7 @@ class CurrentUserAttributesTest extends TestCase
                     'joined_at'          => '2021-01-01 00:00:00',
                 ],
             ],
-            'login_providers' => [
+            LoginProvider::class=> [
                 [
                     'id'            => 1,
                     'user_id'       => 3,
@@ -59,9 +62,7 @@ class CurrentUserAttributesTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_includes_login_provider_in_current_user_attributes()
     {
         // Log in as the user with OAuth providers
@@ -90,9 +91,7 @@ class CurrentUserAttributesTest extends TestCase
         $this->assertEquals('github', $body['data']['attributes']['loginProvider']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_returns_null_for_users_without_login_providers()
     {
         // Log in as a normal user without OAuth providers
@@ -121,9 +120,7 @@ class CurrentUserAttributesTest extends TestCase
         $this->assertNull($body['data']['attributes']['loginProvider']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_uses_cached_provider_when_available()
     {
         // Log in as the user with OAuth providers

@@ -26,11 +26,15 @@ class AuthenticationException extends Exception implements KnownError
         'invalid_state' => [
             'Invalid state',
         ],
+
+        'already_linked' => [
+            'Account already linked to another user',
+        ],
     ];
 
     public function getShortCode(): string
     {
-        $message = $this->getMessage();
+        $message = trim($this->getMessage());
 
         if (!Arr::has(self::MESSAGE_TYPES, $message)) {
             foreach (self::MESSAGE_TYPES as $type => $messages) {
@@ -48,10 +52,10 @@ class AuthenticationException extends Exception implements KnownError
         return 'authentication_error';
     }
 
-    public function shouldBeReported()
+    public function shouldBeReported(): bool
     {
         $code = $this->getShortCode();
 
-        return $code !== 'invalid_state' && $code !== 'bad_verification_code';
+        return !in_array($code, ['invalid_state', 'bad_verification_code', 'already_linked']);
     }
 }

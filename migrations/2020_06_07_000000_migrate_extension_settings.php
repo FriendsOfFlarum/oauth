@@ -13,7 +13,7 @@ use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Database\Schema\Builder;
 
 return [
-    'up' => function (Builder $schema) {
+    'up' => static function (Builder $schema) {
         /**
          * @var $settings SettingsRepositoryInterface
          */
@@ -31,7 +31,7 @@ return [
             $settings->delete($item->key);
         }
     },
-    'down' => function (Builder $schema) {
+    'down' => static function (Builder $schema) {
         $schema->getConnection()->table('settings')
             ->where('key', 'LIKE', 'fof-oauth.%')
             ->delete();

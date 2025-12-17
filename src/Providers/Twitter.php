@@ -58,7 +58,7 @@ class Twitter extends Provider
     /**
      * @throws AuthenticationException
      */
-    public function suggestions(Registration $registration, $user, string $token)
+    public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $email = $user->email;
 

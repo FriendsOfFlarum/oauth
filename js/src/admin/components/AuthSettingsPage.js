@@ -2,7 +2,8 @@ import app from 'flarum/admin/app';
 import Button from 'flarum/common/components/Button';
 import Dropdown from 'flarum/common/components/Dropdown';
 import ExtensionPage from 'flarum/admin/components/ExtensionPage';
-import icon from 'flarum/common/helpers/icon';
+import Icon from 'flarum/common/components/Icon';
+import Badge from 'flarum/common/components/Badge';
 import ItemList from 'flarum/common/utils/ItemList';
 
 export default class AuthSettingsPage extends ExtensionPage {
@@ -16,7 +17,7 @@ export default class AuthSettingsPage extends ExtensionPage {
     return (
       <div className="container">
         <div className="AuthSettingsPage">
-          <div className="Form">
+          <form className="Form">
             {this.buildSettingComponent({
               type: 'boolean',
               setting: 'fof-oauth.only_icons',
@@ -74,7 +75,7 @@ export default class AuthSettingsPage extends ExtensionPage {
             </div>
 
             {this.submitButton()}
-          </div>
+          </form>
         </div>
       </div>
     );
@@ -89,6 +90,9 @@ export default class AuthSettingsPage extends ExtensionPage {
       const showSettings = !!this.showing[name];
       const callbackUrl = `${app.forum.attribute('baseUrl')}/auth/${name}`;
 
+      const groupId = this.setting(`fof-oauth.${name}.group`)();
+      const selectedGroup = groupId ? app.store.getById('groups', groupId) : null;
+
       items.add(
         `fof-oauth.${name}`,
         <div className={`Provider ${enabled ? 'enabled' : 'disabled'} ${showSettings && 'showing'}`}>
@@ -98,46 +102,52 @@ export default class AuthSettingsPage extends ExtensionPage {
               setting: `fof-oauth.${name}`,
               label: (
                 <div>
-                  {icon(provider.icon)}
+                  <Icon name={provider.icon} />
                   <span>{app.translator.trans(`fof-oauth.lib.providers.${name}`)}</span>
                 </div>
               ),
             })}
 
-            {
-              <Button
-                className={`Button Button--rounded ${this.showing[name] && 'active'}`}
-                onclick={() => (this.showing[name] = !showSettings)}
-                aria-label={app.translator.trans('fof-oauth.admin.settings_accessibility_label', {
-                  name,
-                })}
-              >
-                {icon(`fas fa-cog`)}
-              </Button>
-            }
+            {enabled && selectedGroup && (
+              <div className="Provider--group">
+                {/*<Icon name={selectedGroup.icon() || 'fas fa-user-group'} />*/}
+                <Badge icon={selectedGroup.icon() || 'fas fa-user-group'} />
+                {selectedGroup.namePlural()}
+              </div>
+            )}
+
+            <Button
+              className={`Button Button--rounded ${this.showing[name] && 'active'}`}
+              onclick={() => (this.showing[name] = !showSettings)}
+              aria-label={app.translator.trans('fof-oauth.admin.settings_accessibility_label', {
+                name,
+              })}
+            >
+              <Icon name="fas fa-cog" />
+            </Button>
           </div>
 
-          <div className="Provider--settings">
-            <div>
-              <p>
-                {app.translator.trans(`fof-oauth.admin.settings.providers.${name}.description`, {
-                  link: (
-                    <a href={provider.link} target="_blank">
-                      {provider.link}
-                    </a>
-                  ),
-                })}
-              </p>
-              <p>
-                {app.translator.trans(`fof-oauth.admin.settings.providers.callback_url_text`, {
-                  url: (
-                    <a href={callbackUrl} target="_blank">
-                      {callbackUrl}
-                    </a>
-                  ),
-                })}
-              </p>
+          <div className="Provider--settings" inert={!showSettings}>
+            <p>
+              {app.translator.trans(`fof-oauth.admin.settings.providers.${name}.description`, {
+                link: (
+                  <a href={provider.link} target="_blank">
+                    {provider.link}
+                  </a>
+                ),
+              })}
+            </p>
+            <p>
+              {app.translator.trans(`fof-oauth.admin.settings.providers.callback_url_text`, {
+                url: (
+                  <a href={callbackUrl} target="_blank">
+                    {callbackUrl}
+                  </a>
+                ),
+              })}
+            </p>
 
+            <div class="Form">
               {Object.keys(provider.fields).map((field) =>
                 this.buildSettingComponent({
                   type: 'string',
@@ -187,7 +197,7 @@ export default class AuthSettingsPage extends ExtensionPage {
             <Dropdown
               label={
                 selectedGroup
-                  ? [icon(selectedGroup.icon() || icons[selectedGroup.id()]), '\t', selectedGroup.namePlural()]
+                  ? [<Icon name={selectedGroup.icon() || icons[selectedGroup.id()]} />, '\t', selectedGroup.namePlural()]
                   : app.translator.trans('fof-oauth.admin.settings.providers.no_group_label')
               }
               buttonClassName="Button"

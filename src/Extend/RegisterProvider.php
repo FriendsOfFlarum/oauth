@@ -19,14 +19,14 @@ use InvalidArgumentException;
 
 class RegisterProvider implements ExtenderInterface
 {
-    private $provider;
+    private string $provider;
 
     public function __construct(string $provider)
     {
         $this->provider = $provider;
     }
 
-    public function extend(Container $container, ?Extension $extension = null)
+    public function extend(Container $container, ?Extension $extension = null): void
     {
         $provider = $container->make($this->provider);
 

@@ -56,7 +56,7 @@ class GitHub extends Provider
         return ['scope' => ['user:email']];
     }
 
-    public function suggestions(Registration $registration, $user, string $token)
+    public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $this->verifyEmail($email = $user->getEmail() ?: $this->getEmailFromApi($token));
 
@@ -68,7 +68,7 @@ class GitHub extends Provider
         $this->provideAvatar($registration, Arr::get($user->toArray(), 'avatar_url'));
     }
 
-    private function getEmailFromApi(string $token)
+    private function getEmailFromApi(string $token): ?string
     {
         $url = $this->provider->apiDomain.'/user/emails';
 
@@ -83,5 +83,7 @@ class GitHub extends Provider
                 return $email['email'];
             }
         }
+
+        return null;
     }
 }

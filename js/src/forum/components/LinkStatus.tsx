@@ -1,17 +1,18 @@
 import app from 'flarum/forum/app';
 import Component, { ComponentAttrs } from 'flarum/common/Component';
-import icon from 'flarum/common/helpers/icon';
 import Button from 'flarum/common/components/Button';
 import type Mithril from 'mithril';
 import LinkedAccount from '../models/LinkedAccount';
 import User from 'flarum/common/models/User';
 import ProviderInfo from './ProviderInfo';
 import extractText from 'flarum/common/utils/extractText';
+import Icon from 'flarum/common/components/Icon';
 import LogInButton from 'flarum/forum/components/LogInButton';
 
 export interface ILinkStatusAttrs extends ComponentAttrs {
   provider: LinkedAccount;
   user: User;
+  refresh?: () => Promise<void>;
 }
 
 export interface LinkStatusState {
@@ -36,7 +37,7 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
 
   view(): Mithril.Children {
     return (
-      <div className={`LinkedAccounts-Account LinkedAccounts-Account--${this.attrs.provider.name()}`}>
+      <div className={`LinkedAccountsList-item LinkedAccountsList-item--${this.attrs.provider.name()}`}>
         {this.iconView()}
         {this.statusView()}
         {this.actionView()}
@@ -47,7 +48,7 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
   iconView() {
     return (
       <div className="LinkedAccountsList-item-icon">
-        {icon(this.attrs.provider.icon(), { className: `Provider-Icon Provider-Icon--${this.attrs.provider.name()}` })}
+        <Icon name={this.attrs.provider.icon()} className={`Provider-Icon Provider-Icon--${this.attrs.provider.name()}`} />
       </div>
     );
   }
@@ -81,6 +82,7 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
           <LogInButton
             className={`Button FoFLogInButton LogInButton--${provider.name()}`}
             icon={provider.icon()}
+            provider={provider.name()}
             path={`/auth/${provider.name()}?linkTo=${user.id()}`}
             loading={this.state.loading}
           >
@@ -106,9 +108,8 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
     ) {
       this.state.loading = true;
       await provider.delete();
-      await app.store.find<LinkedAccount[]>('users/' + this.attrs.user.id() + '/linked-accounts', {});
+      await this.attrs.refresh?.();
       this.state.loading = false;
-      m.redraw();
     }
   }
 }
