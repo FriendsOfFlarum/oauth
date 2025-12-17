@@ -1,9 +1,6 @@
-import AuthSettingsPage from './components/AuthSettingsPage';
-import ConfigureWithOAuthPage from './components/ConfigureWithOAuthPage';
-import ConfigureWithOAuthButton from './components/ConfigureWithOAuthButton';
-
-export * from './components';
+import app from 'flarum/admin/app';
 export { default as extend } from './extend';
 
-// Needed for backwards compatibility
-export { AuthSettingsPage, ConfigureWithOAuthPage, ConfigureWithOAuthButton };
+app.initializers.add('fof/oauth', () => {
+  //
+});

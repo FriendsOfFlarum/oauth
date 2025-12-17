@@ -19,6 +19,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use Omines\OAuth2\Client\Provider\Gitlab;
 use Omines\OAuth2\Client\Provider\GitlabResourceOwner;
 use Psr\Http\Message\ResponseInterface;
+use PHPUnit\Framework\Attributes\Test;
 
 class AuthenticationFlowTest extends TestCase
 {
@@ -59,6 +60,7 @@ class AuthenticationFlowTest extends TestCase
         $this->setting('fof-oauth.gitlab', 1);
     }
 
+    #[Test]
     public function test_loginProvider_is_set_with_correct_value_after_oauth_login(): void
     {
         $this->mockProvider('123456', 'Seboubeach1@machine.local');
@@ -96,6 +98,7 @@ class AuthenticationFlowTest extends TestCase
         $this->checkOauthProviderIsSerialized($this->toRequestCookies($response), 'gitlab');
     }
 
+    #[Test]
     protected function checkOauthProviderIsSerialized(array $cookies, ?string $value = null): void
     {
         $response = $this->send(

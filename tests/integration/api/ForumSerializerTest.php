@@ -14,6 +14,8 @@ namespace FoF\OAuth\Tests\integration\api;
 use Flarum\Extend;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class ForumSerializerTest extends TestCase
 {
@@ -51,9 +53,7 @@ class ForumSerializerTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_includes_providers_in_forum_attributes_for_guests()
     {
         $response = $this->send(
@@ -68,11 +68,8 @@ class ForumSerializerTest extends TestCase
         $this->assertArrayNotHasKey('fofOauthModerate', $body['data']['attributes']);
     }
 
-    /**
-     * @dataProvider authorizedUserProvider
-     *
-     * @test
-     */
+    #[Test]
+    #[DataProvider('authorizedUserProvider')]
     public function it_does_not_include_providers_in_forum_attributes_for_logged_in_users(int $userId)
     {
         $response = $this->send(
@@ -88,9 +85,7 @@ class ForumSerializerTest extends TestCase
         $this->assertTrue($body['data']['attributes']['fofOauthModerate']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function normal_user_does_not_have_moderate_flag()
     {
         $response = $this->send(
@@ -106,9 +101,7 @@ class ForumSerializerTest extends TestCase
         $this->assertFalse($body['data']['attributes']['fofOauthModerate']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function admin_panel_is_available()
     {
         $login = $this->send(

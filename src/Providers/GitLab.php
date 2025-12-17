@@ -58,7 +58,7 @@ class GitLab extends Provider
         return ['scope' => 'read_user'];
     }
 
-    public function suggestions(Registration $registration, $user, string $token)
+    public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $this->verifyEmail($email = $user->getEmail());
 

@@ -52,7 +52,7 @@ class AuthenticationException extends Exception implements KnownError
         return 'authentication_error';
     }
 
-    public function shouldBeReported()
+    public function shouldBeReported(): bool
     {
         $code = $this->getShortCode();
 

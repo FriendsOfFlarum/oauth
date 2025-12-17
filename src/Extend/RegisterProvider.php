@@ -19,7 +19,7 @@ use InvalidArgumentException;
 
 class RegisterProvider implements ExtenderInterface
 {
-    private $provider;
+    private string $provider;
 
     public function __construct(string $provider)
     {

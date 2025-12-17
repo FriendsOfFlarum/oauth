@@ -132,7 +132,7 @@ class TwitterAuthController implements RequestHandlerInterface
         );
     }
 
-    protected function getSetting($key): ?string
+    protected function getSetting(string $key): ?string
     {
         return $this->settings->get("fof-oauth.twitter.{$key}");
     }

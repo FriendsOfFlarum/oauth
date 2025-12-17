@@ -20,8 +20,7 @@ abstract class Provider
 {
     public function __construct(
         protected SettingsRepositoryInterface $settings
-    )
-    {
+    ) {
     }
 
     // Provider data
@@ -51,19 +50,19 @@ abstract class Provider
         return [];
     }
 
-    public function suggestions(Registration $registration, $user, string $token)
+    public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         //
     }
 
     // Helpers
 
-    public function enabled()
+    public function enabled(): bool
     {
-        return $this->settings->get("fof-oauth.{$this->name()}");
+        return (bool) $this->settings->get("fof-oauth.{$this->name()}");
     }
 
-    protected function getSetting($key): string
+    protected function getSetting(string $key): string
     {
         return $this->settings->get("fof-oauth.{$this->name()}.{$key}") ?? '';
     }

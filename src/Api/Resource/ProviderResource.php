@@ -25,18 +25,25 @@ use Tobyz\JsonApiServer\Pagination\Pagination;
 
 class ProviderResource extends AbstractDatabaseResource
 {
-    private Collection $providers;
-
-    public function __construct()
-    {
-        $this->providers = static::getProviders();
-    }
+    private ?Collection $providers = null;
 
     public static function getProviders(): Collection
     {
-        return collect(resolve('fof-oauth.providers.forum'))->reject(function ($provider) {
+        /** @var array<string, mixed> $providers */
+        $providers = resolve('fof-oauth.providers.forum');
+
+        return collect($providers)->reject(function ($provider) {
             return $provider === null;
         });
+    }
+
+    protected function getProvidersCollection(): Collection
+    {
+        if ($this->providers === null) {
+            $this->providers = static::getProviders();
+        }
+
+        return $this->providers;
     }
 
     public function model(): string
@@ -133,7 +140,7 @@ class ProviderResource extends AbstractDatabaseResource
             Schema\Integer::make('priority')
                 ->get($this->useProviderAttribute('priority', -100)),
             Schema\Boolean::make('orphaned')
-                ->get(fn (LoginProvider $loginProvider) => $this->providers->firstWhere('name', $loginProvider->provider) === null),
+                ->get(fn (LoginProvider $loginProvider) => $this->getProvidersCollection()->firstWhere('name', $loginProvider->provider) === null),
             Schema\Boolean::make('linked')
                 ->get(fn (LoginProvider $loginProvider) => $loginProvider->exists),
             Schema\Str::make('identifier'),
@@ -156,9 +163,9 @@ class ProviderResource extends AbstractDatabaseResource
         return ((string) $model->id) ?: "{$model->user_id}-{$model->provider}";
     }
 
-    protected function getProviderAttr(string $name, string $attr)
+    protected function getProviderAttr(string $name, string $attr): mixed
     {
-        $provider = $this->providers->firstWhere('name', $name);
+        $provider = $this->getProvidersCollection()->firstWhere('name', $name);
 
         if ($provider === null) {
             return null;
@@ -167,7 +174,7 @@ class ProviderResource extends AbstractDatabaseResource
         return Arr::get($provider, $attr);
     }
 
-    protected function useProviderAttribute(string $attr, $default = null): callable
+    protected function useProviderAttribute(string $attr, mixed $default = null): callable
     {
         return function (LoginProvider $loginProvider, Context $context) use ($default, $attr) {
             return $this->getProviderAttr($loginProvider->provider, $attr) ?? $default;

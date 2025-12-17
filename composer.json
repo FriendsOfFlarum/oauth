@@ -28,7 +28,6 @@
         }
     ],
     "require": {
-        "php": "^8.2",
         "flarum/core": "^2.0.0",
         "league/oauth1-client": "^1.10.1",
         "league/oauth2-facebook": "^2.2.0",
@@ -79,8 +78,8 @@
                 "flarum/gdpr"
             ]
         },
-        "flagrow": {
-            "discuss": "https://discuss.flarum.org/d/25182"
+        "branch-alias": {
+            "dev-2.x": "2.x-dev"
         },
         "flarum-cli": {
             "modules": {
@@ -90,8 +89,8 @@
         }
     },
     "require-dev": {
-        "flarum/phpstan": "^2.0.0-beta",
-        "flarum/testing": "^2.0.0-beta"
+        "flarum/phpstan": "^2.0.0",
+        "flarum/testing": "^2.0.0"
     },
     "scripts": {
         "analyse:phpstan": "phpstan analyse",

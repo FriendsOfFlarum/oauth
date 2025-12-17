@@ -21,7 +21,7 @@ class SsoIdFilter implements FilterInterface
         return 'sso';
     }
 
-    public function filter($state, $value, bool $negate): void
+    public function filter(mixed $state, mixed $value, bool $negate): void
     {
         /** @var DatabaseSearchState $state */
         if (!$state->getActor()->hasPermission('fof-oauth.admin.permissions.moderate_user_providers')) {

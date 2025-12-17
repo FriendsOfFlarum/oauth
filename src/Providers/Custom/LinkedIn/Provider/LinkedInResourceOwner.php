@@ -56,7 +56,7 @@ class LinkedInResourceOwner extends \League\OAuth2\Client\Provider\GenericResour
      *
      * @return mixed
      */
-    public function getAttribute($key)
+    public function getAttribute(string $key): mixed
     {
         return $this->getValueByKey($this->response, (string) $key);
     }

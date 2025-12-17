@@ -41,7 +41,7 @@ class AssignToUser
     /**
      * @param RegisteringFromProvider $event
      */
-    public function handle(RegisteringFromProvider $event)
+    public function handle(RegisteringFromProvider $event): void
     {
         $provider = $event->provider;
         $user = $event->user;
