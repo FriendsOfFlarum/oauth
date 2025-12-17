@@ -18,8 +18,8 @@ use Flarum\Testing\integration\TestCase;
 use League\OAuth2\Client\Token\AccessToken;
 use Omines\OAuth2\Client\Provider\Gitlab;
 use Omines\OAuth2\Client\Provider\GitlabResourceOwner;
-use Psr\Http\Message\ResponseInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Psr\Http\Message\ResponseInterface;
 
 class AuthenticationFlowTest extends TestCase
 {

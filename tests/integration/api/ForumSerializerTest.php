@@ -14,8 +14,8 @@ namespace FoF\OAuth\Tests\integration\api;
 use Flarum\Extend;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 
 class ForumSerializerTest extends TestCase
 {
