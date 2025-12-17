@@ -6,7 +6,7 @@ export default class LinkedAccount extends Model {
     linked(): boolean;
     orphaned(): boolean;
     identifier(): string;
-    providerIdentifier(): string;
     firstLogin(): Date;
     lastLogin(): Date;
+    userId(): number;
 }

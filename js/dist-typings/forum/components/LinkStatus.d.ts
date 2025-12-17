@@ -5,6 +5,7 @@ import User from 'flarum/common/models/User';
 export interface ILinkStatusAttrs extends ComponentAttrs {
     provider: LinkedAccount;
     user: User;
+    refresh?: () => Promise<void>;
 }
 export interface LinkStatusState {
     loading: boolean;
