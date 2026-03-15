@@ -20,72 +20,61 @@ use Illuminate\Contracts\Container\Container;
 
 class OAuthServiceProvider extends AbstractServiceProvider
 {
-    public function register()
+    public function register(): void
     {
         $this->container->tag([
             Providers\Discord::class,
             Providers\Facebook::class,
             Providers\GitHub::class,
             Providers\GitLab::class,
-            Providers\Twitter::class,
             Providers\Google::class,
             Providers\LinkedIn::class,
         ], 'fof-oauth.providers');
 
-        // Add OAuth provider routes
+        // Single stable route — provider is a plain path segment, validated in the controller.
         $this->container->resolving('flarum.forum.routes', function (RouteCollection $collection, Container $container) {
             /** @var RouteHandlerFactory $factory */
             $factory = $container->make(RouteHandlerFactory::class);
 
-            $collection->addRoute('GET', new OAuth2RoutePattern(), 'fof-oauth', $factory->toController(Controllers\AuthController::class));
+            $collection->addRoute(
+                'GET',
+                '/auth/{provider}',
+                'fof-oauth',
+                $factory->toController(Controllers\AuthController::class)
+            );
         });
     }
 
     public function boot(): void
     {
-        // Register provider singletons after all extensions have registered their providers
         $this->container->singleton('fof-oauth.providers.forum', function (Container $container) {
-            /** @var Cache $cache */
-            $cache = $container->make(Cache::class);
             /** @var Config $config */
             $config = $container->make(Config::class);
 
-            // If we're in debug mode, don't cache the providers, but directly return them.
             if ($config->inDebugMode()) {
                 return $this->mapProviders();
             }
 
-            $cacheKey = 'fof-oauth.providers.forum';
+            /** @var Cache $cache */
+            $cache = $container->make(Cache::class);
+            $key = 'fof-oauth.providers.forum';
 
-            $data = $cache->get($cacheKey);
-            if ($data === null) {
-                $data = $this->mapProviders();
-                $cache->forever($cacheKey, $data);
-            }
-
-            return $data;
+            return $cache->get($key) ?? tap($this->mapProviders(), fn ($data) => $cache->forever($key, $data));
         });
 
         $this->container->singleton('fof-oauth.providers.admin', function (Container $container) {
-            /** @var Cache $cache */
-            $cache = $container->make(Cache::class);
             /** @var Config $config */
             $config = $container->make(Config::class);
 
-            // If we're in debug mode, don't cache the providers, but directly return them.
             if ($config->inDebugMode()) {
                 return $this->mapProviders(true);
             }
 
-            $cacheKey = 'fof-oauth.providers.admin';
+            /** @var Cache $cache */
+            $cache = $container->make(Cache::class);
+            $key = 'fof-oauth.providers.admin';
 
-            $data = $cache->get($cacheKey);
-            if ($data === null) {
-                $data = $this->mapProviders(true);
-                $cache->forever($cacheKey, $data);
-            }
-
-            return $data;
+            return $cache->get($key) ?? tap($this->mapProviders(true), fn ($data) => $cache->forever($key, $data));
         });
     }
 
@@ -104,7 +93,7 @@ class OAuthServiceProvider extends AbstractServiceProvider
             }, iterator_to_array($providers));
         }
 
-        return array_map(static function (Provider $provider) {
+        return array_values(array_filter(array_map(static function (Provider $provider) {
             if (!$provider->enabled()) {
                 return null;
             }
@@ -114,6 +103,6 @@ class OAuthServiceProvider extends AbstractServiceProvider
                 'icon'     => $provider->icon(),
                 'priority' => $provider->priority(),
             ];
-        }, iterator_to_array($providers));
+        }, iterator_to_array($providers))));
     }
 }

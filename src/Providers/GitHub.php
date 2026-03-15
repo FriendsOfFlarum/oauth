@@ -51,6 +51,11 @@ class GitHub extends Provider
         ]);
     }
 
+    public function pkceEnabled(): bool
+    {
+        return true;
+    }
+
     public function options(): array
     {
         return ['scope' => ['user:email']];

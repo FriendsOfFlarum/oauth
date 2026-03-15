@@ -13,10 +13,10 @@ namespace FoF\OAuth;
 
 use Exception;
 use Flarum\Foundation\ValidationException;
-use Flarum\Http\Exception\RouteNotFoundException;
-use FoF\Extend\Controllers\AbstractOAuthController;
+use FoF\OAuth\Controllers\AbstractOAuthController;
 use FoF\OAuth\Errors\AuthenticationException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -25,27 +25,16 @@ abstract class Controller extends AbstractOAuthController
 {
     protected function getRouteName(): string
     {
-        return 'auth.'.$this->getProviderName();
+        return 'fof-oauth';
     }
 
-    protected function getIdentifier($user): string
+    protected function getIdentifier(ResourceOwnerInterface $user): string
     {
-        return $user->getId();
+        return (string) $user->getId();
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     *
-     * @throws Exception
-     *
-     * @return ResponseInterface
-     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        if (!(bool) (int) $this->settings->get('fof-oauth.'.$this->getProviderName())) {
-            throw new RouteNotFoundException();
-        }
-
         try {
             return parent::handle($request);
         } catch (Exception $e) {
@@ -65,8 +54,12 @@ abstract class Controller extends AbstractOAuthController
                 $logger->error("[OAuth][{$this->getProviderName()}] {$e->getMessage()}: {$detail}");
             }
 
-            if ($e instanceof IdentityProviderException || $e->getMessage() === 'Invalid state') {
+            if ($e instanceof IdentityProviderException) {
                 throw new AuthenticationException($e->getMessage());
+            }
+
+            if ($e instanceof AuthenticationException) {
+                throw $e;
             }
 
             // Re-throw validation exceptions as authentication exceptions to avoid 500 errors

@@ -45,6 +45,11 @@ class Discord extends Provider
         ]);
     }
 
+    public function pkceEnabled(): bool
+    {
+        return false;
+    }
+
     public function options(): array
     {
         return ['scope' => ['identify', 'email']];

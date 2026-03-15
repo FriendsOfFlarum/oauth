@@ -20,12 +20,13 @@ use Flarum\Search\Database\DatabaseSearchDriver;
 use Flarum\User\Event\LoggedOut;
 use Flarum\User\Event\RegisteringFromProvider;
 use Flarum\User\Search\UserSearcher;
-use FoF\Extend\Events\OAuthLoginSuccessful;
+use FoF\OAuth\Events\OAuthLoginSuccessful;
 
 return [
     (new Extend\Frontend('forum'))
         ->js(__DIR__.'/js/dist/forum.js')
-        ->css(__DIR__.'/resources/less/forum.less'),
+        ->css(__DIR__.'/resources/less/forum.less')
+        ->jsDirectory(__DIR__.'/js/dist/forum'),
 
     (new Extend\Frontend('admin'))
         ->js(__DIR__.'/js/dist/admin.js')
@@ -43,9 +44,6 @@ return [
     (new Extend\Middleware('api'))
         ->add(Middleware\BindRequest::class),
 
-    (new Extend\Routes('forum'))
-        ->get('/auth/twitter', 'auth.twitter', Controllers\TwitterAuthController::class),
-
     new Extend\ApiResource(Api\Resource\ProviderResource::class),
 
     (new Extend\ServiceProvider())
@@ -60,12 +58,6 @@ return [
         ->default('fof-oauth.only_icons', false)
         ->default('fof-oauth.update_email_from_provider', true)
         ->serializeToForum('fof-oauth.only_icons', 'fof-oauth.only_icons', 'boolVal')
-        ->default('fof-oauth.popupWidth', 580)
-        ->default('fof-oauth.popupHeight', 400)
-        ->default('fof-oauth.fullscreenPopup', true)
-        ->serializeToForum('fof-oauth.popupWidth', 'fof-oauth.popupWidth', 'intval')
-        ->serializeToForum('fof-oauth.popupHeight', 'fof-oauth.popupHeight', 'intval')
-        ->serializeToForum('fof-oauth.fullscreenPopup', 'fof-oauth.fullscreenPopup', 'boolVal')
         ->default('fof-oauth.log-oauth-errors', false),
 
     (new Extend\Event())

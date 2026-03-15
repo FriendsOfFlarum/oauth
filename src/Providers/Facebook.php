@@ -36,6 +36,11 @@ class Facebook extends Provider
         ];
     }
 
+    public function pkceEnabled(): bool
+    {
+        return false;
+    }
+
     public function provider(string $redirectUri): AbstractProvider
     {
         return new FacebookProvider([

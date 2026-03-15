@@ -16,7 +16,7 @@ use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
 use Flarum\User\LoginProvider;
 use Flarum\User\User;
-use FoF\Extend\Controllers\AbstractOAuthController;
+use FoF\OAuth\Controllers\AbstractOAuthController;
 use Illuminate\Contracts\Cache\Store as Cache;
 use PHPUnit\Framework\Attributes\Test;
 

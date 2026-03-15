@@ -71,7 +71,7 @@ class ProviderResource extends AbstractDatabaseResource
                 ->authenticated()
                 ->query(function ($query, ?Pagination $pagination, Context $context, array $filters, ?array $sort, int $offset, ?int $limit): Context {
                     $actor = $context->getActor();
-                    $userId = (int) Arr::get($filters, 'user', $actor->id);
+                    $userId = (int) Arr::get($filters, 'userId', $actor->id);
 
                     if ($userId !== $actor->id && !$actor->can('moderateUserProviders')) {
                         throw new NotFoundException();

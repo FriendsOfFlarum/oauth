@@ -15,6 +15,8 @@ use Dflydev\FigCookies\SetCookies;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
+use Flarum\User\LoginProvider;
+use Flarum\User\RegistrationToken;
 use League\OAuth2\Client\Token\AccessToken;
 use Omines\OAuth2\Client\Provider\Gitlab;
 use Omines\OAuth2\Client\Provider\GitlabResourceOwner;
@@ -35,23 +37,24 @@ class AuthenticationFlowTest extends TestCase
             'users' => [
                 $this->normalUser(),
                 [
-                    'id'                 => 3, 'username' => 'Seboubeach',
-                    'is_email_confirmed' => 1, 'email' => 'Seboubeach1@machine.local',
+                    'id'                 => 3,
+                    'username'           => 'ExistingOAuthUser',
+                    'is_email_confirmed' => 1,
+                    'email'              => 'existing@machine.local',
                     'password'           => '$2y$10$LO59tiT7uggl6Oe23o/O6.utnF6ipngYjvMvaxo1TciKqBttDNKim',
                     'joined_at'          => '2021-01-01 00:00:00',
                 ],
                 [
-                    'id'                 => 4, 'username' => 'Hephoica',
-                    'is_email_confirmed' => 1, 'email' => 'Hephoica@machine.local',
+                    'id'                 => 4,
+                    'username'           => 'EmailMatchUser',
+                    'is_email_confirmed' => 1,
+                    'email'              => 'emailmatch@machine.local',
                     'password'           => '$2y$10$LO59tiT7uggl6Oe23o/O6.utnF6ipngYjvMvaxo1TciKqBttDNKim',
                     'joined_at'          => '2021-01-01 00:00:00',
                 ],
             ],
-            'login_providers' => [
-                ['id' => 1, 'user_id' => 3, 'provider' => 'gitlab', 'identifier' => '123456'],
-            ],
-            'group_permission' => [
-                ['permission' => 'user.editOwnNickname', 'group_id' => 4],
+            LoginProvider::class => [
+                ['id' => 1, 'user_id' => 3, 'provider' => 'gitlab', 'identifier' => '12345', 'created_at' => '2021-01-01 00:00:00'],
             ],
         ]);
 
@@ -60,106 +63,222 @@ class AuthenticationFlowTest extends TestCase
         $this->setting('fof-oauth.gitlab', 1);
     }
 
+    // -------------------------------------------------------------------------
+    // Existing user with provider link → redirect + remember cookie
+    // -------------------------------------------------------------------------
+
     #[Test]
-    public function test_loginProvider_is_set_with_correct_value_after_oauth_login(): void
+    public function existing_user_is_redirected_and_receives_remember_cookie(): void
     {
-        $this->mockProvider('123456', 'Seboubeach1@machine.local');
+        $this->mockGitlabProvider(12345, 'existing@machine.local');
 
-        $response = $this->send($this->request('GET', '/auth/gitlab'));
+        [$redirectUrl, $cookies] = $this->runOAuthFlow('/auth/gitlab', '/');
 
-        // get query params from location url in the header
-        $location = $response->getHeaderLine('location');
-        parse_str(parse_url($location, PHP_URL_QUERY), $query);
+        $this->assertStringStartsWith('/', $redirectUrl);
+        $this->assertNotEmpty($cookies);
 
-        $request = $this->request('GET', '/auth/gitlab')
-            ->withQueryParams([
-                'code'  => 'code:123456',
-                'state' => $query['state'],
-            ])
-            ->withCookieParams($this->toRequestCookies($response));
-
-        $response = $this->send($request);
-        $content = $response->getBody()->getContents();
-
-        // check if the content contains is_loggedIn
-        $this->assertStringContainsString(
-            'window.opener.app.authenticationComplete(',
-            $content
-        );
-
-        preg_match('/window.opener.app.authenticationComplete\((.*)\)/', $content, $matches);
-        $json = json_decode($matches[1], true);
-
-        $this->assertArrayHasKey('loggedIn', $json);
-
-        $response = $this->send($this->request('GET', '/')->withCookieParams($this->toRequestCookies($response)));
-        $this->assertEquals(200, $response->getStatusCode());
-
-        $this->checkOauthProviderIsSerialized($this->toRequestCookies($response), 'gitlab');
+        $rememberCookie = array_filter($cookies, fn ($n) => str_ends_with($n, 'remember'), ARRAY_FILTER_USE_KEY);
+        $this->assertNotEmpty($rememberCookie);
     }
 
     #[Test]
-    protected function checkOauthProviderIsSerialized(array $cookies, ?string $value = null): void
+    public function existing_user_is_redirected_to_returnTo(): void
     {
+        $this->mockGitlabProvider(12345, 'existing@machine.local');
+
+        [$redirectUrl] = $this->runOAuthFlow('/auth/gitlab', '/d/42-some-discussion');
+
+        $this->assertEquals('/d/42-some-discussion', $redirectUrl);
+    }
+
+    #[Test]
+    public function last_login_at_is_updated_on_login(): void
+    {
+        $this->mockGitlabProvider(12345, 'existing@machine.local');
+
+        $before = LoginProvider::find(1)->last_login_at;
+
+        $this->runOAuthFlow('/auth/gitlab', '/');
+
+        $after = LoginProvider::find(1)->fresh()->last_login_at;
+        $this->assertGreaterThanOrEqual($before, $after);
+    }
+
+    // -------------------------------------------------------------------------
+    // Email match → auto-link + redirect
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function email_match_auto_links_and_redirects(): void
+    {
+        $this->mockGitlabProvider(99999, 'emailmatch@machine.local');
+
+        [$redirectUrl, $cookies] = $this->runOAuthFlow('/auth/gitlab', '/settings');
+
+        $this->assertStringStartsWith('/settings', $redirectUrl);
+        $this->assertStringContainsString('_flarum_linked=gitlab', $redirectUrl);
+        $this->assertNotEmpty(array_filter($cookies, fn ($n) => str_ends_with($n, 'remember'), ARRAY_FILTER_USE_KEY));
+
+        // Login provider should now exist for user 4
+        $this->assertTrue(
+            LoginProvider::where('user_id', 4)
+                ->where('provider', 'gitlab')
+                ->where('identifier', '99999')
+                ->exists()
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // New user → redirect with _flarum_auth token
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function new_user_redirect_contains_flarum_auth_param(): void
+    {
+        $this->mockGitlabProvider(11111, 'brandnew@example.com');
+
+        [$redirectUrl, $cookies] = $this->runOAuthFlow('/auth/gitlab', '/');
+
+        $this->assertStringContainsString('_flarum_auth=', $redirectUrl);
+        // No remember cookie for new (unregistered) users
+        $this->assertEmpty(array_filter($cookies, fn ($n) => $n === 'remember', ARRAY_FILTER_USE_KEY));
+    }
+
+    #[Test]
+    public function new_user_registration_token_is_persisted(): void
+    {
+        $this->mockGitlabProvider(22222, 'another@example.com');
+
+        [$redirectUrl] = $this->runOAuthFlow('/auth/gitlab', '/');
+
+        parse_str(parse_url($redirectUrl, PHP_URL_QUERY) ?? '', $qs);
+        $token = urldecode($qs['_flarum_auth']);
+
+        $this->assertNotEmpty(RegistrationToken::find($token));
+    }
+
+    #[Test]
+    public function new_user_flarum_auth_param_appended_to_returnTo(): void
+    {
+        $this->mockGitlabProvider(33333, 'third@example.com');
+
+        [$redirectUrl] = $this->runOAuthFlow('/auth/gitlab', '/d/99-thread');
+
+        $this->assertStringStartsWith('/d/99-thread', $redirectUrl);
+        $this->assertStringContainsString('_flarum_auth=', $redirectUrl);
+    }
+
+    // -------------------------------------------------------------------------
+    // Disabled / unknown provider → 404
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function disabled_provider_returns_404(): void
+    {
+        // GitHub is not enabled in setUp
+        $response = $this->send($this->request('GET', '/auth/github'));
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+
+    #[Test]
+    public function unknown_provider_returns_404(): void
+    {
+        $response = $this->send($this->request('GET', '/auth/doesnotexist'));
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+
+    // -------------------------------------------------------------------------
+    // Invalid state → AuthenticationException → error page
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function invalid_state_returns_401_error_page(): void
+    {
+        $this->mockGitlabProvider(99991, 'any@example.com');
+
+        // Get the initial redirect to capture session cookies, but use a wrong state.
+        $init = $this->send($this->request('GET', '/auth/gitlab'));
+        $this->assertEquals(302, $init->getStatusCode());
+
         $response = $this->send(
-            $this->request('GET', '/api')->withCookieParams($cookies)
+            $this->request('GET', '/auth/gitlab')
+                ->withQueryParams(['code' => 'some-code', 'state' => 'WRONG_STATE'])
+                ->withCookieParams($this->toRequestCookies($init))
         );
 
-        $this->assertEquals(200, $response->getStatusCode());
-
-        $body = json_decode($response->getBody()->getContents(), true);
-
-        // get user from included
-        $user = array_filter($body['included'], function ($item) {
-            return $item['type'] === 'users';
-        });
-
-        $user = array_values($user)[0];
-        $this->assertArrayHasKey('loginProvider', $user['attributes']);
-        $this->assertEquals($value, $user['attributes']['loginProvider']);
+        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertStringNotContainsString('window.close()', (string) $response->getBody());
     }
 
-    private function mockProvider(string $identifier, string $email): void
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Run a complete OAuth flow (initial redirect → callback with code+state).
+     * Returns [redirectLocation, responseCookies].
+     */
+    private function runOAuthFlow(string $authPath, string $returnTo): array
+    {
+        $initRequest = $this->request('GET', $authPath)
+            ->withQueryParams(['returnTo' => $returnTo]);
+
+        $init = $this->send($initRequest);
+        $this->assertEquals(302, $init->getStatusCode(), 'Expected initial redirect to provider');
+
+        $location = $init->getHeaderLine('Location');
+        parse_str(parse_url($location, PHP_URL_QUERY) ?? '', $qs);
+
+        $callbackRequest = $this->request('GET', $authPath)
+            ->withQueryParams(['code' => 'code:abc', 'state' => $qs['state']])
+            ->withCookieParams($this->toRequestCookies($init));
+
+        $callback = $this->send($callbackRequest);
+        $this->assertEquals(302, $callback->getStatusCode(), 'Expected redirect after callback');
+
+        return [
+            $callback->getHeaderLine('Location'),
+            $this->toRequestCookies($callback),
+        ];
+    }
+
+    private function mockGitlabProvider(int $id, string $email): void
     {
         $container = $this->app()->getContainer();
 
-        $mockProvider = $this->getMockBuilder(Gitlab::class)
-            ->setConstructorArgs([
+        $mockLeague = $this->getMockBuilder(Gitlab::class)
+            ->setConstructorArgs([[
                 'options' => [
                     'clientId'     => 'test',
                     'clientSecret' => 'test',
                     'redirectUri'  => 'http://localhost/auth/gitlab',
                 ],
-            ])
+            ]])
             ->onlyMethods(['getAccessToken', 'getResourceOwner'])
             ->getMock();
 
-        $accessToken = new AccessToken(['access_token' => '123456', 'expires' => time() + 3600]);
-        $mockProvider->method('getAccessToken')->willReturn(
-            $accessToken
-        );
-        $mockProvider->method('getResourceOwner')->willReturn(
-            new GitlabResourceOwner(['id' => $identifier, 'email' => $email], $accessToken)
+        $accessToken = new AccessToken(['access_token' => 'tok', 'expires' => time() + 3600]);
+        $mockLeague->method('getAccessToken')->willReturn($accessToken);
+        $mockLeague->method('getResourceOwner')->willReturn(
+            new GitlabResourceOwner(['id' => $id, 'email' => $email, 'username' => 'testuser'], $accessToken)
         );
 
         $mockFofProvider = $this->getMockBuilder(\FoF\OAuth\Providers\GitLab::class)
-            ->setConstructorArgs([
-                'settings' => $container->make(SettingsRepositoryInterface::class),
-            ])
+            ->setConstructorArgs(['settings' => $container->make(SettingsRepositoryInterface::class)])
             ->onlyMethods(['provider'])
             ->getMock();
-        $mockFofProvider->method('provider')->willReturn($mockProvider);
+        $mockFofProvider->method('provider')->willReturn($mockLeague);
 
-        $this->app()->getContainer()->instance(\FoF\OAuth\Providers\GitLab::class, $mockFofProvider);
+        $container->instance(\FoF\OAuth\Providers\GitLab::class, $mockFofProvider);
     }
 
-    protected function toRequestCookies(ResponseInterface $response): array
+    private function toRequestCookies(ResponseInterface $response): array
     {
-        $responseCookies = [];
+        $cookies = [];
         foreach (SetCookies::fromResponse($response)->getAll() as $cookie) {
-            $responseCookies[$cookie->getName()] = $cookie->getValue();
+            $cookies[$cookie->getName()] = $cookie->getValue();
         }
 
-        return $responseCookies;
+        return $cookies;
     }
 }

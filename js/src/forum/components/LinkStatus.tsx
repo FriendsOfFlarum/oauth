@@ -7,7 +7,6 @@ import User from 'flarum/common/models/User';
 import ProviderInfo from './ProviderInfo';
 import extractText from 'flarum/common/utils/extractText';
 import Icon from 'flarum/common/components/Icon';
-import LogInButton from 'flarum/forum/components/LogInButton';
 
 export interface ILinkStatusAttrs extends ComponentAttrs {
   provider: LinkedAccount;
@@ -23,17 +22,6 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
   state = {
     loading: false,
   };
-
-  onbeforeupdate(vnode: Mithril.Vnode<ILinkStatusAttrs, this>) {
-    super.onbeforeupdate(vnode);
-    if (app.fof_oauth_linkingInProgress && app.fof_oauth_linkingProvider === this.attrs.provider.name()) {
-      this.state.loading = true;
-    } else if (app.fof_oauth_linkingInProgress === false && app.fof_oauth_linkingProvider === this.attrs.provider.name()) {
-      this.state.loading = false;
-      delete app.fof_oauth_linkingInProgress;
-      delete app.fof_oauth_linkingProvider;
-    }
-  }
 
   view(): Mithril.Children {
     return (
@@ -77,19 +65,24 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
         </div>
       );
     } else if (!provider.orphaned() && (user.id() === app.session.user?.id() || !app.forum.attribute<boolean>('fofOauthModerate'))) {
+      const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+      const linkUrl = `${app.forum.attribute<string>('baseUrl')}/auth/${provider.name()}?linkTo=${user.id()}&returnTo=${returnTo}`;
+
       return (
         <div className="LinkedAccountsList-item-actions">
-          <LogInButton
+          <Button
             className={`Button FoFLogInButton LogInButton--${provider.name()}`}
             icon={provider.icon()}
-            provider={provider.name()}
-            path={`/auth/${provider.name()}?linkTo=${user.id()}`}
+            onclick={(e: MouseEvent) => {
+              e.preventDefault();
+              window.location.href = linkUrl;
+            }}
             loading={this.state.loading}
           >
             {app.translator.trans(`fof-oauth.forum.log_in.with_${provider.name()}_button`, {
               provider: app.translator.trans(`fof-oauth.forum.providers.${provider.name()}`),
             })}
-          </LogInButton>
+          </Button>
         </div>
       );
     }

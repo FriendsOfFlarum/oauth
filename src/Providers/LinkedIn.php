@@ -41,6 +41,11 @@ class LinkedIn extends Provider
         ];
     }
 
+    public function pkceEnabled(): bool
+    {
+        return false;
+    }
+
     public function provider(string $redirectUri): AbstractProvider
     {
         return $this->provider = new LinkedInProvider([

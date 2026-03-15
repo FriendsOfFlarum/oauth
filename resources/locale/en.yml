@@ -19,13 +19,6 @@ fof-oauth:
       disable_avatars_help: >
         If enabled, the user's avatar will not be updated to match the provider's avatar on signup.
         Note that this only affects future signups, and will not change the avatar of existing users.
-      fullscreen_popup_label: Use Fullscreen Popup for OAuth
-      fullscreen_popup_help: When enabled, the OAuth login will open in a fullscreen popup. If this is enabled, the width and height settings will be ignored.
-      popup_width_label: OAuth Popup Width
-      popup_width_help: Set the width of the OAuth popup window. This setting will be ignored if "Use Fullscreen Popup for OAuth" is enabled.
-      popup_height_label: OAuth Popup Height
-      popup_height_help: Set the height of the OAuth popup window. This setting will be ignored if "Use Fullscreen Popup for OAuth" is enabled.
-
       providers:
         callback_url_text: If necessary, set the callback URL to {url}.
         group_label: Assign Group
@@ -57,12 +50,6 @@ fof-oauth:
           client_secret_label: => fof-oauth.ref.settings.app_secret
           domain_label: GitLab Domain
 
-        twitter:
-          description: Create an app at {link}. You will need to set a Terms of Service URL and a Privacy Policy URL. Make sure to then add the request email permission.
-
-          api_key_label: API Key
-          api_secret_label: API Secret
-
         google:
           description: Create an application at {link}.
 
@@ -88,7 +75,6 @@ fof-oauth:
       with_gitlab_button: '=> fof-oauth.forum.log_in.with_button'
       with_google_button: '=> fof-oauth.forum.log_in.with_button'
       with_linkedin_button: '=> fof-oauth.forum.log_in.with_button'
-      with_twitter_button: '=> fof-oauth.forum.log_in.with_button'
 
     user:
       settings:
@@ -110,7 +96,11 @@ fof-oauth:
       gitlab: '=> fof-oauth.lib.providers.gitlab'
       google: '=> fof-oauth.lib.providers.google'
       linkedin: '=> fof-oauth.lib.providers.linkedin'
-      twitter: '=> fof-oauth.lib.providers.twitter'
+
+    account_linked:
+      title: Account linked
+      body: "Your {forum} account <strong>{username}</strong> is now linked with {provider}. You can sign in using either your forum password or {provider} going forward."
+      dismiss_button: Got it
 
     signup:
       username_help: Please choose a username to be known by here
@@ -128,7 +118,6 @@ fof-oauth:
       facebook: Facebook
       github: GitHub
       gitlab: GitLab
-      twitter: Twitter
       google: Google
       linkedin: LinkedIn
 

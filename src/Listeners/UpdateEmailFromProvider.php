@@ -12,7 +12,7 @@
 namespace FoF\OAuth\Listeners;
 
 use Flarum\Settings\SettingsRepositoryInterface;
-use FoF\Extend\Events\OAuthLoginSuccessful;
+use FoF\OAuth\Events\OAuthLoginSuccessful;
 use FoF\OAuth\Jobs\CheckAndUpdateUserEmail;
 use Illuminate\Contracts\Bus\Dispatcher;
 
