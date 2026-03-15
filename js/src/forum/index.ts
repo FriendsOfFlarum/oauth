@@ -9,7 +9,8 @@ app.initializers.add('fof/oauth', () => {
   addLinkedAccountsToUserSecurityPage();
 
   // Detect the _flarum_auth query parameter added by ResponseFactory after a
-  // new-user OAuth callback. Strip it from the URL and open the SignUpModal.
+  // new-user OAuth callback. Strip it from the URL, fetch the token data from
+  // the API to pre-populate the SignUpModal, then open the modal.
   const params = new URLSearchParams(window.location.search);
   const authToken = params.get('_flarum_auth');
 
@@ -19,9 +20,29 @@ app.initializers.add('fof/oauth', () => {
     const clean = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
     window.history.replaceState({}, '', clean);
 
-    // Defer until after app.mount() has run so the modal manager is mounted.
-    setTimeout(() => {
-      app.modal.show(() => import('flarum/forum/components/SignUpModal'), { token: authToken });
+    // Defer until after app.mount() has run so the modal manager is mounted,
+    // then resolve the token to username/email/provided before showing the modal.
+    setTimeout(async () => {
+      let modalAttrs: Record<string, unknown> = { token: authToken };
+
+      try {
+        const response = await app.request<{ data: { attributes: { username?: string; email?: string; provided?: string[] } } }>({
+          method: 'GET',
+          url: app.forum.attribute<string>('apiUrl') + '/registration-tokens/' + authToken,
+        });
+        const attrs = response?.data?.attributes ?? {};
+        modalAttrs = {
+          token: authToken,
+          username: attrs.username ?? '',
+          email: attrs.email ?? '',
+          provided: attrs.provided ?? [],
+        };
+      } catch {
+        // If the fetch fails (e.g. token already used), fall back to opening
+        // the modal with just the token — it will show empty fields.
+      }
+
+      app.modal.show(() => import('flarum/forum/components/SignUpModal'), modalAttrs);
     }, 0);
   }
 });
