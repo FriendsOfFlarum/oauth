@@ -160,7 +160,8 @@ class LinkedAccountsTest extends TestCase
             )->withQueryParams(['filter' => ['userId' => 3]])
         );
 
-        $this->assertEquals(403, $response->getStatusCode());
+        // 404 rather than 403: deliberately does not reveal that the resource exists.
+        $this->assertEquals(404, $response->getStatusCode());
     }
 
     // -------------------------------------------------------------------------
@@ -193,6 +194,40 @@ class LinkedAccountsTest extends TestCase
 
         $this->assertContains($response->getStatusCode(), [403, 404]);
         $this->assertTrue(LoginProvider::where('id', 1)->exists());
+    }
+
+    #[Test]
+    public function admin_viewing_another_users_accounts_sees_that_users_accounts_not_their_own(): void
+    {
+        // Admin (user 1) has NO login providers.
+        // User 3 has github + google linked.
+        // When admin queries filter[userId]=3 they must get user 3's accounts, not their own.
+        $response = $this->send(
+            $this->requestAsUser(
+                $this->request('GET', '/api/linked-accounts'),
+                1  // admin, no providers
+            )->withQueryParams(['filter' => ['userId' => 3]])
+        );
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $body = json_decode($response->getBody()->getContents(), true);
+        $accounts = $body['data'];
+
+        // Every returned record must belong to user 3, not user 1.
+        foreach ($accounts as $account) {
+            $this->assertEquals('3', $account['attributes']['userId'],
+                "Account {$account['attributes']['name']} has userId {$account['attributes']['userId']}, expected 3"
+            );
+        }
+
+        // The two linked providers for user 3 must be present and flagged as linked.
+        $linked = array_filter($accounts, fn ($a) => $a['attributes']['linked'] === true);
+        $this->assertCount(2, $linked, 'Expected exactly 2 linked accounts for user 3');
+
+        $names = array_column(array_column($linked, 'attributes'), 'name');
+        $this->assertContains('github', $names);
+        $this->assertContains('google', $names);
     }
 
     #[Test]
