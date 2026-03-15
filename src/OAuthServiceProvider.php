@@ -57,7 +57,7 @@ class OAuthServiceProvider extends AbstractServiceProvider
 
             /** @var Cache $cache */
             $cache = $container->make(Cache::class);
-            $key   = 'fof-oauth.providers.forum';
+            $key = 'fof-oauth.providers.forum';
 
             return $cache->get($key) ?? tap($this->mapProviders(), fn ($data) => $cache->forever($key, $data));
         });
@@ -72,7 +72,7 @@ class OAuthServiceProvider extends AbstractServiceProvider
 
             /** @var Cache $cache */
             $cache = $container->make(Cache::class);
-            $key   = 'fof-oauth.providers.admin';
+            $key = 'fof-oauth.providers.admin';
 
             return $cache->get($key) ?? tap($this->mapProviders(true), fn ($data) => $cache->forever($key, $data));
         });

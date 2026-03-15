@@ -277,6 +277,7 @@ class AuthenticationFlowTest extends TestCase
         foreach (SetCookies::fromResponse($response)->getAll() as $cookie) {
             $cookies[$cookie->getName()] = $cookie->getValue();
         }
+
         return $cookies;
     }
 }

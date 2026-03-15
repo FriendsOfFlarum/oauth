@@ -12,7 +12,6 @@
 namespace FoF\OAuth\Tests\integration;
 
 use Dflydev\FigCookies\SetCookies;
-use Flarum\Http\AccessToken;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
@@ -237,6 +236,7 @@ class AccountLinkingTest extends TestCase
         foreach (SetCookies::fromResponse($response)->getAll() as $cookie) {
             $cookies[$cookie->getName()] = $cookie->getValue();
         }
+
         return $cookies;
     }
 }

@@ -103,5 +103,4 @@ abstract class Provider
 
         $registration->provideAvatar($url);
     }
-
 }

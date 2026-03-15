@@ -13,11 +13,11 @@ namespace FoF\OAuth\Tests\unit;
 
 use Flarum\Forum\Auth\Registration;
 use Flarum\Settings\SettingsRepositoryInterface;
+use Flarum\Testing\unit\TestCase;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use Mockery as m;
 use PHPUnit\Framework\Attributes\Test;
-use Flarum\Testing\unit\TestCase;
 
 class ProviderTest extends TestCase
 {

@@ -32,7 +32,7 @@ class RegisterProvider implements ExtenderInterface
 
         if (!$instance instanceof Provider) {
             throw new InvalidArgumentException(
-                "{$this->provider} must extend " . Provider::class
+                "{$this->provider} must extend ".Provider::class
             );
         }
 
@@ -42,7 +42,7 @@ class RegisterProvider implements ExtenderInterface
             if ($existing->name() === $instance->name()) {
                 throw new RuntimeException(
                     "OAuth provider '{$instance->name()}' is already registered. "
-                    . "Each provider name must be unique across all extensions."
+                    .'Each provider name must be unique across all extensions.'
                 );
             }
         }

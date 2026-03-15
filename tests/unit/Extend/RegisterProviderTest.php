@@ -17,7 +17,6 @@ use FoF\OAuth\Provider;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\Container as ContainerContract;
 use InvalidArgumentException;
-use League\OAuth2\Client\Provider\AbstractProvider as LeagueProvider;
 use Mockery as m;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -33,7 +32,7 @@ class RegisterProviderTest extends TestCase
 
     private function makeProviderClass(string $name, ContainerContract $container): string
     {
-        $className = 'TestProvider_' . $name . '_' . uniqid();
+        $className = 'TestProvider_'.$name.'_'.uniqid();
 
         // Dynamically define a provider class with the given name.
         eval(<<<PHP

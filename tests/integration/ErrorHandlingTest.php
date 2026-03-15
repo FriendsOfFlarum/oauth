@@ -12,12 +12,8 @@
 namespace FoF\OAuth\Tests\integration;
 
 use Dflydev\FigCookies\SetCookies;
-use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use League\OAuth2\Client\Token\AccessToken;
-use Omines\OAuth2\Client\Provider\Gitlab;
-use Omines\OAuth2\Client\Provider\GitlabResourceOwner;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ResponseInterface;
 
@@ -88,6 +84,7 @@ class ErrorHandlingTest extends TestCase
         foreach (SetCookies::fromResponse($response)->getAll() as $cookie) {
             $cookies[$cookie->getName()] = $cookie->getValue();
         }
+
         return $cookies;
     }
 }

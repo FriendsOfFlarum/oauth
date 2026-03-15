@@ -13,7 +13,6 @@ namespace FoF\OAuth\Tests\unit\Controllers;
 
 use Flarum\Testing\unit\TestCase;
 use FoF\OAuth\Controllers\AbstractOAuthController;
-use FoF\OAuth\Errors\AuthenticationException;
 use Illuminate\Session\Store;
 use Mockery as m;
 use PHPUnit\Framework\Attributes\Test;
@@ -37,7 +36,7 @@ class AbstractOAuthControllerTest extends TestCase
      */
     private function controller(): object
     {
-        return new class extends AbstractOAuthController {
+        return new class() extends AbstractOAuthController {
             public function __construct()
             {
                 // No-op: we only test the concrete methods, not the full flow.
@@ -48,13 +47,39 @@ class AbstractOAuthControllerTest extends TestCase
                 return $this->validateReturnTo($returnTo, $request);
             }
 
-            protected function getRouteName(): string { return 'fof-oauth'; }
-            protected function getProvider(string $r): \League\OAuth2\Client\Provider\AbstractProvider { return m::mock(\League\OAuth2\Client\Provider\AbstractProvider::class); }
-            protected function getProviderName(): string { return 'test'; }
-            protected function getAuthorizationUrlOptions(): array { return []; }
-            protected function isPkceEnabled(): bool { return false; }
-            protected function getIdentifier($user): string { return ''; }
-            protected function setSuggestions(\Flarum\Forum\Auth\Registration $r, $user, string $token): void {}
+            protected function getRouteName(): string
+            {
+                return 'fof-oauth';
+            }
+
+            protected function getProvider(string $r): \League\OAuth2\Client\Provider\AbstractProvider
+            {
+                return m::mock(\League\OAuth2\Client\Provider\AbstractProvider::class);
+            }
+
+            protected function getProviderName(): string
+            {
+                return 'test';
+            }
+
+            protected function getAuthorizationUrlOptions(): array
+            {
+                return [];
+            }
+
+            protected function isPkceEnabled(): bool
+            {
+                return false;
+            }
+
+            protected function getIdentifier($user): string
+            {
+                return '';
+            }
+
+            protected function setSuggestions(\Flarum\Forum\Auth\Registration $r, $user, string $token): void
+            {
+            }
         };
     }
 

@@ -156,7 +156,7 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
             $verifier = rtrim(strtr(base64_encode(random_bytes(64)), '+/', '-_'), '=');
             $provider->setPkceCode($verifier);
             $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
-            $options['code_challenge']        = $challenge;
+            $options['code_challenge'] = $challenge;
             $options['code_challenge_method'] = 'S256';
         }
 
@@ -213,7 +213,7 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
     protected function validateState(Store $session, ServerRequestInterface $request): void
     {
         $returnedState = Arr::get($request->getQueryParams(), 'state');
-        $savedState    = $this->get(self::SESSION_OAUTH2STATE, $session);
+        $savedState = $this->get(self::SESSION_OAUTH2STATE, $session);
 
         $this->forget(self::SESSION_OAUTH2STATE, $session);
 
@@ -231,7 +231,7 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
         ResourceOwnerInterface $resourceOwner,
         Store $session
     ): ResponseInterface {
-        $actor    = RequestUtil::getActor($request);
+        $actor = RequestUtil::getActor($request);
         $returnTo = $this->get(self::SESSION_RETURN_TO, $session) ?: '/';
 
         $this->forget(self::SESSION_RETURN_TO, $session);
@@ -383,7 +383,7 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
 
     /**
      * Return the route name used to build the OAuth callback redirect URI.
-     * Example: 'fof-oauth'
+     * Example: 'fof-oauth'.
      */
     abstract protected function getRouteName(): string;
 
@@ -394,7 +394,7 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
 
     /**
      * Return the provider name string as stored in `login_providers.provider`.
-     * Example: 'github', 'google'
+     * Example: 'github', 'google'.
      */
     abstract protected function getProviderName(): string;
 
