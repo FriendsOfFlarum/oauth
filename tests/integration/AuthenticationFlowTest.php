@@ -53,8 +53,8 @@ class AuthenticationFlowTest extends TestCase
                     'joined_at'          => '2021-01-01 00:00:00',
                 ],
             ],
-            'login_providers' => [
-                ['id' => 1, 'user_id' => 3, 'provider' => 'gitlab', 'identifier' => 'gitlab-user-existing'],
+            LoginProvider::class => [
+                ['id' => 1, 'user_id' => 3, 'provider' => 'gitlab', 'identifier' => '12345', 'created_at' => '2021-01-01 00:00:00'],
             ],
         ]);
 
@@ -70,21 +70,21 @@ class AuthenticationFlowTest extends TestCase
     #[Test]
     public function existing_user_is_redirected_and_receives_remember_cookie(): void
     {
-        $this->mockGitlabProvider('gitlab-user-existing', 'existing@machine.local');
+        $this->mockGitlabProvider(12345, 'existing@machine.local');
 
         [$redirectUrl, $cookies] = $this->runOAuthFlow('/auth/gitlab', '/');
 
         $this->assertStringStartsWith('/', $redirectUrl);
         $this->assertNotEmpty($cookies);
 
-        $rememberCookie = array_filter($cookies, fn ($n) => $n === 'remember', ARRAY_FILTER_USE_KEY);
+        $rememberCookie = array_filter($cookies, fn ($n) => str_ends_with($n, 'remember'), ARRAY_FILTER_USE_KEY);
         $this->assertNotEmpty($rememberCookie);
     }
 
     #[Test]
     public function existing_user_is_redirected_to_returnTo(): void
     {
-        $this->mockGitlabProvider('gitlab-user-existing', 'existing@machine.local');
+        $this->mockGitlabProvider(12345, 'existing@machine.local');
 
         [$redirectUrl] = $this->runOAuthFlow('/auth/gitlab', '/d/42-some-discussion');
 
@@ -94,7 +94,7 @@ class AuthenticationFlowTest extends TestCase
     #[Test]
     public function last_login_at_is_updated_on_login(): void
     {
-        $this->mockGitlabProvider('gitlab-user-existing', 'existing@machine.local');
+        $this->mockGitlabProvider(12345, 'existing@machine.local');
 
         $before = LoginProvider::find(1)->last_login_at;
 
@@ -111,18 +111,19 @@ class AuthenticationFlowTest extends TestCase
     #[Test]
     public function email_match_auto_links_and_redirects(): void
     {
-        $this->mockGitlabProvider('gitlab-brand-new-id', 'emailmatch@machine.local');
+        $this->mockGitlabProvider(99999, 'emailmatch@machine.local');
 
         [$redirectUrl, $cookies] = $this->runOAuthFlow('/auth/gitlab', '/settings');
 
-        $this->assertEquals('/settings', $redirectUrl);
-        $this->assertNotEmpty(array_filter($cookies, fn ($n) => $n === 'remember', ARRAY_FILTER_USE_KEY));
+        $this->assertStringStartsWith('/settings', $redirectUrl);
+        $this->assertStringContainsString('_flarum_linked=gitlab', $redirectUrl);
+        $this->assertNotEmpty(array_filter($cookies, fn ($n) => str_ends_with($n, 'remember'), ARRAY_FILTER_USE_KEY));
 
         // Login provider should now exist for user 4
         $this->assertTrue(
             LoginProvider::where('user_id', 4)
                 ->where('provider', 'gitlab')
-                ->where('identifier', 'gitlab-brand-new-id')
+                ->where('identifier', '99999')
                 ->exists()
         );
     }
@@ -134,7 +135,7 @@ class AuthenticationFlowTest extends TestCase
     #[Test]
     public function new_user_redirect_contains_flarum_auth_param(): void
     {
-        $this->mockGitlabProvider('gitlab-never-seen', 'brandnew@example.com');
+        $this->mockGitlabProvider(11111, 'brandnew@example.com');
 
         [$redirectUrl, $cookies] = $this->runOAuthFlow('/auth/gitlab', '/');
 
@@ -146,7 +147,7 @@ class AuthenticationFlowTest extends TestCase
     #[Test]
     public function new_user_registration_token_is_persisted(): void
     {
-        $this->mockGitlabProvider('gitlab-never-seen-2', 'another@example.com');
+        $this->mockGitlabProvider(22222, 'another@example.com');
 
         [$redirectUrl] = $this->runOAuthFlow('/auth/gitlab', '/');
 
@@ -159,7 +160,7 @@ class AuthenticationFlowTest extends TestCase
     #[Test]
     public function new_user_flarum_auth_param_appended_to_returnTo(): void
     {
-        $this->mockGitlabProvider('gitlab-never-seen-3', 'third@example.com');
+        $this->mockGitlabProvider(33333, 'third@example.com');
 
         [$redirectUrl] = $this->runOAuthFlow('/auth/gitlab', '/d/99-thread');
 
@@ -193,7 +194,7 @@ class AuthenticationFlowTest extends TestCase
     #[Test]
     public function invalid_state_returns_401_error_page(): void
     {
-        $this->mockGitlabProvider('any', 'any@example.com');
+        $this->mockGitlabProvider(99991, 'any@example.com');
 
         // Get the initial redirect to capture session cookies, but use a wrong state.
         $init = $this->send($this->request('GET', '/auth/gitlab'));
@@ -241,7 +242,7 @@ class AuthenticationFlowTest extends TestCase
         ];
     }
 
-    private function mockGitlabProvider(string $identifier, string $email): void
+    private function mockGitlabProvider(int $id, string $email): void
     {
         $container = $this->app()->getContainer();
 
@@ -259,7 +260,7 @@ class AuthenticationFlowTest extends TestCase
         $accessToken = new AccessToken(['access_token' => 'tok', 'expires' => time() + 3600]);
         $mockLeague->method('getAccessToken')->willReturn($accessToken);
         $mockLeague->method('getResourceOwner')->willReturn(
-            new GitlabResourceOwner(['id' => $identifier, 'email' => $email], $accessToken)
+            new GitlabResourceOwner(['id' => $id, 'email' => $email, 'username' => 'testuser'], $accessToken)
         );
 
         $mockFofProvider = $this->getMockBuilder(\FoF\OAuth\Providers\GitLab::class)

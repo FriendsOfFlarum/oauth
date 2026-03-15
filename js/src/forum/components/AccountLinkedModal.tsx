@@ -30,9 +30,11 @@ export default class AccountLinkedModal extends Modal<IAccountLinkedModalAttrs> 
 
     return (
       <div className="Modal-body">
-        <div className="AccountLinkedModal-user">
-          <Avatar user={user} />
-          <span className="AccountLinkedModal-username">{user.displayName()}</span>
+        <div className="AccountLinkedModal-user" style="text-align: center; margin-bottom: 1rem;">
+          <Avatar user={user} style="display: block; margin: 0 auto 0.5rem;" />
+          <span className="AccountLinkedModal-username" style="display: block; font-weight: bold;">
+            {user.displayName()}
+          </span>
         </div>
         <p className="AccountLinkedModal-body">
           {app.translator.trans('fof-oauth.forum.account_linked.body', {

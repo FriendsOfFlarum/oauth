@@ -52,9 +52,9 @@ class AccountLinkingTest extends TestCase
                     'joined_at'          => '2021-01-01 00:00:00',
                 ],
             ],
-            'login_providers' => [
+            LoginProvider::class => [
                 // user 4 already has gitlab linked to a different identifier
-                ['id' => 1, 'user_id' => 4, 'provider' => 'gitlab', 'identifier' => 'userb-gitlab-id'],
+                ['id' => 1, 'user_id' => 4, 'provider' => 'gitlab', 'identifier' => '55555', 'created_at' => '2021-01-01 00:00:00'],
             ],
         ]);
 
@@ -70,16 +70,16 @@ class AccountLinkingTest extends TestCase
     #[Test]
     public function authenticated_user_can_link_provider_account(): void
     {
-        $this->mockGitlabProvider('new-gitlab-id-for-usera', 'usera@machine.local');
+        $this->mockGitlabProvider(44444, 'usera@machine.local');
 
-        [$location] = $this->runLinkFlow(userId: 3, providerIdentifier: 'new-gitlab-id-for-usera', returnTo: '/settings');
+        [$location] = $this->runLinkFlow(userId: 3, providerId: 44444, returnTo: '/settings');
 
         $this->assertStringStartsWith('/settings', $location);
 
         $this->assertTrue(
             LoginProvider::where('user_id', 3)
                 ->where('provider', 'gitlab')
-                ->where('identifier', 'new-gitlab-id-for-usera')
+                ->where('identifier', '44444')
                 ->exists()
         );
     }
@@ -87,11 +87,12 @@ class AccountLinkingTest extends TestCase
     #[Test]
     public function link_redirects_to_returnTo(): void
     {
-        $this->mockGitlabProvider('another-new-id', 'usera@machine.local');
+        $this->mockGitlabProvider(66666, 'usera@machine.local');
 
-        [$location] = $this->runLinkFlow(userId: 3, providerIdentifier: 'another-new-id', returnTo: '/u/UserA/security');
+        [$location] = $this->runLinkFlow(userId: 3, providerId: 66666, returnTo: '/u/UserA/security');
 
-        $this->assertEquals('/u/UserA/security', $location);
+        $this->assertStringStartsWith('/u/UserA/security', $location);
+        $this->assertStringContainsString('_flarum_linked=gitlab', $location);
     }
 
     // -------------------------------------------------------------------------
@@ -101,7 +102,7 @@ class AccountLinkingTest extends TestCase
     #[Test]
     public function link_fails_when_linkTo_user_id_does_not_match_actor(): void
     {
-        $this->mockGitlabProvider('some-new-id', 'usera@machine.local');
+        $this->mockGitlabProvider(77777, 'usera@machine.local');
 
         // User 3 tries to link as user 4 — mismatch.
         $initRequest = $this->requestAsUser(
@@ -115,14 +116,13 @@ class AccountLinkingTest extends TestCase
         $location = $init->getHeaderLine('Location');
         parse_str(parse_url($location, PHP_URL_QUERY) ?? '', $qs);
 
-        $callbackRequest = $this->requestAsUser(
+        $callbackCookies = array_merge($initRequest->getCookieParams(), $this->toRequestCookies($init));
+        $callback = $this->send(
             $this->request('GET', '/auth/gitlab')
                 ->withQueryParams(['code' => 'code:abc', 'state' => $qs['state']])
-                ->withCookieParams($this->toRequestCookies($init)),
-            3
+                ->withCookieParams($callbackCookies)
+                ->withAttribute('bypassCsrfToken', true)
         );
-
-        $callback = $this->send($callbackRequest);
 
         // Expect an error response (401) due to user mismatch.
         $this->assertEquals(401, $callback->getStatusCode());
@@ -135,8 +135,8 @@ class AccountLinkingTest extends TestCase
     #[Test]
     public function link_fails_when_provider_already_linked_to_another_user(): void
     {
-        // userb-gitlab-id is already linked to user 4. Try to link it to user 3.
-        $this->mockGitlabProvider('userb-gitlab-id', 'usera@machine.local');
+        // 55555 is already linked to user 4. Try to link it to user 3.
+        $this->mockGitlabProvider(55555, 'usera@machine.local');
 
         $initRequest = $this->requestAsUser(
             $this->request('GET', '/auth/gitlab')->withQueryParams(['linkTo' => 3, 'returnTo' => '/settings']),
@@ -147,13 +147,12 @@ class AccountLinkingTest extends TestCase
         $location = $init->getHeaderLine('Location');
         parse_str(parse_url($location, PHP_URL_QUERY) ?? '', $qs);
 
+        $callbackCookies = array_merge($initRequest->getCookieParams(), $this->toRequestCookies($init));
         $callback = $this->send(
-            $this->requestAsUser(
-                $this->request('GET', '/auth/gitlab')
-                    ->withQueryParams(['code' => 'code:abc', 'state' => $qs['state']])
-                    ->withCookieParams($this->toRequestCookies($init)),
-                3
-            )
+            $this->request('GET', '/auth/gitlab')
+                ->withQueryParams(['code' => 'code:abc', 'state' => $qs['state']])
+                ->withCookieParams($callbackCookies)
+                ->withAttribute('bypassCsrfToken', true)
         );
 
         $this->assertEquals(401, $callback->getStatusCode());
@@ -167,10 +166,11 @@ class AccountLinkingTest extends TestCase
      * Run a full account-linking OAuth flow as the given user.
      * Returns [redirectLocation, cookies].
      */
-    private function runLinkFlow(int $userId, string $providerIdentifier, string $returnTo): array
+    private function runLinkFlow(int $userId, int $providerId, string $returnTo): array
     {
-        $this->mockGitlabProvider($providerIdentifier, 'usera@machine.local');
+        $this->mockGitlabProvider($providerId, 'usera@machine.local');
 
+        // The init request must be authenticated so linkTo validation passes.
         $initRequest = $this->requestAsUser(
             $this->request('GET', '/auth/gitlab')
                 ->withQueryParams(['linkTo' => $userId, 'returnTo' => $returnTo]),
@@ -183,16 +183,26 @@ class AccountLinkingTest extends TestCase
         $location = $init->getHeaderLine('Location');
         parse_str(parse_url($location, PHP_URL_QUERY) ?? '', $qs);
 
+        // The callback must carry:
+        //   - The flarum_session cookie from the init response (so the OAuth state and
+        //     linkTo values stored in the cache can be retrieved using the same session ID).
+        //   - The SAME flarum_remember cookie that was used in the init request (token_A),
+        //     NOT a new one — because RememberFromCookie compares session.access_token against
+        //     the cookie token and invalidates the session (regenerating its ID) when they differ.
+        //     The init request wrote token_A into the session; a new token_B would cause a mismatch.
+        $sessionCookies = $this->toRequestCookies($init);          // flarum_session=<id>
+        $initRequestCookies = $initRequest->getCookieParams();      // flarum_remember=<token_A>
+        $callbackCookies = array_merge($initRequestCookies, $sessionCookies);
+
         $callback = $this->send(
-            $this->requestAsUser(
-                $this->request('GET', '/auth/gitlab')
-                    ->withQueryParams(['code' => 'code:abc', 'state' => $qs['state']])
-                    ->withCookieParams($this->toRequestCookies($init)),
-                $userId
-            )
+            $this->request('GET', '/auth/gitlab')
+                ->withQueryParams(['code' => 'code:abc', 'state' => $qs['state']])
+                ->withCookieParams($callbackCookies)
+                ->withAttribute('bypassCsrfToken', true)
         );
 
-        $this->assertEquals(302, $callback->getStatusCode());
+        $body = $callback->getBody()->getContents();
+        $this->assertEquals(302, $callback->getStatusCode(), 'body: '.strip_tags($body));
 
         return [
             $callback->getHeaderLine('Location'),
@@ -200,7 +210,7 @@ class AccountLinkingTest extends TestCase
         ];
     }
 
-    private function mockGitlabProvider(string $identifier, string $email): void
+    private function mockGitlabProvider(int $id, string $email): void
     {
         $container = $this->app()->getContainer();
 
@@ -218,7 +228,7 @@ class AccountLinkingTest extends TestCase
         $token = new OAuthToken(['access_token' => 'tok', 'expires' => time() + 3600]);
         $mockLeague->method('getAccessToken')->willReturn($token);
         $mockLeague->method('getResourceOwner')->willReturn(
-            new GitlabResourceOwner(['id' => $identifier, 'email' => $email], $token)
+            new GitlabResourceOwner(['id' => $id, 'email' => $email, 'username' => 'testuser'], $token)
         );
 
         $mockFofProvider = $this->getMockBuilder(\FoF\OAuth\Providers\GitLab::class)
