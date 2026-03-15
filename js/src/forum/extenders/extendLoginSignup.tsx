@@ -4,9 +4,7 @@ import LogInButtons from 'flarum/forum/components/LogInButtons';
 import LogInButton from 'flarum/forum/components/LogInButton';
 import extractText from 'flarum/common/utils/extractText';
 import Tooltip from 'flarum/common/components/Tooltip';
-import { openOAuthPopup } from '../utils/popupUtils';
 
-import type LinkedAccount from '../models/LinkedAccount';
 import type Mithril from 'mithril';
 import type ItemList from 'flarum/common/utils/ItemList';
 
@@ -16,13 +14,25 @@ export type OAuthProvider = {
   priority: number;
 } | null;
 
-export default function () {
-  extend(LogInButton, 'initAttrs', function (_returnedValue, attrs) {
-    attrs.onclick = function () {
-      // Used to show a loading state in the Security page.
-      if (attrs.provider) app.fof_oauth_linkingProvider = attrs.provider;
+/**
+ * Build the OAuth authorization URL for a given provider path.
+ * Appends returnTo so the server can redirect back after auth.
+ */
+function oauthUrl(path: string): string {
+  const base = app.forum.attribute<string>('baseUrl');
+  const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+  return `${base}${path}?returnTo=${returnTo}`;
+}
 
-      openOAuthPopup(app, attrs);
+export default function () {
+  // Replace the popup onclick with a full-page navigation.
+  override(LogInButton, 'initAttrs', function (original, attrs) {
+    original(attrs);
+
+    // Override whatever onclick the parent set — we navigate instead of opening a popup.
+    attrs.onclick = function (e: MouseEvent) {
+      e.preventDefault();
+      window.location.href = oauthUrl(attrs.path);
     };
   });
 
@@ -41,7 +51,7 @@ export default function () {
       items.add(
         name,
         <div className={`LogInButtonContainer LogInButtonContainer--${name}`}>
-          <LogInButton className={className} icon={icon} path={`/auth/${name}`} disabled={app.fof_oauth_loginInProgress}>
+          <LogInButton className={className} icon={icon} path={`/auth/${name}`}>
             {app.translator.trans(`fof-oauth.forum.log_in.with_${name}_button`, {
               provider: app.translator.trans(`fof-oauth.forum.providers.${name}`),
             })}
@@ -70,78 +80,8 @@ export default function () {
     vdom.attrs.className += ' FoFLogInButtons--icons';
   });
 
-  extend(app, 'authenticationComplete', function (_, payload) {
-    if (payload.loggedIn) {
-      app.fof_oauth_loginInProgress = true;
-      // This will automatically be reset, as authenticationComplete also triggers a window reload.
-
-      m.redraw();
-    }
-  });
-
-  app.linkingComplete = async function () {
-    try {
-      app.fof_oauth_linkingInProgress = true;
-      m.redraw();
-
-      // Refresh the list of providers
-      const newProviders = await this.store.find<LinkedAccount[]>('linked-accounts');
-
-      // Get the old IDs of the new providers (the one(s) that have just been linked)
-      const newProviderOldIds = newProviders.filter((p) => p.identifier() !== null).map((p) => `${app.session.user!.id()}-${p.name()}`);
-
-      // The store will contain an old version of the login provider (unlinked) that has
-      // another ID than the new one (linked). We need to delete that one from the store
-      // so that the UI gets updated correctly.
-
-      // Find the old providers (match the old ID format: <userId>-<providerName>)
-      const oldProviders = newProviderOldIds
-        .map((oldId) => this.store.getById<LinkedAccount>('linked-accounts', oldId))
-        .filter((p): p is LinkedAccount => !!p);
-
-      if (oldProviders.length) {
-        for (const oldProvider of oldProviders) {
-          // @ts-ignore
-          delete this.store.data['linked-accounts'][oldProvider.id()];
-        }
-      } else {
-        // This may just be a signup/login flow, so reload the page to sign in the user.
-        window.location.reload();
-        return;
-      }
-
-      const userId = app.session?.user?.id();
-
-      if (!userId) throw new Error('User ID not available');
-
-      // Refresh the session user
-      await this.store.find('users', userId);
-
-      app.fof_oauth_linkingInProgress = false;
-      m.redraw();
-    } catch (error) {
-      console.error('An error occurred while refreshing linked accounts after OAuth linking:', error);
-      app.fof_oauth_linkingInProgress = false;
-      m.redraw();
-    }
-  };
-
-  extend('flarum/forum/components/LogInModal', 'onbeforeupdate', function () {
-    if (app.fof_oauth_loginInProgress) {
-      // @ts-ignore
-      this.loading = true;
-    }
-  });
-
-  extend('flarum/forum/components/SignUpModal', 'onbeforeupdate', function () {
-    if (app.fof_oauth_loginInProgress) {
-      // @ts-ignore
-      this.loading = true;
-    }
-  });
-
   extend('flarum/forum/components/SignUpModal', 'fields', function (items: ItemList<unknown>) {
-    // If a suggested username was not provided by the OAuth service, display some help text to the user.
+    // If a suggested username was not provided by the OAuth service, display help text.
     if (!!this.attrs.token && !this.attrs.username) {
       items.add(
         'username-help',

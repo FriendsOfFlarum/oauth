@@ -16,34 +16,29 @@ use Flarum\Http\Exception\RouteNotFoundException;
 use FoF\OAuth\Controller;
 use FoF\OAuth\Events\SettingSuggestions;
 use FoF\OAuth\Provider;
-use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
+use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class AuthController extends Controller
 {
-    /**
-     * @var ?Provider
-     */
-    protected $provider;
+    protected ?Provider $oauthProvider = null;
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $name = Arr::get($request->getQueryParams(), 'provider');
-        $providers = resolve('container')->tagged('fof-oauth.providers');
+        $name = $request->getQueryParams()['provider'] ?? null;
 
-        foreach ($providers as $provider) {
+        foreach ($this->app()->tagged('fof-oauth.providers') as $provider) {
             if ($provider->name() === $name) {
                 if ($provider->enabled()) {
-                    $this->provider = $provider;
+                    $this->oauthProvider = $provider;
                 }
-
                 break;
             }
         }
 
-        if (!$this->provider) {
+        if ($this->oauthProvider === null) {
             throw new RouteNotFoundException();
         }
 
@@ -52,36 +47,45 @@ class AuthController extends Controller
 
     protected function getRouteName(): string
     {
-        // Errors are thrown if we return 'fof-oauth' because no options are passed.
-        return 'auth.twitter';
+        return 'fof-oauth';
     }
 
     protected function getProvider(string $redirectUri): AbstractProvider
     {
-        return $this->provider->provider(
-            $this->url->to('forum')->route(
-                'fof-oauth',
-                ['provider' => $this->getProviderName()]
-            )
-        );
+        return $this->oauthProvider->provider($redirectUri);
     }
 
     protected function getProviderName(): string
     {
-        return $this->provider->name();
+        return $this->oauthProvider->name();
     }
 
     protected function getAuthorizationUrlOptions(): array
     {
-        return $this->provider->options();
+        return $this->oauthProvider->options();
     }
 
-    protected function setSuggestions(Registration $registration, $user, string $token)
+    protected function isPkceEnabled(): bool
     {
-        $this->provider->suggestions($registration, $user, $token);
+        return $this->oauthProvider->pkceEnabled();
+    }
+
+    protected function getIdentifier(ResourceOwnerInterface $user): string
+    {
+        return (string) $user->getId();
+    }
+
+    protected function setSuggestions(Registration $registration, ResourceOwnerInterface $user, string $token): void
+    {
+        $this->oauthProvider->suggestions($registration, $user, $token);
 
         $this->events->dispatch(
             new SettingSuggestions($this->getProviderName(), $registration, $user, $token)
         );
+    }
+
+    private function app(): \Illuminate\Contracts\Container\Container
+    {
+        return resolve('container');
     }
 }

@@ -17,30 +17,31 @@ use Illuminate\Support\Arr;
 
 class AuthenticationException extends Exception implements KnownError
 {
+    /**
+     * Map raw exception messages to short codes used for translations and reporting decisions.
+     * If the message is already a known short code it is returned as-is.
+     */
     const MESSAGE_TYPES = [
         'bad_verification_code' => [
             'OAuthException: This authorization code has expired.',
-            'Received HTTP status code [401] with message "This feature is temporarily unavailable" when getting token credentials.',
         ],
-
-        'invalid_state' => [
-            'Invalid state',
-        ],
-
-        'already_linked' => [
-            'Account already linked to another user',
-        ],
+        'invalid_state'  => [],
+        'already_linked' => [],
     ];
 
     public function getShortCode(): string
     {
         $message = trim($this->getMessage());
 
-        if (!Arr::has(self::MESSAGE_TYPES, $message)) {
-            foreach (self::MESSAGE_TYPES as $type => $messages) {
-                if (in_array($message, $messages)) {
-                    return $type;
-                }
+        // If the message itself is already a known short code, use it directly.
+        if (Arr::has(self::MESSAGE_TYPES, $message)) {
+            return $message;
+        }
+
+        // Otherwise scan the alias lists.
+        foreach (self::MESSAGE_TYPES as $type => $aliases) {
+            if (in_array($message, $aliases, true)) {
+                return $type;
             }
         }
 

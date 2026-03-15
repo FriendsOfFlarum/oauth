@@ -50,6 +50,12 @@ abstract class Provider
         return [];
     }
 
+    /**
+     * Whether to use PKCE (Proof Key for Code Exchange) for this provider.
+     * Providers that support PKCE should override this and return true.
+     */
+    abstract public function pkceEnabled(): bool;
+
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         //
@@ -98,10 +104,4 @@ abstract class Provider
         $registration->provideAvatar($url);
     }
 
-    // Set this value to `true` in your provider class if you wish to provide your own
-    // route or controller.
-    public function excludeFromRoutePattern(): bool
-    {
-        return false;
-    }
 }

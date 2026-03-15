@@ -13,7 +13,7 @@ namespace FoF\OAuth\Listeners;
 
 use Flarum\Http\RequestUtil;
 use Flarum\User\Event\LoggedOut;
-use FoF\Extend\Controllers\AbstractOAuthController;
+use FoF\OAuth\Controllers\AbstractOAuthController;
 use Illuminate\Contracts\Cache\Store as Cache;
 use Illuminate\Session\Store as Session;
 use Psr\Http\Message\ServerRequestInterface;

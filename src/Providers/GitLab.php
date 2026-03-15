@@ -53,6 +53,11 @@ class GitLab extends Provider
         return new GitlabProvider($options);
     }
 
+    public function pkceEnabled(): bool
+    {
+        return true;
+    }
+
     public function options(): array
     {
         return ['scope' => 'read_user'];

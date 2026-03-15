@@ -37,6 +37,11 @@ class Google extends Provider
         ];
     }
 
+    public function pkceEnabled(): bool
+    {
+        return true;
+    }
+
     public function provider(string $redirectUri): AbstractProvider
     {
         return new GoogleProvider([
