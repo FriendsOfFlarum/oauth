@@ -216,7 +216,9 @@ class LinkedAccountsTest extends TestCase
 
         // Every returned record must belong to user 3, not user 1.
         foreach ($accounts as $account) {
-            $this->assertEquals('3', $account['attributes']['userId'],
+            $this->assertEquals(
+                '3',
+                $account['attributes']['userId'],
                 "Account {$account['attributes']['name']} has userId {$account['attributes']['userId']}, expected 3"
             );
         }
