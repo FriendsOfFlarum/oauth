@@ -14,7 +14,6 @@ export default class LinkStatus extends Component<ILinkStatusAttrs, LinkStatusSt
     state: {
         loading: boolean;
     };
-    onbeforeupdate(vnode: Mithril.Vnode<ILinkStatusAttrs, this>): void;
     view(): Mithril.Children;
     iconView(): JSX.Element;
     statusView(): JSX.Element;
