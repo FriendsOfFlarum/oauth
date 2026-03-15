@@ -294,7 +294,10 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
             'identifier' => $this->getIdentifier($resourceOwner),
         ])->touch();
 
-        return new RedirectResponse($returnTo ?: '/');
+        $base = $returnTo ?: '/';
+        $separator = str_contains($base, '?') ? '&' : '?';
+
+        return new RedirectResponse($base.$separator.'_flarum_linked='.urlencode($this->getProviderName()));
     }
 
     /**

@@ -97,6 +97,11 @@ fof-oauth:
       google: '=> fof-oauth.lib.providers.google'
       linkedin: '=> fof-oauth.lib.providers.linkedin'
 
+    account_linked:
+      title: Account linked
+      body: "Your {forum} account <strong>{username}</strong> is now linked with {provider}. You can sign in using either your forum password or {provider} going forward."
+      dismiss_button: Got it
+
     signup:
       username_help: Please choose a username to be known by here
 
