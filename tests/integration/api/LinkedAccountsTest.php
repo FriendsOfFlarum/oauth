@@ -38,6 +38,14 @@ class LinkedAccountsTest extends TestCase
                     'password'           => '$2y$10$LO59tiT7uggl6Oe23o/O6.utnF6ipngYjvMvaxo1TciKqBttDNKim',
                     'joined_at'          => '2021-01-01 00:00:00',
                 ],
+                [
+                    'id'                 => 4,
+                    'username'           => 'Moderator',
+                    'is_email_confirmed' => 1,
+                    'email'              => 'mod@machine.local',
+                    'password'           => '$2y$10$LO59tiT7uggl6Oe23o/O6.utnF6ipngYjvMvaxo1TciKqBttDNKim',
+                    'joined_at'          => '2021-01-01 00:00:00',
+                ],
             ],
             LoginProvider::class => [
                 [
@@ -57,8 +65,15 @@ class LinkedAccountsTest extends TestCase
                     'last_login_at' => '2024-06-01 00:00:00',
                 ],
             ],
+            'groups' => [
+                ['id' => 10, 'name_singular' => 'OAuthMod', 'name_plural' => 'OAuthMods', 'color' => null, 'icon' => null, 'is_hidden' => 0],
+            ],
             'group_user' => [
                 ['user_id' => 3, 'group_id' => 1], // admin
+                ['user_id' => 4, 'group_id' => 10], // user 4 → OAuthMod group only
+            ],
+            'group_permission' => [
+                ['permission' => 'moderateUserProviders', 'group_id' => 10],
             ],
         ]);
 
@@ -244,5 +259,92 @@ class LinkedAccountsTest extends TestCase
 
         $this->assertEquals(204, $response->getStatusCode());
         $this->assertFalse(LoginProvider::where('id', 1)->exists());
+    }
+
+    #[Test]
+    public function guest_cannot_delete_linked_account(): void
+    {
+        $response = $this->send(
+            $this->request('DELETE', '/api/linked-accounts/1')
+        );
+
+        // 401 when auth middleware fires first; 400 when API layer rejects the
+        // request before auth (e.g. missing Content-Type). Either way the
+        // record must not be deleted.
+        $this->assertContains($response->getStatusCode(), [400, 401]);
+        $this->assertTrue(LoginProvider::where('id', 1)->exists());
+    }
+
+    // -------------------------------------------------------------------------
+    // moderateUserProviders permission
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function user_with_permission_can_list_another_users_linked_accounts(): void
+    {
+        $response = $this->send(
+            $this->requestAsUser(
+                $this->request('GET', '/api/linked-accounts'),
+                4  // has moderateUserProviders via members group
+            )->withQueryParams(['filter' => ['userId' => 3]])
+        );
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $body = json_decode($response->getBody()->getContents(), true);
+        $linked = array_filter($body['data'], fn ($a) => $a['attributes']['linked'] === true);
+        $this->assertCount(2, $linked);
+    }
+
+    #[Test]
+    public function user_with_permission_can_unlink_another_users_account(): void
+    {
+        $response = $this->send(
+            $this->requestAsUser(
+                $this->request('DELETE', '/api/linked-accounts/1'),
+                4  // has moderateUserProviders
+            )
+        );
+
+        $this->assertEquals(204, $response->getStatusCode());
+        $this->assertFalse(LoginProvider::where('id', 1)->exists());
+    }
+
+    // -------------------------------------------------------------------------
+    // No create or update endpoints
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function post_to_linked_accounts_is_rejected(): void
+    {
+        $response = $this->send(
+            $this->requestAsUser(
+                $this->request('POST', '/api/linked-accounts', ['json' => [
+                    'data' => ['type' => 'linked-accounts', 'attributes' => ['provider' => 'github']],
+                ]]),
+                3
+            )
+        );
+
+        // No create endpoint registered — router returns 405 Method Not Allowed.
+        $this->assertEquals(405, $response->getStatusCode());
+        $this->assertCount(2, LoginProvider::where('user_id', 3)->get());
+    }
+
+    #[Test]
+    public function patch_to_linked_account_is_rejected(): void
+    {
+        $response = $this->send(
+            $this->requestAsUser(
+                $this->request('PATCH', '/api/linked-accounts/1', ['json' => [
+                    'data' => ['type' => 'linked-accounts', 'id' => '1', 'attributes' => []],
+                ]]),
+                3
+            )
+        );
+
+        // No update endpoint registered — router returns 405 Method Not Allowed.
+        $this->assertEquals(405, $response->getStatusCode());
+        $this->assertTrue(LoginProvider::where('id', 1)->exists());
     }
 }
