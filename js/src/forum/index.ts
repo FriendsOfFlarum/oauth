@@ -26,16 +26,16 @@ app.initializers.add('fof/oauth', () => {
       let modalAttrs: Record<string, unknown> = { token: authToken };
 
       try {
-        const response = await app.request<{ data: { attributes: { username?: string; email?: string; provided?: string[] } } }>({
-          method: 'GET',
-          url: app.forum.attribute<string>('apiUrl') + '/registration-tokens/' + authToken,
+        const response = await app.request<{ username?: string; email?: string; provided?: string[] }>({
+          method: 'POST',
+          url: app.forum.attribute<string>('apiUrl') + '/registration-token',
+          body: { token: authToken },
         });
-        const attrs = response?.data?.attributes ?? {};
         modalAttrs = {
           token: authToken,
-          username: attrs.username ?? '',
-          email: attrs.email ?? '',
-          provided: attrs.provided ?? [],
+          username: response?.username ?? '',
+          email: response?.email ?? '',
+          provided: response?.provided ?? [],
         };
       } catch {
         // If the fetch fails (e.g. token already used), fall back to opening
