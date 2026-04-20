@@ -1,4 +1,5 @@
+/// <reference types="mithril" />
+import LinkButton from 'flarum/common/components/LinkButton';
 export default class ConfigureWithOAuthButton extends LinkButton {
-    view(): JSX.Element[];
+    view(): JSX.Element;
 }
-import LinkButton from "flarum/common/components/LinkButton";
