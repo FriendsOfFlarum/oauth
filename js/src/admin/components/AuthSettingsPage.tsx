@@ -5,12 +5,16 @@ import ExtensionPage from 'flarum/admin/components/ExtensionPage';
 import Icon from 'flarum/common/components/Icon';
 import Badge from 'flarum/common/components/Badge';
 import ItemList from 'flarum/common/utils/ItemList';
+import type Group from 'flarum/common/models/Group';
+import type Mithril from 'mithril';
 
 export default class AuthSettingsPage extends ExtensionPage {
-  oninit(vnode) {
+  showing: Record<string, boolean> = {};
+
+  oninit(vnode: Mithril.Vnode<this['attrs'], this>) {
     super.oninit(vnode);
 
-    this.showing = [];
+    this.showing = {};
   }
 
   content() {
@@ -59,17 +63,17 @@ export default class AuthSettingsPage extends ExtensionPage {
     );
   }
 
-  providerSettingsItems() {
-    const items = new ItemList();
+  providerSettingsItems(): ItemList<Mithril.Children> {
+    const items = new ItemList<Mithril.Children>();
 
-    app.data['fof-oauth'].map((provider) => {
+    app.data['fof-oauth'].forEach((provider) => {
       const { name } = provider;
       const enabled = !!Number(this.setting(`fof-oauth.${name}`)());
       const showSettings = !!this.showing[name];
-      const callbackUrl = `${app.forum.attribute('baseUrl')}/auth/${name}`;
+      const callbackUrl = `${app.forum.attribute<string>('baseUrl')}/auth/${name}`;
 
       const groupId = this.setting(`fof-oauth.${name}.group`)();
-      const selectedGroup = groupId ? app.store.getById('groups', groupId) : null;
+      const selectedGroup = groupId ? app.store.getById<Group>('groups', groupId) : null;
 
       items.add(
         `fof-oauth.${name}`,
@@ -88,7 +92,6 @@ export default class AuthSettingsPage extends ExtensionPage {
 
             {enabled && selectedGroup && (
               <div className="Provider--group">
-                {/*<Icon name={selectedGroup.icon() || 'fas fa-user-group'} />*/}
                 <Badge icon={selectedGroup.icon() || 'fas fa-user-group'} />
                 {selectedGroup.namePlural()}
               </div>
@@ -125,14 +128,14 @@ export default class AuthSettingsPage extends ExtensionPage {
               })}
             </p>
 
-            <div class="Form">
+            <div className="Form">
               {Object.keys(provider.fields).map((field) =>
                 this.buildSettingComponent({
                   type: 'string',
                   setting: `fof-oauth.${name}.${field}`,
                   label: app.translator.trans(`fof-oauth.admin.settings.providers.${name}.${field}_label`),
                   required: {
-                    [showSettings && provider.fields[field].includes('required') ? 'required' : null]: true,
+                    [showSettings && provider.fields[field].includes('required') ? 'required' : (null as unknown as string)]: true,
                   },
                 })
               )}
@@ -147,13 +150,13 @@ export default class AuthSettingsPage extends ExtensionPage {
     return items;
   }
 
-  getAvailableGroups() {
-    const groups = app.store.all('groups');
-    return groups.filter((group) => !['2', '3'].includes(group.id())); // Exclude the "Guests" and "Members" groups
+  getAvailableGroups(): Group[] {
+    const groups = app.store.all<Group>('groups');
+    return groups.filter((group) => !['2', '3'].includes(group.id()!)); // Exclude the "Guests" and "Members" groups
   }
 
-  customProviderSettings(name) {
-    const items = new ItemList();
+  customProviderSettings(name: string): ItemList<Mithril.Children> {
+    const items = new ItemList<Mithril.Children>();
 
     // Add group selection dropdown
     items.add(
@@ -164,8 +167,8 @@ export default class AuthSettingsPage extends ExtensionPage {
 
         {(() => {
           const groupId = this.setting(`fof-oauth.${name}.group`)();
-          const selectedGroup = groupId ? app.store.getById('groups', groupId) : null;
-          const icons = {
+          const selectedGroup = groupId ? app.store.getById<Group>('groups', groupId) : null;
+          const icons: Record<string, string> = {
             1: 'fas fa-check', // Admins
             3: 'fas fa-user', // Members
             4: 'fas fa-map-pin', // Mods
@@ -175,7 +178,7 @@ export default class AuthSettingsPage extends ExtensionPage {
             <Dropdown
               label={
                 selectedGroup
-                  ? [<Icon name={selectedGroup.icon() || icons[selectedGroup.id()]} />, '\t', selectedGroup.namePlural()]
+                  ? [<Icon name={selectedGroup.icon() || icons[selectedGroup.id()!]} />, '\t', selectedGroup.namePlural()]
                   : app.translator.trans('fof-oauth.admin.settings.providers.no_group_label')
               }
               buttonClassName="Button"
@@ -187,8 +190,8 @@ export default class AuthSettingsPage extends ExtensionPage {
 
               {this.getAvailableGroups().map((group) => (
                 <Button
-                  icon={group.icon() || icons[group.id()]}
-                  onclick={() => this.setting(`fof-oauth.${name}.group`)(group.id())}
+                  icon={group.icon() || icons[group.id()!]}
+                  onclick={() => this.setting(`fof-oauth.${name}.group`)(group.id()!)}
                   active={groupId === group.id()}
                   key={group.id()}
                 >
