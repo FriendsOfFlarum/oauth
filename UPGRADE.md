@@ -178,6 +178,7 @@ If you maintain one of these extensions, the changes above apply to you:
 - [Auth0](https://extiverse.com/extension/lodge104/flarum-ext-oauth-auth0)
 - [Line](https://extiverse.com/extension/ianm/oauth-line)
 - [Microsoft](https://flarum.org/extension/xrh0905/oauth-microsoft)
+- [Reddit](https://github.com/imorland/flarum-ext-oauth-reddit)
 - [Slack](https://extiverse.com/extension/blomstra/oauth-slack)
 - [Twitch](https://github.com/imorland/flarum-ext-oauth-twitch)
 
