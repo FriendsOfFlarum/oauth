@@ -1,4 +1,5 @@
 import ExtensionPage from 'flarum/admin/components/ExtensionPage';
+import type Mithril from 'mithril';
 import ConfigureWithOAuthButton from './ConfigureWithOAuthButton';
 
 /**
@@ -6,18 +7,18 @@ import ConfigureWithOAuthButton from './ConfigureWithOAuthButton';
  * It is not used directly by `fof/oauth` itself.
  */
 export default class ConfigureWithOAuthPage extends ExtensionPage {
-  oninit(vnode) {
+  oninit(vnode: Mithril.Vnode<this['attrs'], this>) {
     super.oninit(vnode);
   }
 
   content() {
-    return [
+    return (
       <div className="container">
         <div className="OAuthSettingsPage">
           <br />
           <ConfigureWithOAuthButton />
         </div>
-      </div>,
-    ];
+      </div>
+    );
   }
 }
