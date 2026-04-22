@@ -110,13 +110,17 @@ class Flarum extends Provider
 
         foreach (explode(',', $srcset) as $entry) {
             $entry = trim($entry);
-            if ($entry === '') continue;
+            if ($entry === '') {
+                continue;
+            }
 
             $parts = preg_split('/\s+/', $entry, 2);
             $url = $parts[0] ?? null;
             $descriptor = $parts[1] ?? '1x';
 
-            if (! $url) continue;
+            if (!$url) {
+                continue;
+            }
 
             $density = (float) rtrim($descriptor, 'x');
             if ($density > $bestDensity) {
