@@ -37,6 +37,13 @@ fof-oauth:
           app_id_label: => fof-oauth.ref.settings.app_id
           app_secret_label: => fof-oauth.ref.settings.app_secret
 
+        flarum:
+          description: Use another Flarum forum as the authorization server. The forum must have flarum/oauth-provider installed. Register an OAuth client on that forum (Admin → Extensions → OAuth Provider) and paste its Client ID and Client Secret below. See the docs at {link}.
+
+          forum_url_label: Forum URL
+          client_id_label: => fof-oauth.ref.settings.client_id
+          client_secret_label: => fof-oauth.ref.settings.client_secret
+
         github:
           description: Create an OAuth app at {link}.
 
@@ -71,6 +78,7 @@ fof-oauth:
       # You may use {provider} in the translation.
       with_discord_button: '=> fof-oauth.forum.log_in.with_button'
       with_facebook_button: '=> fof-oauth.forum.log_in.with_button'
+      with_flarum_button: '=> fof-oauth.forum.log_in.with_button'
       with_github_button: '=> fof-oauth.forum.log_in.with_button'
       with_gitlab_button: '=> fof-oauth.forum.log_in.with_button'
       with_google_button: '=> fof-oauth.forum.log_in.with_button'
@@ -92,6 +100,7 @@ fof-oauth:
     providers:
       discord: '=> fof-oauth.lib.providers.discord'
       facebook: '=> fof-oauth.lib.providers.facebook'
+      flarum: '=> fof-oauth.lib.providers.flarum'
       github: '=> fof-oauth.lib.providers.github'
       gitlab: '=> fof-oauth.lib.providers.gitlab'
       google: '=> fof-oauth.lib.providers.google'
@@ -116,6 +125,7 @@ fof-oauth:
     providers:
       discord: Discord
       facebook: Facebook
+      flarum: Flarum
       github: GitHub
       gitlab: GitLab
       google: Google
