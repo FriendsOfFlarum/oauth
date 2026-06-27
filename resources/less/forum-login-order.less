@@ -9,19 +9,48 @@
 
   .Modal-body > .Form {
     order: 1;
+    margin-bottom: 0;
   }
 
   .Modal-body > .LogInButtons {
     order: 2;
+    margin-top: 12px;
+    margin-bottom: 20px;
+  }
+
+  .Modal-body > .LogInButtons .LogInButtonContainer {
+    margin-bottom: 8px;
+  }
+
+  .Modal-body > .LogInButtons .LogInButtonContainer:last-child {
+    margin-bottom: 0;
   }
 
   .FoFLogInButton {
+    display: block;
+    box-sizing: border-box;
     width: 100%;
+    min-height: 36px;
+    padding: 8px 13px;
+    font-size: 14px;
+    line-height: 20px;
+    border-radius: var(--border-radius);
+    text-align: center;
   }
 }
 
 .FoFLogInButtons--icons {
+  margin-top: 12px;
+
   .FoFLogInButton {
     width: 50px;
+    min-height: 50px;
+    height: 50px;
+    padding: 0;
+    border-radius: 30px;
+  }
+
+  .LogInButtonContainer {
+    margin-bottom: 0;
   }
 }
