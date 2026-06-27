@@ -33,7 +33,7 @@ export default function () {
       .filter((provider): provider is NonNullable<OAuthProvider> => provider !== null);
 
     enabledOAuthProviders.forEach(({ name, icon, priority }) => {
-      let className = `Button FoFLogInButton LogInButton--${name}`;
+      let className = `Button Button--block FoFLogInButton LogInButton--${name}`;
 
       if (onlyIcons) {
         className += ' Button--icon';
@@ -69,6 +69,14 @@ export default function () {
 
     // @ts-ignore
     vdom.attrs.className += ' FoFLogInButtons--icons';
+  });
+
+  override(LogInModal.prototype, 'body', function () {
+    return [<div className="Form Form--centered">{this.fields().toArray()}</div>, <LogInButtons />];
+  });
+
+  override(SignUpModal.prototype, 'body', function () {
+    return [<div className="Form Form--centered">{this.fields().toArray()}</div>, !this.attrs.token && <LogInButtons />];
   });
 
   extend(ForumApplication.prototype, 'authenticationComplete', function (_, payload) {
