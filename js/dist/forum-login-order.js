@@ -1,10 +1,14 @@
 (function () {
-  var app = flarum.core.app;
+  function defaultExport(module) {
+    return module && module.__esModule ? module.default : module;
+  }
+
+  var app = defaultExport(flarum.core.compat['forum/app']);
   var extension = flarum.core.compat['common/extend'];
-  var LogInButtons = flarum.core.compat['forum/components/LogInButtons'];
-  var LogInButton = flarum.core.compat['forum/components/LogInButton'];
-  var LogInModal = flarum.core.compat['forum/components/LogInModal'];
-  var SignUpModal = flarum.core.compat['forum/components/SignUpModal'];
+  var LogInButtons = defaultExport(flarum.core.compat['forum/components/LogInButtons']);
+  var LogInButton = defaultExport(flarum.core.compat['forum/components/LogInButton']);
+  var LogInModal = defaultExport(flarum.core.compat['forum/components/LogInModal']);
+  var SignUpModal = defaultExport(flarum.core.compat['forum/components/SignUpModal']);
 
   app.initializers.add('fof/oauth-login-order', function () {
     extension.extend(LogInButton, 'initAttrs', function (_, attrs) {
