@@ -32,4 +32,8 @@
 
   flarum.core.compat['common/extend'] = extension;
   flarum.core.compat['flarum/common/extend'] = extension;
+
+  if (typeof module !== 'undefined') {
+    module.exports = (flarum.extensions && flarum.extensions['fof-oauth']) || { extend: [] };
+  }
 })();
