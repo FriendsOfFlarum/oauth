@@ -61,31 +61,33 @@
   var LogInModal = defaultExport(compatGet('forum/components/LogInModal', 'flarum/forum/components/LogInModal'));
   var SignUpModal = defaultExport(compatGet('forum/components/SignUpModal', 'flarum/forum/components/SignUpModal'));
 
-  if (!app || !LogInButtons || !LogInButton || !LogInModal || !SignUpModal) {
-    return;
+  if (app && LogInButtons && LogInButton && LogInModal && SignUpModal) {
+    app.initializers.add('fof/oauth-login-order', function () {
+      extend(LogInButton, 'initAttrs', function (_, attrs) {
+        if (attrs.className && attrs.className.indexOf('FoFLogInButton') !== -1) {
+          var providerName = providerNameFromClass(attrs.className);
+
+          if (providerName && providerIcons[providerName]) {
+            attrs.icon = providerIcons[providerName];
+          }
+
+          if (!isLinkingButton(attrs) && attrs.className.indexOf('Button--block') === -1) {
+            attrs.className = attrs.className.replace('Button ', 'Button Button--block ');
+          }
+        }
+      });
+
+      override(LogInModal.prototype, 'body', function () {
+        return [m('div', { className: 'Form Form--centered' }, this.fields().toArray()), m(LogInButtons)];
+      });
+
+      override(SignUpModal.prototype, 'body', function () {
+        return [m('div', { className: 'Form Form--centered' }, this.fields().toArray()), !this.attrs.token && m(LogInButtons)];
+      });
+    });
   }
 
-  app.initializers.add('fof/oauth-login-order', function () {
-    extend(LogInButton, 'initAttrs', function (_, attrs) {
-      if (attrs.className && attrs.className.indexOf('FoFLogInButton') !== -1) {
-        var providerName = providerNameFromClass(attrs.className);
-
-        if (providerName && providerIcons[providerName]) {
-          attrs.icon = providerIcons[providerName];
-        }
-
-        if (!isLinkingButton(attrs) && attrs.className.indexOf('Button--block') === -1) {
-          attrs.className = attrs.className.replace('Button ', 'Button Button--block ');
-        }
-      }
-    });
-
-    override(LogInModal.prototype, 'body', function () {
-      return [m('div', { className: 'Form Form--centered' }, this.fields().toArray()), m(LogInButtons)];
-    });
-
-    override(SignUpModal.prototype, 'body', function () {
-      return [m('div', { className: 'Form Form--centered' }, this.fields().toArray()), !this.attrs.token && m(LogInButtons)];
-    });
-  });
+  if (typeof module !== 'undefined') {
+    module.exports = (flarum.extensions && flarum.extensions['fof-oauth']) || { extend: [] };
+  }
 })();
