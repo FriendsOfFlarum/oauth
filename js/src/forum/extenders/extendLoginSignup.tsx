@@ -19,6 +19,20 @@ export type OAuthProvider = {
   priority: number;
 } | null;
 
+const providerIcons: Record<string, string> = {
+  discord: 'fab fa-discord',
+  facebook: 'fab fa-facebook-f',
+  github: 'fab fa-github',
+  gitlab: 'fab fa-gitlab',
+  google: 'fab fa-google',
+  linkedin: 'fab fa-linkedin-in',
+  twitter: 'fab fa-twitter',
+};
+
+function providerIcon(name: string, icon: string): string {
+  return providerIcons[name] ?? icon;
+}
+
 export default function () {
   extend(LogInButton, 'initAttrs', function (_returnedValue, attrs) {
     attrs.onclick = function () {
@@ -42,7 +56,7 @@ export default function () {
       items.add(
         name,
         <div className={`LogInButtonContainer LogInButtonContainer--${name}`}>
-          <LogInButton className={className} icon={icon} path={`/auth/${name}`} disabled={app.fof_oauth_loginInProgress}>
+          <LogInButton className={className} icon={providerIcon(name, icon)} path={`/auth/${name}`} disabled={app.fof_oauth_loginInProgress}>
             {app.translator.trans(`fof-oauth.forum.log_in.with_${name}_button`, {
               provider: app.translator.trans(`fof-oauth.forum.providers.${name}`),
             })}
