@@ -32,15 +32,23 @@
   }
 
   .FoFLogInButton {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-sizing: border-box;
     width: 100%;
-    min-height: 36px;
+    height: 36px;
+    min-height: 0;
     padding: 8px 13px;
     font-size: 14px;
     line-height: 20px;
     border-radius: var(--border-radius);
     text-align: center;
+  }
+
+  .FoFLogInButton .Button-icon,
+  .FoFLogInButton .Button-label {
+    line-height: 20px;
   }
 }
 
