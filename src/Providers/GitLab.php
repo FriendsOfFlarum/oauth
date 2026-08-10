@@ -73,7 +73,7 @@ class GitLab extends Provider
 
         $payload = $user->toArray();
 
-        if(!empty($payload['confirmed_at'])){
+        if (!empty($payload['confirmed_at'])) {
             $registration->provideTrustedEmail($email);
         } else {
             $registration->suggestEmail($email);
