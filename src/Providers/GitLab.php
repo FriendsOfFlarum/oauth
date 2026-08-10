@@ -13,7 +13,6 @@ namespace FoF\OAuth\Providers;
 
 use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Provider;
-use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use Omines\OAuth2\Client\Provider\Gitlab as GitlabProvider;
 use Omines\OAuth2\Client\Provider\GitlabResourceOwner;
