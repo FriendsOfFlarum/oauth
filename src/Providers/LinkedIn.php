@@ -69,7 +69,7 @@ class LinkedIn extends Provider
     {
         $this->verifyEmail($email = $user->getEmail());
 
-        if($user->getAttribute('email_verified')) {
+        if ($user->getAttribute('email_verified')) {
             $registration->provideTrustedEmail($email);
         } else {
             $registration->suggestEmail($email);
