@@ -66,9 +66,9 @@ class GitLab extends Provider
     {
         $this->verifyEmail($email = $user->getEmail());
 
+        /** @var array<string, mixed> $payload */
         $payload = $user->toArray();
 
-        /** @phpstan-ignore-next-line - missing property from vendor array shape */
         if (!empty($payload['confirmed_at'])) {
             $registration->provideTrustedEmail($email);
         } else {
