@@ -260,7 +260,12 @@ class AuthenticationFlowTest extends TestCase
         $accessToken = new AccessToken(['access_token' => 'tok', 'expires' => time() + 3600]);
         $mockLeague->method('getAccessToken')->willReturn($accessToken);
         $mockLeague->method('getResourceOwner')->willReturn(
-            new GitlabResourceOwner(['id' => $id, 'email' => $email, 'username' => 'testuser'], $accessToken)
+            new GitlabResourceOwner([
+                'id' => $id,
+                'email' => $email,
+                'username' => 'testuser',
+                'confirmed_at' => '2026-01-01T00:00:00Z',
+            ], $accessToken)
         );
 
         $mockFofProvider = $this->getMockBuilder(\FoF\OAuth\Providers\GitLab::class)
