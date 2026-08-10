@@ -228,7 +228,12 @@ class AccountLinkingTest extends TestCase
         $token = new OAuthToken(['access_token' => 'tok', 'expires' => time() + 3600]);
         $mockLeague->method('getAccessToken')->willReturn($token);
         $mockLeague->method('getResourceOwner')->willReturn(
-            new GitlabResourceOwner(['id' => $id, 'email' => $email, 'username' => 'testuser'], $token)
+            new GitlabResourceOwner([
+                'id' => $id,
+                'email' => $email,
+                'username' => 'testuser',
+                'confirmed_at' => '2026-01-01T00:00:00Z',
+            ], $token)
         );
 
         $mockFofProvider = $this->getMockBuilder(\FoF\OAuth\Providers\GitLab::class)
