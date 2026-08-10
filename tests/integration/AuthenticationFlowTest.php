@@ -261,9 +261,9 @@ class AuthenticationFlowTest extends TestCase
         $mockLeague->method('getAccessToken')->willReturn($accessToken);
         $mockLeague->method('getResourceOwner')->willReturn(
             new GitlabResourceOwner([
-                'id' => $id,
-                'email' => $email,
-                'username' => 'testuser',
+                'id'           => $id,
+                'email'        => $email,
+                'username'     => 'testuser',
                 'confirmed_at' => '2026-01-01T00:00:00Z',
             ], $accessToken)
         );
