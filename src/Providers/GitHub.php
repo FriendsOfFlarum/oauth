@@ -16,6 +16,7 @@ use FoF\OAuth\Provider;
 use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Github as GitHubProvider;
+use League\OAuth2\Client\Provider\GithubResourceOwner;
 
 class GitHub extends Provider
 {
@@ -56,6 +57,9 @@ class GitHub extends Provider
         return ['scope' => ['user:email']];
     }
 
+    /**
+     * @param GithubResourceOwner $user
+     */
     public function suggestions(Registration $registration, $user, string $token)
     {
         $this->verifyEmail($email = $user->getEmail() ?: $this->getEmailFromApi($token));

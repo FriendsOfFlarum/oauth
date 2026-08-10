@@ -15,6 +15,7 @@ use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Facebook as FacebookProvider;
+use League\OAuth2\Client\Provider\FacebookUser;
 
 class Facebook extends Provider
 {
@@ -46,6 +47,9 @@ class Facebook extends Provider
         ]);
     }
 
+    /**
+     * @param FacebookUser $user
+     */
     public function suggestions(Registration $registration, $user, string $token)
     {
         $this->verifyEmail($email = $user->getEmail());

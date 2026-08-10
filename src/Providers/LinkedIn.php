@@ -15,6 +15,7 @@ use Flarum\Forum\Auth\Registration;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Provider;
 use FoF\OAuth\Providers\Custom\LinkedIn\Provider\LinkedIn as LinkedInProvider;
+use FoF\OAuth\Providers\Custom\LinkedIn\Provider\LinkedInResourceOwner;
 use League\OAuth2\Client\Provider\AbstractProvider;
 
 class LinkedIn extends Provider
@@ -61,12 +62,20 @@ class LinkedIn extends Provider
         ]);
     }
 
+    /**
+     * @param LinkedInResourceOwner $user
+     */
     public function suggestions(Registration $registration, $user, string $token)
     {
         $this->verifyEmail($email = $user->getEmail());
 
+        if($user->getAttribute('email_verified')) {
+            $registration->provideTrustedEmail($email);
+        } else {
+            $registration->suggestEmail($email);
+        }
+
         $registration
-        ->provideTrustedEmail($email)
         ->suggestUsername($user->getFirstName())
         ->setPayload($user->toArray());
 
