@@ -15,6 +15,7 @@ use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use Wohali\OAuth2\Client\Provider\Discord as DiscordProvider;
+use Wohali\OAuth2\Client\Provider\DiscordResourceOwner;
 
 class Discord extends Provider
 {
@@ -55,6 +56,9 @@ class Discord extends Provider
         return ['scope' => ['identify', 'email']];
     }
 
+    /**
+     * @param DiscordResourceOwner $user
+     */
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $this->verifyEmail($email = $user->getEmail());
@@ -64,10 +68,17 @@ class Discord extends Provider
             "https://cdn.discordapp.com/avatars/{$user->getId()}/{$user->getAvatarHash()}.png"
             : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
+        $payload = $user->toArray();
+
+        if ($payload['verified'] ?? false) {
+            $registration->provideTrustedEmail($email);
+        } else {
+            $registration->suggestEmail($email);
+        }
+
         $registration
-            ->provideTrustedEmail($email)
             ->suggestUsername($user->getUsername() ?: '')
-            ->setPayload($user->toArray());
+            ->setPayload($payload);
 
         $this->provideAvatar($registration, $file);
     }

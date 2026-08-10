@@ -15,6 +15,7 @@ use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Google as GoogleProvider;
+use League\OAuth2\Client\Provider\GoogleUser;
 
 class Google extends Provider
 {
@@ -65,12 +66,20 @@ class Google extends Provider
         return $hostedDomain !== '' ? $hostedDomain : null;
     }
 
+    /**
+     * @param GoogleUser $user
+     */
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $this->verifyEmail($email = $user->getEmail());
 
+        if ($user->isEmailTrustworthy()) {
+            $registration->provideTrustedEmail($email);
+        } else {
+            $registration->suggestEmail($email);
+        }
+
         $registration
-            ->provideTrustedEmail($email)
             ->suggestUsername($user->getName())
             ->setPayload($user->toArray());
 
