@@ -1,0 +1,72 @@
+// Keep FoF OAuth buttons visually after the native submit button in auth modals.
+// This avoids registering extra frontend JS bundles that can conflict with Flarum 1.x bootExtensions.
+.LogInModal,
+.SignUpModal {
+  .Modal-body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .Modal-body > .Form {
+    order: 1;
+    margin-bottom: 0;
+  }
+
+  .Modal-body > .LogInButtons {
+    order: 2;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 360px;
+    margin-top: 12px;
+    margin-right: auto;
+    margin-bottom: 20px;
+    margin-left: auto;
+  }
+
+  .Modal-body > .LogInButtons .LogInButtonContainer {
+    margin-bottom: 8px;
+  }
+
+  .Modal-body > .LogInButtons .LogInButtonContainer:last-child {
+    margin-bottom: 0;
+  }
+
+  .FoFLogInButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 100%;
+    height: 36px;
+    min-height: 0;
+    padding: 8px 13px;
+    font-size: 14px;
+    line-height: 20px;
+    border-radius: var(--border-radius);
+    text-align: center;
+  }
+
+  .FoFLogInButton .Button-icon,
+  .FoFLogInButton .Button-label {
+    line-height: 20px;
+  }
+}
+
+.FoFLogInButtons--icons {
+  max-width: 360px;
+  margin-top: 12px;
+  margin-right: auto;
+  margin-left: auto;
+
+  .FoFLogInButton {
+    width: 50px;
+    min-height: 50px;
+    height: 50px;
+    padding: 0;
+    border-radius: 30px;
+  }
+
+  .LogInButtonContainer {
+    margin-bottom: 0;
+  }
+}

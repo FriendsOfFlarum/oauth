@@ -39,7 +39,17 @@ abstract class Provider
 
     public function icon(): string
     {
-        return "fab fa-{$this->name()}";
+        $icons = [
+            'discord'  => 'fab fa-discord',
+            'facebook' => 'fab fa-facebook-f',
+            'github'   => 'fab fa-github',
+            'gitlab'   => 'fab fa-gitlab',
+            'google'   => 'fab fa-google',
+            'linkedin' => 'fab fa-linkedin-in',
+            'twitter'  => 'fab fa-twitter',
+        ];
+
+        return $icons[$this->name()] ?? "fab fa-{$this->name()}";
     }
 
     public function priority(): int
