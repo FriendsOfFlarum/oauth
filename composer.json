@@ -1,6 +1,6 @@
 {
     "name": "fof/oauth",
-    "description": "Allow users to log in with GitHub, Facebook, Google, Discord, GitLab, LinkedIn, and more!",
+    "description": "Allow users to log in with Flarum, GitHub, Facebook, Google, Discord, GitLab, LinkedIn, and more!",
     "keywords": [
         "flarum",
         "friendsofflarum",

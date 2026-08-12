@@ -10,6 +10,7 @@ By default these providers are included:
 
 - Discord
 - Facebook
+- Flarum
 - GitHub
 - GitLab
 - Google

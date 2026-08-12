@@ -1,0 +1,17 @@
+@fof-oauth-flarum-logo: ~"url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjE5IDE0IDYxIDcyIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxOSAxNCkiIGZpbGw9IiMwMDAiPjxwb2x5Z29uIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4Ljk5MiA2MC4wNTYpIHNjYWxlKDEgLTEpIHRyYW5zbGF0ZSgtMTguOTkyIC02MC4wNTYpIiBwb2ludHM9IjMuMjgxIDY3Ljc4NCAzLjI1NiA3MS40MTggMzQuNzI5IDcxLjQxOCAzNC43MjkgNDguNjk0Ii8+PHBhdGggZD0iTTEuNTAyIDBDLjY3MyAwIDAgLjY3MyAwIDEuNTA0djQ2LjEwOGMuMDkgMS41MjUuMDEzIDMuMTE1IDQuODY4IDUuNzE3IDAgMC00Ljc1OC00LjYxIDIuNzI5LTQuNjM0aDUzLjE3OVYwSDEuNTAyeiIvPjwvZz48L3N2Zz4=')";
+
+// Render the Flarum symbol as a CSS mask so it inherits the surrounding
+// `color` (currentColor), the same way Font Awesome glyphs do.
+.icon.flarum-logo {
+  display: inline-block;
+  // Match Font Awesome's fixed-width glyph footprint (~1.25em wide square) so
+  // the logo lines up horizontally with neighbouring FA icons in lists. The
+  // symbol itself is 61x72, so a tighter `width` would pull it flush-left
+  // against the edge of its column.
+  width: 1.25em;
+  height: 1em;
+  background-color: currentColor;
+  mask: @fof-oauth-flarum-logo center / contain no-repeat;
+  -webkit-mask: @fof-oauth-flarum-logo center / contain no-repeat;
+  vertical-align: middle;
+}
