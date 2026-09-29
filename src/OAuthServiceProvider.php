@@ -25,6 +25,7 @@ class OAuthServiceProvider extends AbstractServiceProvider
         $this->container->tag([
             Providers\Discord::class,
             Providers\Facebook::class,
+            Providers\Flarum::class,
             Providers\GitHub::class,
             Providers\GitLab::class,
             Providers\Google::class,
