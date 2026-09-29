@@ -235,6 +235,11 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
         $actor = RequestUtil::getActor($request);
         $returnTo = $this->get(self::SESSION_RETURN_TO, $session) ?: '/';
 
+        // Check again: the value may have been stored by an older release, before the current rules.
+        if (!self::isSafeReturnPath($returnTo)) {
+            $returnTo = '/';
+        }
+
         $this->forget(self::SESSION_RETURN_TO, $session);
 
         // Account-linking flow: an authenticated user is connecting an OAuth provider.
@@ -353,17 +358,22 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
             }
         }
 
-        // Reject anything that looks like an absolute URL (has a scheme or //host).
-        if (!empty($returnTo) && (str_contains($returnTo, '://') || str_starts_with($returnTo, '//'))) {
-            return '/';
-        }
+        return self::isSafeReturnPath($returnTo) ? $returnTo : '/';
+    }
 
-        // Must start with / to be a valid relative path.
-        if (!empty($returnTo) && !str_starts_with($returnTo, '/')) {
-            return '/';
-        }
-
-        return $returnTo ?: '/';
+    /**
+     * Whether a returnTo value is a path on this forum and safe to redirect to.
+     *
+     * Rejects anything that looks like an absolute URL (has a scheme or //host). Browsers read "\" as "/",
+     * so "/\host" is a //host too, and strip tab/CR/LF, so "/<TAB>/host" is as well.
+     */
+    public static function isSafeReturnPath(string $returnTo): bool
+    {
+        return str_starts_with($returnTo, '/')
+            && !str_starts_with($returnTo, '//')
+            && !str_contains($returnTo, '://')
+            && !str_contains($returnTo, '\\')
+            && !preg_match('/[\x00-\x1F\x7F]/', $returnTo);
     }
 
     // -------------------------------------------------------------------------
