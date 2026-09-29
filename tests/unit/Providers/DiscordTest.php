@@ -54,4 +54,33 @@ class DiscordTest extends ProviderTestCase
 
         $this->suggest(['id' => '1', 'username' => 'user', 'verified' => true]);
     }
+
+    // getProviderVerifiedEmail()
+
+    private function verified(array $response): ?string
+    {
+        return (new Discord($this->settings()))->getProviderVerifiedEmail(new DiscordResourceOwner($response), 'token');
+    }
+
+    public function test_verified_email_returned_when_verified(): void
+    {
+        $this->assertSame('user@example.com', $this->verified(['id' => '1', 'email' => 'user@example.com', 'verified' => true]));
+    }
+
+    public function test_no_verified_email_when_unverified_or_flag_missing(): void
+    {
+        $this->assertNull($this->verified(['id' => '1', 'email' => 'user@example.com', 'verified' => false]));
+        $this->assertNull($this->verified(['id' => '1', 'email' => 'user@example.com']));
+    }
+
+    public function test_no_verified_email_when_flag_is_not_boolean_true(): void
+    {
+        $this->assertNull($this->verified(['id' => '1', 'email' => 'user@example.com', 'verified' => 'true']));
+        $this->assertNull($this->verified(['id' => '1', 'email' => 'user@example.com', 'verified' => 1]));
+    }
+
+    public function test_no_verified_email_when_email_missing(): void
+    {
+        $this->assertNull($this->verified(['id' => '1', 'verified' => true]));
+    }
 }

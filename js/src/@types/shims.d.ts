@@ -6,6 +6,8 @@ declare module 'flarum/forum/ForumApplication' {
     fof_oauth_linkingInProgress?: boolean;
     fof_oauth_linkingProvider?: string;
     fof_oauth_loginInProgress?: boolean;
+    /** Provider whose login button is hidden while the Log In modal shows the unverified email notice. */
+    fof_oauth_unverifiedEmailProvider?: string;
     linkingComplete: () => Promise<void>;
   }
 }

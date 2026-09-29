@@ -33,6 +33,9 @@ export default function () {
       .filter((provider): provider is NonNullable<OAuthProvider> => provider !== null);
 
     enabledOAuthProviders.forEach(({ name, icon, priority }) => {
+      // Signing in with this provider again would only repeat the unverified email notice.
+      if (name === app.fof_oauth_unverifiedEmailProvider) return;
+
       let className = `Button FoFLogInButton LogInButton--${name}`;
 
       if (onlyIcons) {
@@ -80,6 +83,20 @@ export default function () {
     }
   });
 
+  override(ForumApplication.prototype, 'authenticationComplete', function (original, payload: Record<string, unknown>) {
+    const fofOAuth = payload.fofOAuth as { unverifiedEmailInUse?: boolean; provider?: string; email?: string } | undefined;
+
+    // The provider's email isn't verified and an account already uses it: ask the user to log in to that
+    // account (and link the provider afterwards) instead of offering a sign-up form that can only fail.
+    if (fofOAuth?.unverifiedEmailInUse) {
+      app.modal.show(LogInModal, { identification: fofOAuth.email, fofOAuthUnverifiedEmailProvider: fofOAuth.provider });
+
+      return;
+    }
+
+    return original(payload);
+  });
+
   ForumApplication.prototype.linkingComplete = async function () {
     try {
       app.fof_oauth_linkingInProgress = true;
@@ -125,6 +142,27 @@ export default function () {
       m.redraw();
     }
   };
+
+  extend(LogInModal.prototype, 'oninit', function () {
+    const provider = this.attrs.fofOAuthUnverifiedEmailProvider;
+
+    if (provider) {
+      app.fof_oauth_unverifiedEmailProvider = provider;
+
+      this.alertAttrs = {
+        type: 'warning',
+        content: app.translator.trans('fof-oauth.forum.log_in.unverified_email_in_use', {
+          provider: app.translator.trans(`fof-oauth.forum.providers.${provider}`),
+        }),
+      };
+    }
+  });
+
+  extend(LogInModal.prototype, 'onremove', function () {
+    if (this.attrs.fofOAuthUnverifiedEmailProvider) {
+      app.fof_oauth_unverifiedEmailProvider = undefined;
+    }
+  });
 
   extend(LogInModal.prototype, 'onbeforeupdate', function () {
     if (app.fof_oauth_loginInProgress) {

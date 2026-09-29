@@ -54,4 +54,28 @@ class LinkedInTest extends ProviderTestCase
 
         $this->suggest(['sub' => '1', 'given_name' => 'User', 'email_verified' => true]);
     }
+
+    // getProviderVerifiedEmail()
+
+    private function verified(array $response): ?string
+    {
+        return (new LinkedIn($this->settings()))->getProviderVerifiedEmail(new LinkedInResourceOwner($response), 'token');
+    }
+
+    public function test_verified_email_returned_when_email_verified(): void
+    {
+        $this->assertSame('user@example.com', $this->verified(['sub' => '1', 'email' => 'user@example.com', 'email_verified' => true]));
+    }
+
+    public function test_no_verified_email_when_unverified_missing_or_not_boolean_true(): void
+    {
+        $this->assertNull($this->verified(['sub' => '1', 'email' => 'user@example.com', 'email_verified' => false]));
+        $this->assertNull($this->verified(['sub' => '1', 'email' => 'user@example.com']));
+        $this->assertNull($this->verified(['sub' => '1', 'email' => 'user@example.com', 'email_verified' => 'true']));
+    }
+
+    public function test_no_verified_email_when_email_missing(): void
+    {
+        $this->assertNull($this->verified(['sub' => '1', 'email_verified' => true]));
+    }
 }

@@ -18,8 +18,10 @@ use Flarum\Http\UrlGenerator;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\Extend\Controllers\AbstractOAuthController;
 use FoF\OAuth\Errors\AuthenticationException;
+use FoF\OAuth\Errors\UnverifiedEmailInUseException;
 use Illuminate\Contracts\Cache\Store as CacheStore;
 use Illuminate\Contracts\Events\Dispatcher;
+use Laminas\Diactoros\Response\HtmlResponse;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -69,6 +71,8 @@ abstract class Controller extends AbstractOAuthController
 
         try {
             return parent::handle($request);
+        } catch (UnverifiedEmailInUseException $e) {
+            return $this->unverifiedEmailInUseResponse($e);
         } catch (Exception $e) {
             if ((bool) $this->settings->get('fof-oauth.log-oauth-errors')) {
                 /** @var LoggerInterface $logger */
@@ -92,5 +96,25 @@ abstract class Controller extends AbstractOAuthController
 
             throw $e;
         }
+    }
+
+    /**
+     * Close the popup and hand the opener a payload it recognises, like core's ResponseFactory does, so the forum can
+     * ask the user to log in and link the provider. This is a normal response, independent of error handling.
+     */
+    protected function unverifiedEmailInUseResponse(UnverifiedEmailInUseException $e): ResponseInterface
+    {
+        $payload = [
+            'fofOAuth' => [
+                'unverifiedEmailInUse' => true,
+                'provider'             => $e->provider,
+                'email'                => $e->email,
+            ],
+        ];
+
+        // The email comes from the provider: hex-encode HTML-significant characters so it can't break out of the script.
+        $json = json_encode($payload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+        return new HtmlResponse(sprintf('<script>window.close(); window.opener.app.authenticationComplete(%s);</script>', $json));
     }
 }

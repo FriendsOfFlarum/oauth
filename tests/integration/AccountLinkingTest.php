@@ -14,6 +14,7 @@ namespace FoF\OAuth\Tests\integration;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
 use Flarum\User\LoginProvider;
+use Flarum\User\User;
 
 /**
  * Covers linking an OAuth identity to the currently logged-in account.
@@ -86,5 +87,32 @@ class AccountLinkingTest extends TestCase
 
         $this->assertEquals(422, $response->getStatusCode());
         $this->assertSame(4, LoginProvider::where('provider', 'gitlab')->where('identifier', '55555')->value('user_id'));
+    }
+
+    public function test_linking_requests_confirmation_of_verified_provider_email(): void
+    {
+        $this->setting('fof-oauth.update_email_from_provider', 1);
+        $this->setting('mail_driver', 'log');
+        $this->mockGitlab(['id' => 44444, 'username' => 'usera', 'email' => 'different@example.com', 'confirmed_at' => '2021-01-01T00:00:00Z']);
+        $logs = $this->captureLogs();
+
+        $response = $this->oauthLinkCallback('gitlab', 3, 3);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertSame('usera@machine.local', User::find(3)->email);
+        $this->assertCount(1, $this->sentMail($logs, 'different@example.com'));
+        $this->assertCount(1, $this->sentMail($logs, 'usera@machine.local'));
+    }
+
+    public function test_linking_does_not_sync_unverified_provider_email(): void
+    {
+        $this->setting('fof-oauth.update_email_from_provider', 1);
+        $this->mockGitlab(['id' => 44444, 'username' => 'usera', 'email' => 'different@example.com', 'confirmed_at' => null]);
+
+        $response = $this->oauthLinkCallback('gitlab', 3, 3);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertTrue(LoginProvider::where('user_id', 3)->where('identifier', '44444')->exists());
+        $this->assertSame('usera@machine.local', User::find(3)->email);
     }
 }

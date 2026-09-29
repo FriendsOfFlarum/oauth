@@ -60,4 +60,32 @@ class GitLabTest extends ProviderTestCase
 
         $this->suggest(['id' => 1, 'username' => 'user', 'avatar_url' => 'https://gitlab.example/avatar.png', 'email' => '', 'confirmed_at' => '2021-01-01T00:00:00Z']);
     }
+
+    // getProviderVerifiedEmail()
+
+    private function verified(array $response): ?string
+    {
+        $owner = new GitlabResourceOwner(
+            array_merge(['id' => 1, 'username' => 'user', 'avatar_url' => 'https://gitlab.example/avatar.png'], $response),
+            new AccessToken(['access_token' => 'token'])
+        );
+
+        return (new GitLab($this->settings()))->getProviderVerifiedEmail($owner, 'token');
+    }
+
+    public function test_verified_email_returned_when_confirmed(): void
+    {
+        $this->assertSame('user@example.com', $this->verified(['email' => 'user@example.com', 'confirmed_at' => '2021-01-01T00:00:00Z']));
+    }
+
+    public function test_no_verified_email_when_unconfirmed_or_missing(): void
+    {
+        $this->assertNull($this->verified(['email' => 'user@example.com', 'confirmed_at' => null]));
+        $this->assertNull($this->verified(['email' => 'user@example.com']));
+    }
+
+    public function test_no_verified_email_when_email_empty(): void
+    {
+        $this->assertNull($this->verified(['email' => '', 'confirmed_at' => '2021-01-01T00:00:00Z']));
+    }
 }

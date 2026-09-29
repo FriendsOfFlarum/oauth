@@ -65,7 +65,7 @@ class Discord extends Provider
 
         $payload = $user->toArray();
 
-        if ($payload['verified'] ?? false) {
+        if ($this->getProviderVerifiedEmail($user, $token) !== null) {
             $registration->provideTrustedEmail($email);
         } else {
             $registration->suggestEmail($email);
@@ -76,5 +76,13 @@ class Discord extends Provider
             ->setPayload($payload);
 
         $this->provideAvatar($registration, $file);
+    }
+
+    /**
+     * @param DiscordResourceOwner $user
+     */
+    public function getProviderVerifiedEmail($user, string $token): ?string
+    {
+        return $user->getVerified() === true ? ($user->getEmail() ?: null) : null;
     }
 }

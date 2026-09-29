@@ -13,8 +13,14 @@ namespace FoF\OAuth\Tests\integration;
 
 use Dflydev\FigCookies\SetCookies;
 use Flarum\Settings\SettingsRepositoryInterface;
+use FoF\OAuth\Providers\GitHub;
 use FoF\OAuth\Providers\GitLab;
+use GuzzleHttp\Psr7\Response;
+use League\OAuth2\Client\Provider\Github as GithubClient;
+use League\OAuth2\Client\Provider\GithubResourceOwner;
 use League\OAuth2\Client\Token\AccessToken;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use Omines\OAuth2\Client\Provider\Gitlab as GitlabClient;
 use Omines\OAuth2\Client\Provider\GitlabResourceOwner;
 use Psr\Http\Message\ResponseInterface;
@@ -50,6 +56,76 @@ trait PerformsOAuthLogin
         $provider->method('provider')->willReturn($client);
 
         $container->instance(GitLab::class, $provider);
+    }
+
+    /**
+     * Replace the GitHub provider's client: the round trip returns `$resourceOwner` from `GET /user`,
+     * and `GET /user/emails` returns `$emails`.
+     */
+    protected function mockGithub(array $resourceOwner, array $emails): void
+    {
+        $container = $this->app()->getContainer();
+
+        $client = $this->getMockBuilder(GithubClient::class)
+            ->setConstructorArgs([[
+                'clientId'     => 'test',
+                'clientSecret' => 'test',
+                'redirectUri'  => 'http://localhost/auth/github',
+            ]])
+            ->onlyMethods(['getAccessToken', 'getResourceOwner', 'getResponse'])
+            ->getMock();
+
+        $accessToken = new AccessToken(['access_token' => 'token', 'expires' => time() + 3600]);
+        $client->method('getAccessToken')->willReturn($accessToken);
+        $client->method('getResourceOwner')->willReturn(new GithubResourceOwner($resourceOwner));
+        $client->method('getResponse')->willReturn(new Response(200, [], (string) json_encode($emails)));
+
+        $provider = $this->getMockBuilder(GitHub::class)
+            ->setConstructorArgs([$container->make(SettingsRepositoryInterface::class)])
+            ->onlyMethods(['provider'])
+            ->getMock();
+        $provider->method('provider')->willReturn($client);
+
+        $container->instance(GitHub::class, $provider);
+    }
+
+    /**
+     * Capture everything logged to Flarum's logger from now on.
+     */
+    protected function captureLogs(): TestHandler
+    {
+        $handler = new TestHandler();
+
+        /** @var Logger $logger */
+        $logger = $this->app()->getContainer()->make('log');
+        $logger->pushHandler($handler);
+
+        return $handler;
+    }
+
+    /**
+     * Raw MIME messages sent through the `log` mail driver (set `mail_driver` to `log` before booting),
+     * optionally only those addressed to `$to`.
+     *
+     * @return string[]
+     */
+    protected function sentMail(TestHandler $logs, ?string $to = null): array
+    {
+        $messages = [];
+
+        foreach ($logs->getRecords() as $record) {
+            $message = (string) $record['message'];
+
+            if (strpos($message, 'Subject:') === false || !preg_match('/^To: (.+)$/m', $message, $matches)) {
+                continue;
+            }
+
+            if ($to === null || strpos($matches[1], $to) !== false) {
+                $messages[] = $message;
+            }
+        }
+
+        return $messages;
     }
 
     /**

@@ -95,6 +95,18 @@ class ProviderTest extends TestCase
         $this->assertSame([], $registration->getSuggested());
     }
 
+    public function test_provider_verified_email_is_null_by_default(): void
+    {
+        $user = new class() {
+            public function getEmail(): string
+            {
+                return 'user@example.com';
+            }
+        };
+
+        $this->assertNull($this->makeProvider()->getProviderVerifiedEmail($user, 'token'));
+    }
+
     public function test_enabled_reads_from_settings(): void
     {
         $this->settings->method('get')->with('fof-oauth.testprovider')->willReturn('1');
