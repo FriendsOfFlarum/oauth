@@ -11,14 +11,41 @@
 
 namespace FoF\OAuth\Providers;
 
+use Exception;
 use Flarum\Forum\Auth\Registration;
+use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Provider;
+use FoF\OAuth\Support\JwksKeyLoader;
 use Illuminate\Support\Arr;
+use Lcobucci\JWT\Signer\Rsa\Sha256;
 use League\OAuth2\Client\Provider\AbstractProvider;
-use League\OAuth2\Client\Provider\GenericProvider;
+use OpenIDConnectClient\OpenIDConnectProvider;
+use Psr\Log\LoggerInterface;
 
+/**
+ * OpenID Connect provider for federated Flarum SSO.
+ *
+ * Uses steverhoades/oauth2-openid-connect-client to perform OIDC authorization
+ * code flow with cryptographic ID token validation: the library verifies the
+ * JWT signature against the issuer's JWKS plus the iss, aud, exp, iat, and
+ * nbf claims before returning the access token.
+ *
+ * Nonce replay-defence is not currently enforced by the upstream library's
+ * ValidatorChain — see https://github.com/steverhoades/oauth2-openid-connect-client
+ * — so we rely on fof/oauth's existing `state` CSRF check for replay
+ * protection. Signature + issuer + audience verification still prevents any
+ * spoofed or MITM'd userinfo response from being trusted.
+ */
 class Flarum extends Provider
 {
+    public function __construct(
+        SettingsRepositoryInterface $settings,
+        protected JwksKeyLoader $jwks,
+        protected LoggerInterface $logger,
+    ) {
+        parent::__construct($settings);
+    }
+
     public function name(): string
     {
         return 'flarum';
@@ -56,21 +83,41 @@ class Flarum extends Provider
             return null;
         }
 
-        return new GenericProvider([
-            'clientId'                => $this->getSetting('client_id'),
-            'clientSecret'            => $this->getSetting('client_secret'),
-            'redirectUri'             => $redirectUri,
-            'urlAuthorize'            => "$base/oauth/authorize",
-            'urlAccessToken'          => "$base/oauth/token",
-            'urlResourceOwnerDetails' => "$base/oauth/userinfo",
-            'scopeSeparator'          => ' ',
-            'responseResourceOwnerId' => 'sub',
-        ]);
+        try {
+            $publicKeys = $this->jwks->load("$base/.well-known/jwks.json");
+        } catch (Exception $e) {
+            $this->logger->error('fof/oauth: failed to load JWKS from Flarum provider', [
+                'issuer' => $base,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+
+        return new OpenIDConnectProvider(
+            [
+                'clientId'                => $this->getSetting('client_id'),
+                'clientSecret'            => $this->getSetting('client_secret'),
+                'redirectUri'             => $redirectUri,
+                'idTokenIssuer'           => $base,
+                'urlAuthorize'            => "$base/oauth/authorize",
+                'urlAccessToken'          => "$base/oauth/token",
+                'urlResourceOwnerDetails' => "$base/oauth/userinfo",
+                'publicKey'               => $publicKeys,
+                'scopes'                  => ['openid', 'profile', 'email'],
+                'responseResourceOwnerId' => 'sub',
+            ],
+            [
+                'signer' => new Sha256(),
+            ],
+        );
     }
 
     public function options(): array
     {
-        return ['scope' => ['openid', 'profile', 'email']];
+        return [
+            'scope' => ['openid', 'profile', 'email'],
+        ];
     }
 
     public function suggestions(Registration $registration, mixed $user, string $token): void
@@ -81,7 +128,7 @@ class Flarum extends Provider
 
         $registration
             ->provideTrustedEmail($email)
-            ->suggestUsername(Arr::get($data, 'preferred_username') ?: Arr::get($data, 'name') ?: '')
+            ->suggestUsername(Arr::get($data, 'name') ?: '')
             ->setPayload($data);
 
         $this->provideAvatar(
@@ -118,7 +165,7 @@ class Flarum extends Provider
             $url = $parts[0] ?? null;
             $descriptor = $parts[1] ?? '1x';
 
-            if (!$url) {
+            if (! $url) {
                 continue;
             }
 
