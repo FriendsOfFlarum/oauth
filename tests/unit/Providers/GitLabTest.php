@@ -32,7 +32,7 @@ class GitLabTest extends ProviderTestCase
     public function test_confirmed_email_is_trusted(): void
     {
         $registration = $this->suggest([
-            'id' => 1, 'username' => 'user', 'avatar_url' => null, 'email' => 'user@example.com', 'confirmed_at' => '2021-01-01T00:00:00Z',
+            'id' => 1, 'username' => 'user', 'avatar_url' => 'https://gitlab.example/avatar.png', 'email' => 'user@example.com', 'confirmed_at' => '2021-01-01T00:00:00Z',
         ]);
 
         $this->assertTrustedEmail('user@example.com', $registration);
@@ -41,7 +41,7 @@ class GitLabTest extends ProviderTestCase
     public function test_unconfirmed_email_is_only_suggested(): void
     {
         $registration = $this->suggest([
-            'id' => 1, 'username' => 'user', 'avatar_url' => null, 'email' => 'user@example.com', 'confirmed_at' => null,
+            'id' => 1, 'username' => 'user', 'avatar_url' => 'https://gitlab.example/avatar.png', 'email' => 'user@example.com', 'confirmed_at' => null,
         ]);
 
         $this->assertSuggestedEmail('user@example.com', $registration);
@@ -49,7 +49,7 @@ class GitLabTest extends ProviderTestCase
 
     public function test_missing_confirmed_at_is_only_suggested(): void
     {
-        $registration = $this->suggest(['id' => 1, 'username' => 'user', 'avatar_url' => null, 'email' => 'user@example.com']);
+        $registration = $this->suggest(['id' => 1, 'username' => 'user', 'avatar_url' => 'https://gitlab.example/avatar.png', 'email' => 'user@example.com']);
 
         $this->assertSuggestedEmail('user@example.com', $registration);
     }
@@ -58,6 +58,6 @@ class GitLabTest extends ProviderTestCase
     {
         $this->expectException(AuthenticationException::class);
 
-        $this->suggest(['id' => 1, 'username' => 'user', 'avatar_url' => null, 'email' => '', 'confirmed_at' => '2021-01-01T00:00:00Z']);
+        $this->suggest(['id' => 1, 'username' => 'user', 'avatar_url' => 'https://gitlab.example/avatar.png', 'email' => '', 'confirmed_at' => '2021-01-01T00:00:00Z']);
     }
 }

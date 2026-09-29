@@ -40,7 +40,7 @@ trait PerformsOAuthLogin
         $accessToken = new AccessToken(['access_token' => 'token', 'expires' => time() + 3600]);
         $client->method('getAccessToken')->willReturn($accessToken);
         $client->method('getResourceOwner')->willReturn(
-            new GitlabResourceOwner(array_merge(['avatar_url' => null], $resourceOwner), $accessToken)
+            new GitlabResourceOwner(array_merge(['avatar_url' => 'https://gitlab.example/avatar.png'], $resourceOwner), $accessToken)
         );
 
         $provider = $this->getMockBuilder(GitLab::class)
