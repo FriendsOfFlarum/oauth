@@ -53,7 +53,7 @@ class JwksKeyLoader
         $cache = $this->cache();
 
         $cached = $cache->get($cacheKey);
-        if (is_array($cached) && ! empty($cached)) {
+        if (is_array($cached) && !empty($cached)) {
             return $cached;
         }
 
@@ -74,7 +74,7 @@ class JwksKeyLoader
         $context = stream_context_create([
             'http' => [
                 'timeout' => 5,
-                'header' => "Accept: application/json\r\n",
+                'header'  => "Accept: application/json\r\n",
             ],
         ]);
 
@@ -84,16 +84,24 @@ class JwksKeyLoader
         }
 
         $document = json_decode($body, true);
-        if (! is_array($document) || ! isset($document['keys']) || ! is_array($document['keys'])) {
+        if (!is_array($document) || !isset($document['keys']) || !is_array($document['keys'])) {
             throw new RuntimeException("Malformed JWKS document at $jwksUrl");
         }
 
         $keys = [];
         foreach ($document['keys'] as $entry) {
-            if (! is_array($entry)) continue;
-            if (($entry['kty'] ?? null) !== 'RSA') continue;
-            if (($entry['alg'] ?? 'RS256') !== 'RS256') continue;
-            if (! isset($entry['n'], $entry['e'])) continue;
+            if (!is_array($entry)) {
+                continue;
+            }
+            if (($entry['kty'] ?? null) !== 'RSA') {
+                continue;
+            }
+            if (($entry['alg'] ?? 'RS256') !== 'RS256') {
+                continue;
+            }
+            if (!isset($entry['n'], $entry['e'])) {
+                continue;
+            }
 
             $keys[] = $this->jwkToPem($entry['n'], $entry['e']);
         }
@@ -180,7 +188,7 @@ class JwksKeyLoader
 
         $bytes = '';
         while ($length > 0) {
-            $bytes = chr($length & 0xff).$bytes;
+            $bytes = chr($length & 0xFF).$bytes;
             $length >>= 8;
         }
 

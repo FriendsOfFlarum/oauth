@@ -88,7 +88,7 @@ class Flarum extends Provider
         } catch (Exception $e) {
             $this->logger->error('fof/oauth: failed to load JWKS from Flarum provider', [
                 'issuer' => $base,
-                'error' => $e->getMessage(),
+                'error'  => $e->getMessage(),
             ]);
 
             return null;
@@ -165,7 +165,7 @@ class Flarum extends Provider
             $url = $parts[0] ?? null;
             $descriptor = $parts[1] ?? '1x';
 
-            if (! $url) {
+            if (!$url) {
                 continue;
             }
 
