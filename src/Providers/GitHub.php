@@ -21,7 +21,7 @@ use League\OAuth2\Client\Provider\GithubResourceOwner;
 class GitHub extends Provider
 {
     /**
-     * @var GitHubProvider
+     * @var GitHubProvider|null
      */
     protected $provider;
 
@@ -67,28 +67,56 @@ class GitHub extends Provider
      */
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
-        $this->verifyEmail($email = $user->getEmail() ?: $this->getEmailFromApi($token));
+        $verified = $this->getProviderVerifiedEmail($user, $token);
+
+        if ($verified !== null) {
+            $registration->provideTrustedEmail($verified);
+        } else {
+            // The public profile email carries no verification flag, so it is only ever suggested.
+            $this->verifyEmail($email = $user->getEmail());
+
+            $registration->suggestEmail($email);
+        }
 
         $registration
-            ->provideTrustedEmail($email)
             ->suggestUsername($user->getNickname() ?: '')
             ->setPayload($user->toArray());
 
         $this->provideAvatar($registration, Arr::get($user->toArray(), 'avatar_url'));
     }
 
+    /**
+     * The `email` from `GET /user` is the public profile email and has no verification flag, so it is never
+     * trusted. Only the primary, verified address from `GET /user/emails` (scope `user:email`) is returned.
+     *
+     * @param GithubResourceOwner $user
+     */
+    public function getProviderVerifiedEmail(mixed $user, string $token): ?string
+    {
+        return $this->getEmailFromApi($token);
+    }
+
     private function getEmailFromApi(string $token): ?string
     {
-        $url = $this->provider->apiDomain.'/user/emails';
+        // Provider instances are resolved fresh from the container, so the client may not be built yet
+        // (e.g. when called from the email sync listener).
+        /** @var GitHubProvider $client */
+        $client = $this->provider ?? $this->provider('');
 
-        $response = $this->provider->getResponse(
-            $this->provider->getAuthenticatedRequest('GET', $url, $token)
+        $url = $client->apiDomain.'/user/emails';
+
+        $response = $client->getResponse(
+            $client->getAuthenticatedRequest('GET', $url, $token)
         );
 
-        $emails = json_decode($response->getBody(), true);
+        $emails = json_decode((string) $response->getBody(), true);
+
+        if (!is_array($emails)) {
+            return null;
+        }
 
         foreach ($emails as $email) {
-            if ($email['primary'] && $email['verified']) {
+            if (is_array($email) && ($email['primary'] ?? false) === true && ($email['verified'] ?? false) === true && !empty($email['email'])) {
                 return $email['email'];
             }
         }

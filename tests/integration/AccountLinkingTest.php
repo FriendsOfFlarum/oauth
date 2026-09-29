@@ -25,6 +25,7 @@ use Psr\Http\Message\ResponseInterface;
 class AccountLinkingTest extends TestCase
 {
     use RetrievesAuthorizedUsers;
+    use PerformsOAuthLogin;
 
     protected function setUp(): void
     {
@@ -159,6 +160,23 @@ class AccountLinkingTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // Email sync on linking
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function linking_requests_confirmation_of_verified_provider_email(): void
+    {
+        $this->setting('fof-oauth.update_email_from_provider', 1);
+        $this->setting('mail_driver', 'log');
+        $logs = $this->captureLogs();
+
+        $this->runLinkFlow(userId: 3, providerId: 44444, returnTo: '/settings', email: 'different@example.com');
+
+        $this->assertSame('usera@machine.local', \Flarum\User\User::find(3)->email);
+        $this->assertCount(1, $this->sentMail($logs, 'different@example.com'));
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
@@ -166,9 +184,9 @@ class AccountLinkingTest extends TestCase
      * Run a full account-linking OAuth flow as the given user.
      * Returns [redirectLocation, cookies].
      */
-    private function runLinkFlow(int $userId, int $providerId, string $returnTo): array
+    private function runLinkFlow(int $userId, int $providerId, string $returnTo, string $email = 'usera@machine.local'): array
     {
-        $this->mockGitlabProvider($providerId, 'usera@machine.local');
+        $this->mockGitlabProvider($providerId, $email);
 
         // The init request must be authenticated so linkTo validation passes.
         $initRequest = $this->requestAsUser(

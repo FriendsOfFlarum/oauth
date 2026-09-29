@@ -61,6 +61,24 @@ abstract class Provider
         //
     }
 
+    /**
+     * Return the user's email address only if the provider confirms the user owns it, otherwise null.
+     *
+     * This is the provider's single decision on email trust. It is used by the post-login email sync
+     * (`fof-oauth.update_email_from_provider`), and bundled providers also use it in `suggestions()` to
+     * choose between `provideTrustedEmail()` and `suggestEmail()`.
+     *
+     * The default returns null, so providers that do not implement it never have their email synced.
+     *
+     * @see https://github.com/FriendsOfFlarum/oauth/blob/2.x/README.md#email-trust
+     *
+     * @param mixed $user The resource owner returned by the provider
+     */
+    public function getProviderVerifiedEmail(mixed $user, string $token): ?string
+    {
+        return null;
+    }
+
     // Helpers
 
     public function enabled(): bool

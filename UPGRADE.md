@@ -104,6 +104,16 @@ fof-oauth:
 
 The `providers.{name}` key is now also used by the `AccountLinkedModal` that appears after a first-time link, so make sure it is present and human-readable.
 
+### 10. Email trust: `getProviderVerifiedEmail()` (new)
+
+`Provider::getProviderVerifiedEmail(mixed $user, string $token): ?string` returns the email only when your provider confirms the user owns it, otherwise `null`. The default is `null`.
+
+- **Email sync:** with `Update email address from provider` enabled, only the address this method returns can start an email change (a confirmation link to the new address and a notice to the current one). If you don't implement it, your provider's emails are never synced, and a warning is logged at most once a day.
+- **Registration and login:** in `suggestions()`, call `provideTrustedEmail()` only for a verified address, and `suggestEmail()` otherwise. A trusted email that matches an existing account logs that account in and links it, so trusting an unverified address allows account takeover.
+- **Unverified email already in use:** if your provider only suggests an email that an existing account already uses, the user is returned to the forum with `_fof_oauth_unverified=<provider>` and asked to log in and link the provider, instead of being shown a sign-up form that can only fail.
+
+See [Email trust](README.md#email-trust) in the README for the full contract.
+
 ---
 
 ## Full example provider
@@ -153,8 +163,22 @@ class MyProvider extends Provider
 
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
-        $registration->provideTrustedEmail($user->getEmail());
+        $this->verifyEmail($email = $user->getEmail());
+
+        // Only trust an email your provider confirms the user owns; otherwise just pre-fill the sign-up form.
+        if ($this->getProviderVerifiedEmail($user, $token) !== null) {
+            $registration->provideTrustedEmail($email);
+        } else {
+            $registration->suggestEmail($email);
+        }
+
         $registration->suggestUsername($user->getNickname());
+    }
+
+    public function getProviderVerifiedEmail(mixed $user, string $token): ?string
+    {
+        // Replace with your provider's verification signal, e.g. the OpenID Connect `email_verified` claim.
+        return ($user->toArray()['email_verified'] ?? false) === true ? $user->getEmail() : null;
     }
 }
 ```

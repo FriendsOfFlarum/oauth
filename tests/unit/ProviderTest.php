@@ -101,6 +101,19 @@ class ProviderTest extends TestCase
     }
 
     #[Test]
+    public function provider_verified_email_is_null_by_default(): void
+    {
+        $user = new class() {
+            public function getEmail(): string
+            {
+                return 'user@example.com';
+            }
+        };
+
+        $this->assertNull($this->makeProvider()->getProviderVerifiedEmail($user, 'token'));
+    }
+
+    #[Test]
     public function pkce_enabled_returns_declared_value(): void
     {
         $this->assertTrue($this->makeProvider(['pkceEnabled' => true])->pkceEnabled());

@@ -19,6 +19,7 @@ use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\LoginProvider;
 use Flarum\User\User;
 use FoF\OAuth\Errors\AuthenticationException;
+use FoF\OAuth\Errors\UnverifiedEmailInUseException;
 use FoF\OAuth\Events\LinkingToProvider;
 use FoF\OAuth\Events\OAuthLoginSuccessful;
 use Illuminate\Contracts\Cache\Store as CacheStore;
@@ -250,14 +251,21 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
             $response = $this->linkAccount($actor, $resourceOwner, $returnTo);
         } else {
             // Normal login / registration flow.
-            $response = $this->response->make(
-                $this->getProviderName(),
-                $this->getIdentifier($resourceOwner),
-                function (Registration $registration) use ($resourceOwner, $token) {
-                    $this->setSuggestions($registration, $resourceOwner, (string) $token);
-                },
-                $returnTo
-            );
+            try {
+                $response = $this->response->make(
+                    $this->getProviderName(),
+                    $this->getIdentifier($resourceOwner),
+                    function (Registration $registration) use ($resourceOwner, $token) {
+                        $this->setSuggestions($registration, $resourceOwner, (string) $token);
+                    },
+                    $returnTo
+                );
+            } catch (UnverifiedEmailInUseException $e) {
+                // Nobody was logged in or linked, so there is no successful login to report.
+                $this->forget(self::SESSION_OAUTH2STATE, $session);
+
+                return $this->unverifiedEmailInUseResponse($e, $returnTo);
+            }
         }
 
         // Regenerate session ID after authentication to prevent session fixation.
@@ -298,6 +306,18 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
         $separator = str_contains($base, '?') ? '&' : '?';
 
         return new RedirectResponse($base.$separator.'_flarum_linked='.urlencode($this->getProviderName()));
+    }
+
+    /**
+     * Redirect back with only the provider name, so the forum can ask the user to log in and link that provider.
+     * The email is deliberately not put in the URL, where it would end up in logs and referrers.
+     */
+    protected function unverifiedEmailInUseResponse(UnverifiedEmailInUseException $e, string $returnTo): RedirectResponse
+    {
+        $base = $returnTo ?: '/';
+        $separator = str_contains($base, '?') ? '&' : '?';
+
+        return new RedirectResponse($base.$separator.'_fof_oauth_unverified='.urlencode($e->provider));
     }
 
     /**

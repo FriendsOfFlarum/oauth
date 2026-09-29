@@ -63,7 +63,7 @@ class LinkedIn extends Provider
     {
         $this->verifyEmail($email = $user->getEmail());
 
-        if ($user->getAttribute('email_verified')) {
+        if ($this->getProviderVerifiedEmail($user, $token) !== null) {
             $registration->provideTrustedEmail($email);
         } else {
             $registration->suggestEmail($email);
@@ -74,5 +74,14 @@ class LinkedIn extends Provider
         ->setPayload($user->toArray());
 
         $this->provideAvatar($registration, $user->getImageUrl());
+    }
+
+    /**
+     * @param LinkedInResourceOwner $user
+     */
+    public function getProviderVerifiedEmail(mixed $user, string $token): ?string
+    {
+        // OpenID Connect `email_verified` claim from the userinfo endpoint.
+        return $user->getAttribute('email_verified') === true ? ($user->getEmail() ?: null) : null;
     }
 }

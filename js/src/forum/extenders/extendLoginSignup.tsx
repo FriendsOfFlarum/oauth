@@ -42,6 +42,9 @@ export default function () {
       app.forum.attribute<OAuthProvider[]>('fof-oauth')?.filter((provider): provider is NonNullable<OAuthProvider> => provider !== null) ?? [];
 
     enabledOAuthProviders.forEach(({ name, icon, priority }) => {
+      // Signing in with this provider again would only repeat the unverified email notice.
+      if (name === app.fof_oauth_unverifiedEmailProvider) return;
+
       let className = `Button FoFLogInButton LogInButton--${name}`;
 
       if (onlyIcons) {
@@ -90,6 +93,28 @@ export default function () {
         </div>,
         35
       );
+    }
+  });
+
+  // LogInModal is lazy loaded in 2.x, so it is extended by module path.
+  extend('flarum/forum/components/LogInModal', 'oninit', function (this: any) {
+    const provider = this.attrs.fofOAuthUnverifiedEmailProvider;
+
+    if (provider) {
+      app.fof_oauth_unverifiedEmailProvider = provider;
+
+      this.alertAttrs = {
+        type: 'warning',
+        content: app.translator.trans('fof-oauth.forum.log_in.unverified_email_in_use', {
+          provider: app.translator.trans(`fof-oauth.forum.providers.${provider}`),
+        }),
+      };
+    }
+  });
+
+  extend('flarum/forum/components/LogInModal', 'onremove', function (this: any) {
+    if (this.attrs.fofOAuthUnverifiedEmailProvider) {
+      app.fof_oauth_unverifiedEmailProvider = undefined;
     }
   });
 }

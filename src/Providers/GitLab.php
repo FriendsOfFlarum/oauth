@@ -73,7 +73,7 @@ class GitLab extends Provider
 
         $payload = $user->toArray();
 
-        if (!empty($payload['confirmed_at'])) {
+        if ($this->getProviderVerifiedEmail($user, $token) !== null) {
             $registration->provideTrustedEmail($email);
         } else {
             $registration->suggestEmail($email);
@@ -84,5 +84,18 @@ class GitLab extends Provider
             ->setPayload($payload);
 
         $this->provideAvatar($registration, $user->getAvatarUrl());
+    }
+
+    /**
+     * @param GitlabResourceOwner $user
+     */
+    public function getProviderVerifiedEmail(mixed $user, string $token): ?string
+    {
+        /** @var array<string, mixed> $payload */
+        $payload = $user->toArray();
+
+        // `confirmed_at` is set once the account's primary email is confirmed. Self-hosted instances with email
+        // confirmation disabled auto-confirm accounts, so this is only as strong as the instance's policy.
+        return !empty($payload['confirmed_at']) ? ($user->getEmail() ?: null) : null;
     }
 }

@@ -14,7 +14,7 @@ fof-oauth:
         log-oauth-errors-help: If enabled, OAuth errors will be logged to the Flarum log. This may help with debugging OAuth issues, but may also contain sensitive information.
       only_icons_label: Only show the Log In Button icons (alternative layout)
       update_email_from_provider_label: Update email address from provider
-      update_email_from_provider_help: If enabled, the user's email address will be updated to match the one provided by the OAuth provider on each login to the forum. Not all providers provide the updated email, in which case this setting will not have any effect with those providers.
+      update_email_from_provider_help: If enabled, logging in with an OAuth provider whose verified email differs from the user's forum email sends a confirmation link to the new address, and a notice to the current one. The email changes once the link is followed. Providers that cannot confirm the address is verified, including third-party providers that have not been updated to support it, will not change the email address.
       disable_avatars_label: Disable avatars from provider
       disable_avatars_help: >
         If enabled, the user's avatar will not be updated to match the provider's avatar on signup.
@@ -65,6 +65,7 @@ fof-oauth:
 
   forum:
     log_in:
+      unverified_email_in_use: "{provider} hasn't confirmed this email address, so we can't use it to sign you in. If you already have an account, log in below, then link {provider} from your account settings."
       with_button: Log In with {provider}
 
       # Modify these if your provider requires specific wording.
@@ -111,6 +112,15 @@ fof-oauth:
       bad_verification_code: Invalid or expired verification token. Please try again.
       invalid_state: Invalid state. Please try again.
       already_linked: This account is already linked to another user.
+
+  email:
+    provider_email_change_notice:
+      subject: "Email Address Change Requested"
+      # The greeting is added by the email layout.
+      body: |
+        After you signed in to {forum} with {provider}, a change of your account's email address to {new_email} was requested. The change takes effect once the new address is confirmed.
+
+        If this wasn't you, your {provider} account may be compromised. Secure it, and contact the {forum} administrators.
 
   lib:
     providers:
