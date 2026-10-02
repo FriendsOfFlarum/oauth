@@ -13,6 +13,7 @@ namespace FoF\OAuth\Api;
 
 use Flarum\Api\Context;
 use Flarum\Api\Schema;
+use FoF\OAuth\OAuthOnly;
 
 class AddForumAttributes
 {
@@ -23,6 +24,10 @@ class AddForumAttributes
             Schema\Str::make('fof-oauth')
                 ->visible(fn ($model, Context $context) => $context->getActor()->isGuest())
                 ->get(fn () => resolve('fof-oauth.providers.forum')),
+
+            // Lets the forum hide password login and sign-up, see OAuthOnly
+            Schema\Boolean::make('fofOauthOnly')
+                ->get(fn () => resolve(OAuthOnly::class)->active()),
 
             // This attribute is used to check if the user can moderate OAuth providers
             Schema\Boolean::make('fofOauthModerate')

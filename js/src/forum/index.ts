@@ -1,12 +1,14 @@
 import app from 'flarum/forum/app';
 import addLinkedAccountsToUserSecurityPage from './extenders/addLinkedAccountsToUserSecurityPage';
 import extendLoginSignup from './extenders/extendLoginSignup';
+import extendOAuthOnly from './extenders/extendOAuthOnly';
 
 export { default as extend } from './extend';
 export * from './components';
 
 app.initializers.add('fof/oauth', () => {
   extendLoginSignup();
+  extendOAuthOnly();
   addLinkedAccountsToUserSecurityPage();
 
   const params = new URLSearchParams(window.location.search);
