@@ -12,6 +12,7 @@
 namespace FoF\OAuth;
 
 use Flarum\Api\Context;
+use Flarum\Api\Endpoint;
 use Flarum\Api\Resource;
 use Flarum\Api\Schema;
 use Flarum\Extend;
@@ -39,10 +40,15 @@ return [
 
     (new Extend\Middleware('forum'))
         ->add(Middleware\ErrorHandler::class)
-        ->add(Middleware\BindRequest::class),
+        ->add(Middleware\BindRequest::class)
+        ->add(Middleware\RestrictPasswordReset::class),
 
     (new Extend\Middleware('api'))
-        ->add(Middleware\BindRequest::class),
+        ->add(Middleware\BindRequest::class)
+        ->add(Middleware\RestrictPasswordReset::class),
+
+    (new Extend\Auth())
+        ->addPasswordChecker('fof-oauth.oauth_only', Auth\OAuthOnlyPasswordChecker::class),
 
     new Extend\ApiResource(Api\Resource\ProviderResource::class),
 
@@ -52,11 +58,16 @@ return [
     (new Extend\ApiResource(Resource\ForumResource::class))
         ->fields(Api\AddForumAttributes::class),
     (new Extend\ApiResource(Resource\UserResource::class))
-        ->fields(Api\AddUserAttributes::class),
+        ->fields(Api\AddUserAttributes::class)
+        ->endpoint(Endpoint\Create::class, function (Endpoint\Create $endpoint) {
+            // The hook's class-string form is instantiated without the container, so resolve it here.
+            return $endpoint->before(fn (Context $context) => resolve(Api\RequireRegistrationToken::class)($context));
+        }),
 
     (new Extend\Settings())
         ->default('fof-oauth.only_icons', false)
         ->default('fof-oauth.update_email_from_provider', true)
+        ->default('fof-oauth.oauth_only', false)
         ->serializeToForum('fof-oauth.only_icons', 'fof-oauth.only_icons', 'boolVal')
         ->default('fof-oauth.log-oauth-errors', false),
 

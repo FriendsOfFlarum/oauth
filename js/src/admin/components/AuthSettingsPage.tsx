@@ -35,6 +35,12 @@ export default class AuthSettingsPage extends ExtensionPage {
             })}
             {this.buildSettingComponent({
               type: 'boolean',
+              setting: 'fof-oauth.oauth_only',
+              label: app.translator.trans('fof-oauth.admin.settings.oauth_only_label'),
+              help: app.translator.trans('fof-oauth.admin.settings.oauth_only_help'),
+            })}
+            {this.buildSettingComponent({
+              type: 'boolean',
               setting: 'fof-oauth.disable_avatars',
               label: app.translator.trans('fof-oauth.admin.settings.disable_avatars_label'),
               help: app.translator.trans('fof-oauth.admin.settings.disable_avatars_help'),
