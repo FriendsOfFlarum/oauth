@@ -15,6 +15,12 @@ fof-oauth:
       only_icons_label: Only show the Log In Button icons (alternative layout)
       update_email_from_provider_label: Update email address from provider
       update_email_from_provider_help: If enabled, logging in with an OAuth provider whose verified email differs from the user's forum email sends a confirmation link to the new address, and a notice to the current one. The email changes once the link is followed. Providers that cannot confirm the address is verified, including third-party providers that have not been updated to support it, will not change the email address.
+      oauth_only_label: Only allow logging in and signing up with OAuth providers
+      oauth_only_help: >
+        If enabled, members can no longer log in, sign up or reset their password with a password; they use the enabled providers instead.
+        Administrators keep password login, through the "Administrator login" link in the log in modal.
+        Existing members without a linked provider are linked on their first provider login if the provider confirms the same email address; anyone else will need an administrator's help.
+        Has no effect while no provider is enabled. Keep "Allow sign up" enabled in Permissions, otherwise new members can't sign up with a provider either.
       disable_avatars_label: Disable avatars from provider
       disable_avatars_help: >
         If enabled, the user's avatar will not be updated to match the provider's avatar on signup.
@@ -66,6 +72,8 @@ fof-oauth:
   forum:
     log_in:
       unverified_email_in_use: "{provider} hasn't confirmed this email address, so we can't use it to sign you in. If you already have an account, log in below, then link {provider} from your account settings."
+      unverified_email_in_use_oauth_only: "{provider} hasn't confirmed this email address, so we can't use it to sign you in. Confirm the address with {provider} and try again, or ask an administrator for help."
+      admin_log_in_link: Administrator login
       with_button: Log In with {provider}
 
       # Modify these if your provider requires specific wording.
