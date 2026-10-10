@@ -4,6 +4,7 @@ import LogInButtons from 'flarum/forum/components/LogInButtons';
 import LogInButton from 'flarum/forum/components/LogInButton';
 import extractText from 'flarum/common/utils/extractText';
 import Tooltip from 'flarum/common/components/Tooltip';
+import { oauthOnly } from './extendOAuthOnly';
 
 import type Mithril from 'mithril';
 import type ItemList from 'flarum/common/utils/ItemList';
@@ -103,11 +104,14 @@ export default function () {
     if (provider) {
       app.fof_oauth_unverifiedEmailProvider = provider;
 
+      const providerName = app.translator.trans(`fof-oauth.forum.providers.${provider}`);
+
+      // In OAuth-only mode there is no password login to link the provider from.
       this.alertAttrs = {
         type: 'warning',
-        content: app.translator.trans('fof-oauth.forum.log_in.unverified_email_in_use', {
-          provider: app.translator.trans(`fof-oauth.forum.providers.${provider}`),
-        }),
+        content: oauthOnly()
+          ? app.translator.trans('fof-oauth.forum.log_in.unverified_email_in_use_oauth_only', { provider: providerName })
+          : app.translator.trans('fof-oauth.forum.log_in.unverified_email_in_use', { provider: providerName }),
       };
     }
   });
