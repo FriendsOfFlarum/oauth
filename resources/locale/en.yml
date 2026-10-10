@@ -20,7 +20,8 @@ fof-oauth:
         If enabled, members can no longer log in, sign up or reset their password with a password; they use the enabled providers instead.
         Administrators keep password login, through the "Administrator login" link in the log in modal.
         Existing members without a linked provider are linked on their first provider login if the provider confirms the same email address; anyone else will need an administrator's help.
-        Has no effect while no provider is enabled. Keep "Allow sign up" enabled in Permissions, otherwise new members can't sign up with a provider either.
+        Has no effect while no provider is enabled. Keep "Sign up" set to "Open" in Permissions, otherwise new members can't sign up with a provider either.
+      oauth_only_sign_up_closed_warning: "Sign up is set to Closed in <a>Permissions</a>. Flarum uses that setting for sign-ups through providers too, so nobody can join while it's closed."
       disable_avatars_label: Disable avatars from provider
       disable_avatars_help: >
         If enabled, the user's avatar will not be updated to match the provider's avatar on signup.
