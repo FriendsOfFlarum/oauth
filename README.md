@@ -24,6 +24,7 @@ By default these providers are included:
 - **PKCE support** — providers that support Proof Key for Code Exchange can opt in per-provider
 - **Group assignment** — automatically assign users to a forum group when they register via a specific provider
 - **Admin moderation** — view and manage users' linked provider accounts from the admin panel
+- **OAuth-only mode** — optionally make providers the only way members log in and sign up, while administrators keep password login (see [OAuth-only mode](#oauth-only-mode))
 
 ### Permissions
 
@@ -111,6 +112,25 @@ Providers from other extensions only sync once they support this (see [Email tru
 #### Signing in when the provider's email isn't confirmed
 
 If a provider reports an email address it hasn't confirmed, and an existing forum account already uses that address, the user is not offered the sign-up form (which could only fail with "email already taken"). Instead they're returned to the forum and the Log In form opens with that provider's button hidden, explaining that the provider hasn't confirmed the address and that, if they already have an account, they can log in and link the provider from their account settings. The email address is not put in the URL, so the form isn't pre-filled. An unconfirmed address can never sign in to or link an existing account automatically.
+
+In [OAuth-only mode](#oauth-only-mode), members can't log in with a password, so the message instead asks them to confirm the address with the provider, or to contact an administrator.
+
+#### OAuth-only mode
+
+Enable **Only allow logging in and signing up with OAuth providers** to make the enabled providers the only way members log in and sign up. While it's on:
+
+- The Log In modal shows only the provider buttons, and the header's Sign Up button is removed. New members sign up through a provider, then complete the usual sign-up form, pre-filled with what the provider shares.
+- Members can't log in, sign up or reset their password with a password. The server enforces this, so it isn't just hidden: password logins through the API are rejected too, and a password reset requested for a member sends no email.
+- **Change password** and **Change email** are hidden from members' settings, because both need a password.
+
+Administrators keep password login, so you can still get in if a provider stops working, or while the forum is in maintenance mode. Click **Administrator login** at the bottom of the Log In modal to show the password form and the forgot password link.
+
+Before enabling it:
+
+- Keep **Sign up** set to **Open** under Permissions. Flarum uses that setting for sign-ups through providers as well, so closing it stops new members joining at all. The extension settings page shows a warning while OAuth-only mode is on and sign-up is closed.
+- Make sure at least one provider is enabled and working. OAuth-only mode has no effect while no provider is enabled, so disabling the last one can't lock members out.
+- Existing members who signed up with a password are linked to a provider the first time they log in with it, as long as the provider confirms the same email address their forum account uses (see [Email trust](#email-trust)). Anyone else can't log in until that's resolved. For example, an administrator can change the member's forum email to the address they use with the provider.
+- Extensions that ask members to confirm their password reject it in this mode. flarum/gdpr and fof/username-request skip that check for members with a linked provider.
 
 ### Extending
 
