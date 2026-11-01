@@ -83,7 +83,15 @@ class GitLab extends Provider
             ->suggestUsername($user->getUsername() ?: '')
             ->setPayload($payload);
 
-        $this->provideAvatar($registration, $user->getAvatarUrl());
+        $this->provideAvatar($registration, $this->avatarUrl($user, $token));
+    }
+
+    /**
+     * @param GitlabResourceOwner $user
+     */
+    public function avatarUrl(mixed $user, string $token): ?string
+    {
+        return $user->getAvatarUrl() ?: null;
     }
 
     /**

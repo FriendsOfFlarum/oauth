@@ -69,7 +69,15 @@ class Facebook extends Provider
             ->suggestUsername($user->getName() ?: '')
             ->setPayload($user->toArray());
 
-        $this->provideAvatar($registration, $user->getPictureUrl());
+        $this->provideAvatar($registration, $this->avatarUrl($user, $token));
+    }
+
+    /**
+     * @param FacebookUser $user
+     */
+    public function avatarUrl(mixed $user, string $token): ?string
+    {
+        return $user->getPictureUrl() ?: null;
     }
 
     /**

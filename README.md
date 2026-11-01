@@ -22,6 +22,7 @@ By default these providers are included:
 - **Email-match auto-link** — if a provider returns a *verified* email address that matches an existing account, the provider is linked automatically and the user is logged in (see [Email trust](#email-trust))
 - **Account linked confirmation** — a modal is shown the first time a provider is linked, confirming the connection
 - **PKCE support** — providers that support Proof Key for Code Exchange can opt in per-provider
+- **Provider avatars** — members who sign up with a provider get its avatar, and so do existing members without an avatar when they link a provider (on its first link, whether from their settings or by a matching confirmed email). An avatar a member already has is never replaced. Turn this off with **Disable avatars from provider**. The avatar is downloaded by a queued job; without a queue worker (the default `sync` driver) that happens during the login, so a first link can take a few seconds longer
 - **Group assignment** — automatically assign users to a forum group when they register via a specific provider
 - **Admin moderation** — view and manage users' linked provider accounts from the admin panel
 - **OAuth-only mode** — optionally make providers the only way members log in and sign up, while administrators keep password login (see [OAuth-only mode](#oauth-only-mode))

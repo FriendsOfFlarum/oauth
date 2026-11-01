@@ -22,6 +22,8 @@ use FoF\OAuth\Errors\AuthenticationException;
 use FoF\OAuth\Errors\UnverifiedEmailInUseException;
 use FoF\OAuth\Events\LinkingToProvider;
 use FoF\OAuth\Events\OAuthLoginSuccessful;
+use FoF\OAuth\Jobs\ApplyProviderAvatar;
+use Illuminate\Contracts\Bus\Dispatcher as BusDispatcher;
 use Illuminate\Contracts\Cache\Store as CacheStore;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Session\Store;
@@ -34,6 +36,8 @@ use League\OAuth2\Client\Token\AccessTokenInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 abstract class AbstractOAuthController implements RequestHandlerInterface
 {
@@ -242,6 +246,9 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
 
         $this->forget(self::SESSION_RETURN_TO, $session);
 
+        $alreadyLinked = $this->findLink($resourceOwner) !== null;
+        $suggested = false;
+
         // Account-linking flow: an authenticated user is connecting an OAuth provider.
         if ($this->has(self::SESSION_LINKTO, $session) && $actor->exists) {
             $actor->assertRegistered();
@@ -254,17 +261,28 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
             }
 
             $response = $this->linkAccount($actor, $resourceOwner, $returnTo);
+
+            if (!$alreadyLinked) {
+                $this->provideAvatarOnLink($actor, $resourceOwner, $token);
+            }
         } else {
             // Normal login / registration flow.
             try {
                 $response = $this->response->make(
                     $this->getProviderName(),
                     $this->getIdentifier($resourceOwner),
-                    function (Registration $registration) use ($resourceOwner, $token) {
+                    function (Registration $registration) use ($resourceOwner, $token, &$suggested) {
                         $this->setSuggestions($registration, $resourceOwner, (string) $token);
+                        $suggested = true;
                     },
                     $returnTo
                 );
+
+                // The account was linked by its email address just now, rather than signed up. The avatar comes from
+                // avatarUrl(), not the sign-up suggestions, which may hold a placeholder meant only for new accounts.
+                if (!$alreadyLinked && $suggested && ($link = $this->findLink($resourceOwner)) !== null) {
+                    $this->provideAvatarOnLink($link->user, $resourceOwner, $token);
+                }
             } catch (UnverifiedEmailInUseException $e) {
                 // Nobody was logged in or linked, so there is no successful login to report.
                 $this->forget(self::SESSION_OAUTH2STATE, $session);
@@ -280,6 +298,44 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
         $this->forget(self::SESSION_OAUTH2STATE, $session);
 
         return $response;
+    }
+
+    protected function findLink(ResourceOwnerInterface $resourceOwner): ?LoginProvider
+    {
+        return LoginProvider::where('provider', $this->getProviderName())
+            ->where('identifier', $this->getIdentifier($resourceOwner))
+            ->first();
+    }
+
+    /**
+     * Give an account that was just linked the provider's avatar, if it has none. Sign-ups get it from core.
+     *
+     * Best effort: the download runs as a queued job, and nothing here may fail the login. With the sync queue
+     * driver the job runs during this request, so the first link can take a few seconds longer.
+     */
+    protected function provideAvatarOnLink(User $user, ResourceOwnerInterface $resourceOwner, AccessTokenInterface $token): void
+    {
+        if ($user->getRawOriginal('avatar_url') !== null || (bool) $this->settings->get('fof-oauth.disable_avatars')) {
+            return;
+        }
+
+        try {
+            $url = $this->providerAvatarUrl($resourceOwner, (string) $token);
+
+            if (is_string($url) && $url !== '') {
+                resolve(BusDispatcher::class)->dispatch(new ApplyProviderAvatar($user->id, $url));
+            }
+        } catch (Throwable $e) {
+            resolve(LoggerInterface::class)->warning("[OAuth][{$this->getProviderName()}] Could not apply the provider's avatar to user {$user->id}: {$e->getMessage()}");
+        }
+    }
+
+    /**
+     * The user's avatar URL at the provider, for an account that was just linked.
+     */
+    protected function providerAvatarUrl(ResourceOwnerInterface $resourceOwner, string $token): ?string
+    {
+        return null;
     }
 
     /**
