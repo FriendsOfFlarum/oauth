@@ -20,7 +20,6 @@ use League\OAuth2\Client\Grant\AbstractGrant;
 use League\OAuth2\Client\Grant\AuthorizationCode;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\GenericProvider;
-use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Token\AccessTokenInterface;
 use Psr\Log\LoggerInterface;
@@ -98,13 +97,13 @@ class FlarumProvider extends GenericProvider
         if (is_string($idToken) && $idToken !== '') {
             $this->verifiedSubjects[$token] = $this->verifyIdToken($idToken);
         } elseif ($grant instanceof AuthorizationCode) {
-            throw new IdentityProviderException('The token response has no ID token.', 0, $response);
+            throw new IdentityProviderException('The token response has no ID token. The client on the provider forum must allow the openid scope.', 0, $response);
         }
 
         return $token;
     }
 
-    public function getResourceOwner(AccessToken $token): ResourceOwnerInterface
+    public function getResourceOwner(AccessToken $token): FlarumResourceOwner
     {
         $subject = $this->verifiedSubjects[$token] ?? null;
 
@@ -112,13 +111,37 @@ class FlarumProvider extends GenericProvider
             throw new IdentityProviderException('The access token did not come with a verified ID token.', 0, []);
         }
 
+        /** @var FlarumResourceOwner $owner */
         $owner = parent::getResourceOwner($token);
 
-        if ((string) $owner->getId() !== $subject) {
+        if ($owner->getSubject() !== $subject) {
             throw new IdentityProviderException('The UserInfo subject does not match the ID token.', 0, $owner->toArray());
         }
 
         return $owner;
+    }
+
+    protected function createResourceOwner(array $response, AccessToken $token): FlarumResourceOwner
+    {
+        return new FlarumResourceOwner($response, $this->forumKey());
+    }
+
+    /**
+     * Identifies the provider forum in linked account identifiers: a hash of its host, port and path, short enough
+     * for the 100 character identifier column. The scheme is left out, so a forum moving to https keeps its links.
+     */
+    public function forumKey(): string
+    {
+        return static::forumKeyFor($this->issuer);
+    }
+
+    public static function forumKeyFor(string $forumUrl): string
+    {
+        $url = parse_url($forumUrl);
+        $defaultPort = strtolower($url['scheme'] ?? '') === 'http' ? 80 : 443;
+        $port = isset($url['port']) && $url['port'] !== $defaultPort ? ':'.$url['port'] : '';
+
+        return substr(hash('sha256', strtolower($url['host'] ?? '').$port.($url['path'] ?? '')), 0, 16);
     }
 
     /**
@@ -170,6 +193,10 @@ class FlarumProvider extends GenericProvider
 
         if (!is_string($claims->sub ?? null) || $claims->sub === '') {
             throw new IdentityProviderException('Invalid ID token: no subject.', 0, []);
+        }
+
+        if (strlen($claims->sub) > FlarumResourceOwner::MAX_SUBJECT_LENGTH) {
+            throw new IdentityProviderException('Invalid ID token: the subject is too long.', 0, []);
         }
 
         return $claims->sub;

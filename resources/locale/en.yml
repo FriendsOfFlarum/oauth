@@ -130,6 +130,7 @@ fof-oauth:
       bad_verification_code: Invalid or expired verification token. Please try again.
       invalid_state: Invalid state. Please try again.
       already_linked: This account is already linked to another user.
+      provider_misconfigured: This login method isn't set up correctly. Please contact the forum administrators.
 
   email:
     provider_email_change_notice:

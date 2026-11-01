@@ -17,6 +17,7 @@ use Flarum\Foundation\Config;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Errors\AuthenticationException;
 use FoF\OAuth\Providers\Custom\Flarum\FlarumProvider;
+use FoF\OAuth\Providers\Custom\Flarum\FlarumResourceOwner;
 use FoF\OAuth\Providers\Flarum;
 use FoF\OAuth\Tests\fixtures\Flarum\IssuesFlarumIdTokens;
 use GuzzleHttp\Client;
@@ -36,8 +37,6 @@ use Monolog\Logger;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
-use RuntimeException;
 
 class FlarumTest extends ProviderTestCase
 {
@@ -71,7 +70,7 @@ class FlarumTest extends ProviderTestCase
 
         $container = new Container();
         $container->instance(Cache::class, $this->cache);
-        $container->instance(LoggerInterface::class, new NullLogger());
+        $container->instance(LoggerInterface::class, new Logger('test', [$this->logs]));
         $container->instance(Config::class, new Config(['url' => 'https://consumer.example', 'debug' => $debug]));
 
         return new Flarum($stub, $container);
@@ -189,22 +188,74 @@ class FlarumTest extends ProviderTestCase
 
     #[Test]
     #[DataProvider('rejectedForumUrls')]
-    public function forum_url_is_rejected(string $url, bool $debug): void
+    public function forum_url_is_rejected(string $url, bool $debug, string $reason): void
     {
-        $this->expectException(RuntimeException::class);
-
-        $this->clientFor($url, $debug);
+        try {
+            $this->clientFor($url, $debug);
+            $this->fail('The forum URL should have been rejected.');
+        } catch (AuthenticationException $e) {
+            $this->assertSame('provider_misconfigured', $e->getShortCode(), 'The user only sees a generic error');
+            $this->assertTrue($this->logs->hasErrorThatContains($reason), 'The reason is logged for the admin');
+            $this->assertFalse($this->logs->hasErrorThatContains('pass'), 'Credentials are not logged');
+            $this->assertFalse($this->logs->hasErrorThatContains('forum=1'), 'The query is not logged');
+        }
     }
 
     public static function rejectedForumUrls(): array
     {
         return [
-            'empty'                       => ['', false],
-            'no scheme'                   => ['provider.example', false],
-            'http'                        => ['http://provider.example', false],
-            'http on a 127. host name'    => ['http://127.provider.example', false],
-            'other scheme in debug mode'  => ['ftp://provider.example', true],
+            'empty'                       => ['', false, 'missing or invalid'],
+            'no scheme'                   => ['provider.example', false, 'missing or invalid'],
+            'http'                        => ['http://provider.example', false, 'must use https'],
+            'http on a 127. host name'    => ['http://127.provider.example', false, 'must use https'],
+            'other scheme in debug mode'  => ['ftp://provider.example', true, 'must use https'],
+            'query'                       => ['https://provider.example/?forum=1', false, 'scheme, host, port and path'],
+            'fragment'                    => ['https://provider.example/#forum', false, 'scheme, host, port and path'],
+            'credentials'                 => ['https://user:pass@provider.example', false, 'https://provider.example... may only'],
         ];
+    }
+
+    // Linked account identifiers
+
+    private function identifierFor(string $forumUrl, string $sub = '42', bool $debug = false): string
+    {
+        return (new FlarumResourceOwner(['sub' => $sub], $this->clientFor($forumUrl, $debug)->forumKey()))->getId();
+    }
+
+    #[Test]
+    public function identifier_is_the_subject_qualified_by_the_forum(): void
+    {
+        $identifier = $this->identifierFor('https://provider.example/forum');
+
+        $this->assertStringStartsWith('42@', $identifier);
+        $this->assertLessThanOrEqual(100, strlen($this->identifierFor('https://provider.example/forum', str_repeat('9', 20))), 'Fits the identifier column');
+    }
+
+    #[Test]
+    public function same_subject_on_another_forum_has_another_identifier(): void
+    {
+        $identifier = $this->identifierFor('https://provider.example');
+
+        $this->assertNotSame($identifier, $this->identifierFor('https://other.example'));
+        $this->assertNotSame($identifier, $this->identifierFor('https://provider.example/forum'));
+        $this->assertNotSame($identifier, $this->identifierFor('https://provider.example:8443'));
+    }
+
+    #[Test]
+    public function identifier_ignores_an_explicit_default_port(): void
+    {
+        $this->assertSame($this->identifierFor('https://provider.example'), $this->identifierFor('https://provider.example:443'));
+        $this->assertSame($this->identifierFor('http://provider.example', debug: true), $this->identifierFor('http://provider.example:80', debug: true));
+        $this->assertSame($this->identifierFor('https://provider.example:8080'), $this->identifierFor('http://provider.example:8080', debug: true));
+    }
+
+    #[Test]
+    public function identifier_survives_scheme_case_and_trailing_slash_changes(): void
+    {
+        $identifier = $this->identifierFor('https://provider.example/forum');
+
+        $this->assertSame($identifier, $this->identifierFor('https://PROVIDER.example/forum/'));
+        $this->assertSame($identifier, $this->identifierFor('http://provider.example/forum', debug: true));
     }
 
     // ID token verification
@@ -241,7 +292,7 @@ class FlarumTest extends ProviderTestCase
         return count(array_filter($this->history, fn ($entry) => str_ends_with($entry['request']->getUri()->getPath(), '/jwks.json')));
     }
 
-    private function login(FlarumProvider $client): GenericResourceOwner
+    private function login(FlarumProvider $client): FlarumResourceOwner
     {
         /** @var AccessToken $token */
         $token = $client->getAccessToken('authorization_code', ['code' => 'code']);
@@ -268,7 +319,7 @@ class FlarumTest extends ProviderTestCase
             $this->jsonResponse(['sub' => '42', 'email' => 'user@example.com']),
         ));
 
-        $this->assertSame('42', $owner->getId());
+        $this->assertSame('42', $owner->getSubject());
         $this->assertSame(1, $this->jwksRequests());
     }
 
@@ -290,7 +341,7 @@ class FlarumTest extends ProviderTestCase
             $this->jsonResponse(['sub' => '42']),
         ));
 
-        $this->assertSame('42', $owner->getId());
+        $this->assertSame('42', $owner->getSubject());
     }
 
     #[Test]
@@ -304,7 +355,7 @@ class FlarumTest extends ProviderTestCase
             $this->jsonResponse(['sub' => '42']),
         ));
 
-        $this->assertSame('42', $owner->getId());
+        $this->assertSame('42', $owner->getSubject());
         $this->assertSame(2, $this->jwksRequests());
     }
 
@@ -356,7 +407,7 @@ class FlarumTest extends ProviderTestCase
             $this->jsonResponse(['sub' => '42']),
         ));
 
-        $this->assertSame('42', $owner->getId());
+        $this->assertSame('42', $owner->getSubject());
     }
 
     #[Test]
@@ -385,6 +436,19 @@ class FlarumTest extends ProviderTestCase
     }
 
     #[Test]
+    public function subject_too_long_for_the_identifier_column_is_rejected(): void
+    {
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['sub' => str_repeat('9', 84)])), $this->jwksResponse(0)), 'too long');
+
+        $owner = $this->login($this->client(
+            $this->tokenResponse($this->idToken(['sub' => str_repeat('9', 83)])),
+            $this->jsonResponse(['sub' => str_repeat('9', 83)]),
+        ));
+
+        $this->assertSame(100, strlen($owner->getId()));
+    }
+
+    #[Test]
     public function small_clock_difference_is_tolerated(): void
     {
         $owner = $this->login($this->client(
@@ -393,7 +457,7 @@ class FlarumTest extends ProviderTestCase
             $this->jsonResponse(['sub' => '42']),
         ));
 
-        $this->assertSame('42', $owner->getId());
+        $this->assertSame('42', $owner->getSubject());
         $this->assertSame(0, JWT::$leeway, 'The global leeway should be restored');
     }
 

@@ -16,6 +16,7 @@ use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
 use Flarum\User\LoginProvider;
 use Flarum\User\User;
+use FoF\OAuth\Providers\Custom\Flarum\FlarumProvider;
 use FoF\OAuth\Providers\Flarum;
 use FoF\OAuth\Tests\fixtures\Flarum\IssuesFlarumIdTokens;
 use GuzzleHttp\Client;
@@ -38,6 +39,8 @@ class FlarumLoginTest extends TestCase
     private const FORUM_URL = 'https://provider.example';
     private const CLIENT_ID = 'client-id';
 
+    private string $forumUrl;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -52,7 +55,8 @@ class FlarumLoginTest extends TestCase
 
         $this->setting('fof-oauth.flarum', 1);
         // Unique per test, so the cached key set of one test isn't used by another.
-        $this->setting('fof-oauth.flarum.forum_url', self::FORUM_URL.'/'.bin2hex(random_bytes(4)));
+        $this->forumUrl = self::FORUM_URL.'/'.bin2hex(random_bytes(4));
+        $this->setting('fof-oauth.flarum.forum_url', $this->forumUrl);
         $this->setting('fof-oauth.flarum.client_id', self::CLIENT_ID);
         $this->setting('fof-oauth.flarum.client_secret', 'secret');
         $this->setting('fof-oauth.update_email_from_provider', 0);
@@ -92,9 +96,7 @@ class FlarumLoginTest extends TestCase
 
     private function idToken(array $claims = []): string
     {
-        $issuer = $this->app()->getContainer()->make(SettingsRepositoryInterface::class)->get('fof-oauth.flarum.forum_url');
-
-        return $this->issueIdToken($issuer, self::CLIENT_ID, $claims);
+        return $this->issueIdToken($this->forumUrl, self::CLIENT_ID, $claims);
     }
 
     #[Test]
@@ -110,7 +112,48 @@ class FlarumLoginTest extends TestCase
 
         $this->assertStringNotContainsString('_flarum_auth', $location);
         $this->assertStringContainsString('_flarum_linked=flarum', $location);
-        $this->assertSame(4, LoginProvider::where('provider', 'flarum')->where('identifier', '42')->value('user_id'));
+        $this->assertSame(4, LoginProvider::where('provider', 'flarum')->where('identifier', '42@'.FlarumProvider::forumKeyFor($this->forumUrl))->value('user_id'));
+    }
+
+    #[Test]
+    public function account_linked_through_another_forum_is_not_logged_in_to(): void
+    {
+        // User 42 of the forum the provider used to point at linked account 4.
+        $this->prepareDatabase([
+            LoginProvider::class => [
+                ['id' => 1, 'user_id' => 4, 'provider' => 'flarum', 'identifier' => '42@'.FlarumProvider::forumKeyFor('https://old.example'), 'created_at' => '2021-01-01 00:00:00'],
+            ],
+        ]);
+
+        // User 42 of the forum it points at now is someone else.
+        $this->mockProviderForum(
+            $this->tokenResponse($this->idToken()),
+            $this->jwksResponse(0),
+            $this->jsonResponse(['sub' => '42', 'name' => 'Newcomer', 'email' => 'newcomer@machine.local', 'email_verified' => true]),
+        );
+
+        $location = $this->oauthLogin('flarum');
+
+        $this->assertStringContainsString('_flarum_auth', $location, 'A new identity goes to sign-up');
+        $this->assertStringNotContainsString('_flarum_linked', $location);
+        $this->assertSame(1, LoginProvider::where('provider', 'flarum')->count());
+    }
+
+    #[Test]
+    public function misconfigured_forum_url_shows_a_generic_error(): void
+    {
+        $this->config('debug', false);
+        $this->setting('fof-oauth.flarum.forum_url', 'http://provider.example');
+        $logs = $this->captureLogs();
+
+        $response = $this->send($this->request('GET', '/auth/flarum'));
+        $body = (string) $response->getBody();
+
+        $this->assertEquals(401, $response->getStatusCode());
+        // The test app has no language pack, so the page shows the error code instead of its translation.
+        $this->assertMatchesRegularExpression('/provider_misconfigured|set up correctly/', $body);
+        $this->assertStringNotContainsString('provider.example', $body);
+        $this->assertTrue($logs->hasErrorThatContains('the forum URL http://provider.example must use https'));
     }
 
     #[Test]

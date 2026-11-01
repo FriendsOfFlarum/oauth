@@ -14,15 +14,15 @@ namespace FoF\OAuth\Providers;
 use Flarum\Forum\Auth\Registration;
 use Flarum\Foundation\Config;
 use Flarum\Settings\SettingsRepositoryInterface;
+use FoF\OAuth\Errors\AuthenticationException;
 use FoF\OAuth\Provider;
 use FoF\OAuth\Providers\Custom\Flarum\FlarumProvider;
+use FoF\OAuth\Providers\Custom\Flarum\FlarumResourceOwner;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
-use League\OAuth2\Client\Provider\GenericResourceOwner;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 
 /**
  * Log in with an account on another Flarum forum, which runs flarum/oauth-provider.
@@ -92,15 +92,26 @@ class Flarum extends Provider
     /**
      * The provider forum's URL, which must use https: the client secret, the authorization code and the user's
      * details are sent to it. Plain http is only allowed for loopback hosts, and in debug mode for local testing.
+     *
+     * @throws AuthenticationException when the URL isn't usable; the reason goes to the log, not to the user.
      */
     protected function forumUrl(): string
     {
         $url = rtrim(trim($this->getSetting('forum_url')), '/');
-        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
-        $host = strtolower(trim((string) parse_url($url, PHP_URL_HOST), '[]'));
+        $parts = parse_url($url);
+        $scheme = strtolower($parts['scheme'] ?? '');
+        $host = strtolower(trim($parts['host'] ?? '', '[]'));
 
         if ($host === '') {
-            throw new RuntimeException('The Flarum provider has no valid forum URL configured.');
+            throw $this->misconfigured('the forum URL is missing or invalid');
+        }
+
+        // The endpoints are built by appending paths to the URL.
+        if (isset($parts['query']) || isset($parts['fragment']) || isset($parts['user']) || isset($parts['pass'])) {
+            // Logged without the parts in question: credentials or tokens must not end up in the log.
+            $safe = $scheme.'://'.$host.(isset($parts['port']) ? ':'.$parts['port'] : '').($parts['path'] ?? '');
+
+            throw $this->misconfigured("the forum URL $safe... may only have a scheme, host, port and path");
         }
 
         $loopback = $host === 'localhost'
@@ -108,10 +119,17 @@ class Flarum extends Provider
             || (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false && str_starts_with($host, '127.'));
 
         if ($scheme !== 'https' && !($scheme === 'http' && ($loopback || $this->container->make(Config::class)->inDebugMode()))) {
-            throw new RuntimeException("The Flarum provider's forum URL must use https: $url");
+            throw $this->misconfigured("the forum URL $url must use https");
         }
 
         return $url;
+    }
+
+    protected function misconfigured(string $reason): AuthenticationException
+    {
+        $this->container->make(LoggerInterface::class)->error("[OAuth][flarum] The Flarum provider is misconfigured: $reason.");
+
+        return new AuthenticationException('provider_misconfigured');
     }
 
     public function options(): array
@@ -120,7 +138,7 @@ class Flarum extends Provider
     }
 
     /**
-     * @param GenericResourceOwner $user
+     * @param FlarumResourceOwner $user
      */
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
@@ -144,7 +162,7 @@ class Flarum extends Provider
     /**
      * The provider forum reports `email_verified` from its own email confirmation.
      *
-     * @param GenericResourceOwner $user
+     * @param FlarumResourceOwner $user
      */
     public function getProviderVerifiedEmail(mixed $user, string $token): ?string
     {
