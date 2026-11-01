@@ -114,6 +114,21 @@ The `providers.{name}` key is now also used by the `AccountLinkedModal` that app
 
 See [Email trust](README.md#email-trust) in the README for the full contract.
 
+### 11. Avatars for linked accounts: `avatarUrl()` (new)
+
+When an existing account without an avatar links your provider, it gets the provider's avatar. Sign-ups are unchanged: they still get the avatar you provide in `suggestions()`.
+
+`Provider::avatarUrl(mixed $user, string $token): ?string` returns the user's avatar URL, or `null` if they have none. The default runs your `suggestions()` and reads the avatar from it, so it works without changes, but no avatar is found if `suggestions()` throws (for example when the user shares no email). Override it if you know the URL directly, and use it in `suggestions()`:
+
+```php
+public function avatarUrl(mixed $user, string $token): ?string
+{
+    return $user->getAvatarUrl() ?: null;
+}
+```
+
+Return `null` rather than a generic placeholder image: a placeholder is fine for a new account, but shouldn't be given to an existing one.
+
 ---
 
 ## Full example provider

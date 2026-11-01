@@ -73,7 +73,15 @@ class LinkedIn extends Provider
         ->suggestUsername($user->getFirstName())
         ->setPayload($user->toArray());
 
-        $this->provideAvatar($registration, $user->getImageUrl());
+        $this->provideAvatar($registration, $this->avatarUrl($user, $token));
+    }
+
+    /**
+     * @param LinkedInResourceOwner $user
+     */
+    public function avatarUrl(mixed $user, string $token): ?string
+    {
+        return $user->getImageUrl() ?: null;
     }
 
     /**

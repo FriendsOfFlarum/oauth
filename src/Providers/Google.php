@@ -83,7 +83,15 @@ class Google extends Provider
             ->suggestUsername($user->getName())
             ->setPayload($user->toArray());
 
-        $this->provideAvatar($registration, $user->getAvatar());
+        $this->provideAvatar($registration, $this->avatarUrl($user, $token));
+    }
+
+    /**
+     * @param GoogleUser $user
+     */
+    public function avatarUrl(mixed $user, string $token): ?string
+    {
+        return $user->getAvatar() ?: null;
     }
 
     /**

@@ -78,6 +78,11 @@ class AuthController extends Controller
         return (string) $user->getId();
     }
 
+    protected function providerAvatarUrl(ResourceOwnerInterface $resourceOwner, string $token): ?string
+    {
+        return $this->oauthProvider->avatarUrl($resourceOwner, $token);
+    }
+
     protected function setSuggestions(Registration $registration, ResourceOwnerInterface $user, string $token): void
     {
         $this->oauthProvider->suggestions($registration, $user, $token);
