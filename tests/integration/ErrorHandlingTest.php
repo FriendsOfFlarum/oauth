@@ -12,8 +12,11 @@
 namespace FoF\OAuth\Tests\integration;
 
 use Dflydev\FigCookies\SetCookies;
+use Flarum\Extend;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
+use FoF\OAuth\Controllers\AbstractOAuthController;
+use Illuminate\Contracts\Cache\Store as CacheStore;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ResponseInterface;
 
@@ -76,6 +79,28 @@ class ErrorHandlingTest extends TestCase
         // Raw PHP exception messages should not appear verbatim in the response.
         $this->assertStringNotContainsString('FoF\\OAuth\\Errors\\AuthenticationException', $body);
         $this->assertStringNotContainsString('Throwable', $body);
+    }
+
+    #[Test]
+    public function error_page_back_link_ignores_an_unsafe_cached_returnTo(): void
+    {
+        $this->extend((new Extend\View())->extendNamespace('flarum.forum', __DIR__.'/../fixtures/views'));
+
+        $init = $this->send($this->request('GET', '/auth/gitlab'));
+        $cookies = $this->toRequestCookies($init);
+
+        // Older releases stored returnTo after a weaker check; such an entry can still be in the cache.
+        $this->app()->getContainer()->make(CacheStore::class)
+            ->forever(AbstractOAuthController::SESSION_RETURN_TO.'_'.$cookies['flarum_session'], '/\\evil.example');
+
+        $response = $this->send(
+            $this->request('GET', '/auth/gitlab')
+                ->withQueryParams(['code' => 'code', 'state' => 'TAMPERED'])
+                ->withCookieParams($cookies)
+        );
+
+        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertStringContainsString('<a href="http://localhost">Back</a>', (string) $response->getBody());
     }
 
     private function toRequestCookies(ResponseInterface $response): array

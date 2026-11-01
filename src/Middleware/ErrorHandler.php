@@ -74,7 +74,7 @@ class ErrorHandler implements MiddlewareInterface
         if ($session) {
             $cacheKey = AbstractOAuthController::SESSION_RETURN_TO.'_'.$session->getId();
             $returnTo = $this->cache->get($cacheKey);
-            if (!empty($returnTo)) {
+            if (is_string($returnTo) && AbstractOAuthController::isSafeReturnPath($returnTo)) {
                 return $returnTo;
             }
         }

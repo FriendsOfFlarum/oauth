@@ -13,9 +13,12 @@ namespace FoF\OAuth\Controllers;
 
 use Flarum\Forum\Auth\Registration;
 use Flarum\Http\Exception\RouteNotFoundException;
+use Flarum\User\User;
 use FoF\OAuth\Controller;
+use FoF\OAuth\Errors\UnverifiedEmailInUseException;
 use FoF\OAuth\Events\SettingSuggestions;
 use FoF\OAuth\Provider;
+use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -82,6 +85,27 @@ class AuthController extends Controller
         $this->events->dispatch(
             new SettingSuggestions($this->getProviderName(), $registration, $user, $token)
         );
+
+        $this->assertSuggestedEmailIsNotInUse($registration);
+    }
+
+    /**
+     * An untrusted (suggested) email cannot sign in to or link an existing account. If an account already uses it,
+     * the sign-up form could only fail with "email already taken", so ask the user to log in and link instead.
+     *
+     * @throws UnverifiedEmailInUseException
+     */
+    protected function assertSuggestedEmailIsNotInUse(Registration $registration): void
+    {
+        if (Arr::has($registration->getProvided(), 'email')) {
+            return;
+        }
+
+        $email = Arr::get($registration->getSuggested(), 'email');
+
+        if (!empty($email) && User::query()->where('email', $email)->exists()) {
+            throw new UnverifiedEmailInUseException($this->getProviderName());
+        }
     }
 
     private function app(): \Illuminate\Contracts\Container\Container

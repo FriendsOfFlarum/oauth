@@ -15,6 +15,7 @@ use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Google as GoogleProvider;
+use League\OAuth2\Client\Provider\GoogleUser;
 
 class Google extends Provider
 {
@@ -65,15 +66,50 @@ class Google extends Provider
         return $hostedDomain !== '' ? $hostedDomain : null;
     }
 
+    /**
+     * @param GoogleUser $user
+     */
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $this->verifyEmail($email = $user->getEmail());
 
+        if ($this->getProviderVerifiedEmail($user, $token) !== null) {
+            $registration->provideTrustedEmail($email);
+        } else {
+            $registration->suggestEmail($email);
+        }
+
         $registration
-            ->provideTrustedEmail($email)
             ->suggestUsername($user->getName())
             ->setPayload($user->toArray());
 
         $this->provideAvatar($registration, $user->getAvatar());
+    }
+
+    /**
+     * @param GoogleUser $user
+     */
+    public function getProviderVerifiedEmail(mixed $user, string $token): ?string
+    {
+        // Google's guidance (`isEmailTrustworthy()`) is stricter: it only trusts @gmail.com addresses, or verified
+        // Workspace addresses (with an `hd` claim), because Google is only authoritative for those. A personal
+        // Google account registered with any other address, e.g. user@example.com, reports `email_verified: true`
+        // once the user proved control of that mailbox, but Google cannot vouch that they still control it: the
+        // domain may since have changed hands.
+        //
+        // We also trust `email_verified` on its own. Flarum already treats control of a mailbox as proof of
+        // identity (a password reset goes to it), so this adds little beyond that, and it matches how other
+        // providers' verified flags are treated. Without it, users of such accounts could never link or sign in
+        // to an existing forum account with Google.
+        //
+        // The raw value is read because `GoogleUser::getEmailVerified()` is typed `?bool`, which would coerce a
+        // string such as "true" to true.
+        $emailVerified = $user->toArray()['email_verified'] ?? null;
+
+        if ($user->isEmailTrustworthy() || $emailVerified === true) {
+            return $user->getEmail() ?: null;
+        }
+
+        return null;
     }
 }

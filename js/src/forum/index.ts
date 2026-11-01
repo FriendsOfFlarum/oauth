@@ -1,12 +1,14 @@
 import app from 'flarum/forum/app';
 import addLinkedAccountsToUserSecurityPage from './extenders/addLinkedAccountsToUserSecurityPage';
 import extendLoginSignup from './extenders/extendLoginSignup';
+import extendOAuthOnly from './extenders/extendOAuthOnly';
 
 export { default as extend } from './extend';
 export * from './components';
 
 app.initializers.add('fof/oauth', () => {
   extendLoginSignup();
+  extendOAuthOnly();
   addLinkedAccountsToUserSecurityPage();
 
   const params = new URLSearchParams(window.location.search);
@@ -44,6 +46,20 @@ app.initializers.add('fof/oauth', () => {
       }
 
       app.modal.show(() => import('flarum/forum/components/SignUpModal'), modalAttrs);
+    }, 0);
+  }
+
+  // Detect the _fof_oauth_unverified query parameter added when a provider's email isn't verified and an existing
+  // account already uses it. Strip it from the URL and open the Log In modal, explaining how to link the provider.
+  const unverifiedProvider = params.get('_fof_oauth_unverified');
+
+  if (unverifiedProvider) {
+    params.delete('_fof_oauth_unverified');
+    const clean = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    window.history.replaceState({}, '', clean);
+
+    setTimeout(() => {
+      app.modal.show(() => import('flarum/forum/components/LogInModal'), { fofOAuthUnverifiedEmailProvider: unverifiedProvider });
     }, 0);
   }
 

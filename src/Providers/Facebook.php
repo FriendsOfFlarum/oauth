@@ -15,6 +15,7 @@ use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Facebook as FacebookProvider;
+use League\OAuth2\Client\Provider\FacebookUser;
 
 class Facebook extends Provider
 {
@@ -51,15 +52,40 @@ class Facebook extends Provider
         ]);
     }
 
+    /**
+     * @param FacebookUser $user
+     */
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $this->verifyEmail($email = $user->getEmail());
 
+        if ($this->getProviderVerifiedEmail($user, $token) !== null) {
+            $registration->provideTrustedEmail($email);
+        } else {
+            $registration->suggestEmail($email);
+        }
+
         $registration
-            ->provideTrustedEmail($email)
             ->suggestUsername($user->getName() ?: '')
             ->setPayload($user->toArray());
 
         $this->provideAvatar($registration, $user->getPictureUrl());
+    }
+
+    /**
+     * Facebook exposes no email verification flag, so any email it returns is trusted without a verifiable signal.
+     *
+     * Meta's User reference only says `email` is "The User's primary email address listed on their profile" and
+     * "will not be returned if no valid email address is available". It does not document verification. That
+     * unconfirmed addresses are not returned is Meta's long-standing behaviour as reported by integrators, not a
+     * documented guarantee. Revisit this if Meta documents a verification signal or the behaviour changes.
+     *
+     * @see https://developers.facebook.com/docs/graph-api/reference/user/
+     *
+     * @param FacebookUser $user
+     */
+    public function getProviderVerifiedEmail(mixed $user, string $token): ?string
+    {
+        return $user->getEmail() ?: null;
     }
 }

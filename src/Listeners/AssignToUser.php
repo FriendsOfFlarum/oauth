@@ -53,8 +53,8 @@ class AssignToUser
         // If a group is specified, assign it to the user
         if ($groupId && is_numeric($groupId)) {
             $user->afterSave(function (User $user) use ($groupId) {
-                // Attach the group to the user
-                $user->groups()->attach($groupId);
+                // Another extension may add the same group during registration, e.g. fof/doorman's doorkey group.
+                $user->groups()->syncWithoutDetaching([$groupId]);
             });
         }
     }

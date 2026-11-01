@@ -4,6 +4,7 @@ import LogInButtons from 'flarum/forum/components/LogInButtons';
 import LogInButton from 'flarum/forum/components/LogInButton';
 import extractText from 'flarum/common/utils/extractText';
 import Tooltip from 'flarum/common/components/Tooltip';
+import { oauthOnly } from './extendOAuthOnly';
 
 import type Mithril from 'mithril';
 import type ItemList from 'flarum/common/utils/ItemList';
@@ -42,6 +43,9 @@ export default function () {
       app.forum.attribute<OAuthProvider[]>('fof-oauth')?.filter((provider): provider is NonNullable<OAuthProvider> => provider !== null) ?? [];
 
     enabledOAuthProviders.forEach(({ name, icon, priority }) => {
+      // Signing in with this provider again would only repeat the unverified email notice.
+      if (name === app.fof_oauth_unverifiedEmailProvider) return;
+
       let className = `Button FoFLogInButton LogInButton--${name}`;
 
       if (onlyIcons) {
@@ -90,6 +94,31 @@ export default function () {
         </div>,
         35
       );
+    }
+  });
+
+  // LogInModal is lazy loaded in 2.x, so it is extended by module path.
+  extend('flarum/forum/components/LogInModal', 'oninit', function (this: any) {
+    const provider = this.attrs.fofOAuthUnverifiedEmailProvider;
+
+    if (provider) {
+      app.fof_oauth_unverifiedEmailProvider = provider;
+
+      const providerName = app.translator.trans(`fof-oauth.forum.providers.${provider}`);
+
+      // In OAuth-only mode there is no password login to link the provider from.
+      this.alertAttrs = {
+        type: 'warning',
+        content: oauthOnly()
+          ? app.translator.trans('fof-oauth.forum.log_in.unverified_email_in_use_oauth_only', { provider: providerName })
+          : app.translator.trans('fof-oauth.forum.log_in.unverified_email_in_use', { provider: providerName }),
+      };
+    }
+  });
+
+  extend('flarum/forum/components/LogInModal', 'onremove', function (this: any) {
+    if (this.attrs.fofOAuthUnverifiedEmailProvider) {
+      app.fof_oauth_unverifiedEmailProvider = undefined;
     }
   });
 }

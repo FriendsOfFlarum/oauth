@@ -14,6 +14,7 @@ namespace FoF\OAuth\Providers;
 use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Provider;
 use FoF\OAuth\Providers\Custom\LinkedIn\Provider\LinkedIn as LinkedInProvider;
+use FoF\OAuth\Providers\Custom\LinkedIn\Provider\LinkedInResourceOwner;
 use League\OAuth2\Client\Provider\AbstractProvider;
 
 class LinkedIn extends Provider
@@ -55,15 +56,32 @@ class LinkedIn extends Provider
         ]);
     }
 
+    /**
+     * @param LinkedInResourceOwner $user
+     */
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $this->verifyEmail($email = $user->getEmail());
 
+        if ($this->getProviderVerifiedEmail($user, $token) !== null) {
+            $registration->provideTrustedEmail($email);
+        } else {
+            $registration->suggestEmail($email);
+        }
+
         $registration
-        ->provideTrustedEmail($email)
         ->suggestUsername($user->getFirstName())
         ->setPayload($user->toArray());
 
         $this->provideAvatar($registration, $user->getImageUrl());
+    }
+
+    /**
+     * @param LinkedInResourceOwner $user
+     */
+    public function getProviderVerifiedEmail(mixed $user, string $token): ?string
+    {
+        // OpenID Connect `email_verified` claim from the userinfo endpoint.
+        return $user->getAttribute('email_verified') === true ? ($user->getEmail() ?: null) : null;
     }
 }

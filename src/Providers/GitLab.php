@@ -15,6 +15,7 @@ use Flarum\Forum\Auth\Registration;
 use FoF\OAuth\Provider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use Omines\OAuth2\Client\Provider\Gitlab as GitlabProvider;
+use Omines\OAuth2\Client\Provider\GitlabResourceOwner;
 
 class GitLab extends Provider
 {
@@ -63,15 +64,38 @@ class GitLab extends Provider
         return ['scope' => 'read_user'];
     }
 
+    /**
+     * @param GitlabResourceOwner $user
+     */
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $this->verifyEmail($email = $user->getEmail());
 
+        $payload = $user->toArray();
+
+        if ($this->getProviderVerifiedEmail($user, $token) !== null) {
+            $registration->provideTrustedEmail($email);
+        } else {
+            $registration->suggestEmail($email);
+        }
+
         $registration
-            ->provideTrustedEmail($email)
             ->suggestUsername($user->getUsername() ?: '')
-            ->setPayload($user->toArray());
+            ->setPayload($payload);
 
         $this->provideAvatar($registration, $user->getAvatarUrl());
+    }
+
+    /**
+     * @param GitlabResourceOwner $user
+     */
+    public function getProviderVerifiedEmail(mixed $user, string $token): ?string
+    {
+        /** @var array<string, mixed> $payload */
+        $payload = $user->toArray();
+
+        // `confirmed_at` is set once the account's primary email is confirmed. Self-hosted instances with email
+        // confirmation disabled auto-confirm accounts, so this is only as strong as the instance's policy.
+        return !empty($payload['confirmed_at']) ? ($user->getEmail() ?: null) : null;
     }
 }

@@ -19,6 +19,7 @@ use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\LoginProvider;
 use Flarum\User\User;
 use FoF\OAuth\Errors\AuthenticationException;
+use FoF\OAuth\Errors\UnverifiedEmailInUseException;
 use FoF\OAuth\Events\LinkingToProvider;
 use FoF\OAuth\Events\OAuthLoginSuccessful;
 use Illuminate\Contracts\Cache\Store as CacheStore;
@@ -234,6 +235,11 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
         $actor = RequestUtil::getActor($request);
         $returnTo = $this->get(self::SESSION_RETURN_TO, $session) ?: '/';
 
+        // Check again: the value may have been stored by an older release, before the current rules.
+        if (!self::isSafeReturnPath($returnTo)) {
+            $returnTo = '/';
+        }
+
         $this->forget(self::SESSION_RETURN_TO, $session);
 
         // Account-linking flow: an authenticated user is connecting an OAuth provider.
@@ -250,14 +256,21 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
             $response = $this->linkAccount($actor, $resourceOwner, $returnTo);
         } else {
             // Normal login / registration flow.
-            $response = $this->response->make(
-                $this->getProviderName(),
-                $this->getIdentifier($resourceOwner),
-                function (Registration $registration) use ($resourceOwner, $token) {
-                    $this->setSuggestions($registration, $resourceOwner, (string) $token);
-                },
-                $returnTo
-            );
+            try {
+                $response = $this->response->make(
+                    $this->getProviderName(),
+                    $this->getIdentifier($resourceOwner),
+                    function (Registration $registration) use ($resourceOwner, $token) {
+                        $this->setSuggestions($registration, $resourceOwner, (string) $token);
+                    },
+                    $returnTo
+                );
+            } catch (UnverifiedEmailInUseException $e) {
+                // Nobody was logged in or linked, so there is no successful login to report.
+                $this->forget(self::SESSION_OAUTH2STATE, $session);
+
+                return $this->unverifiedEmailInUseResponse($e, $returnTo);
+            }
         }
 
         // Regenerate session ID after authentication to prevent session fixation.
@@ -301,6 +314,18 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
     }
 
     /**
+     * Redirect back with only the provider name, so the forum can ask the user to log in and link that provider.
+     * The email is deliberately not put in the URL, where it would end up in logs and referrers.
+     */
+    protected function unverifiedEmailInUseResponse(UnverifiedEmailInUseException $e, string $returnTo): RedirectResponse
+    {
+        $base = $returnTo ?: '/';
+        $separator = str_contains($base, '?') ? '&' : '?';
+
+        return new RedirectResponse($base.$separator.'_fof_oauth_unverified='.urlencode($e->provider));
+    }
+
+    /**
      * Dispatch OAuthLoginSuccessful after every successful OAuth callback.
      */
     protected function dispatchSuccessEvent(
@@ -333,17 +358,22 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
             }
         }
 
-        // Reject anything that looks like an absolute URL (has a scheme or //host).
-        if (!empty($returnTo) && (str_contains($returnTo, '://') || str_starts_with($returnTo, '//'))) {
-            return '/';
-        }
+        return self::isSafeReturnPath($returnTo) ? $returnTo : '/';
+    }
 
-        // Must start with / to be a valid relative path.
-        if (!empty($returnTo) && !str_starts_with($returnTo, '/')) {
-            return '/';
-        }
-
-        return $returnTo ?: '/';
+    /**
+     * Whether a returnTo value is a path on this forum and safe to redirect to.
+     *
+     * Rejects anything that looks like an absolute URL (has a scheme or //host). Browsers read "\" as "/",
+     * so "/\host" is a //host too, and strip tab/CR/LF, so "/<TAB>/host" is as well.
+     */
+    public static function isSafeReturnPath(string $returnTo): bool
+    {
+        return str_starts_with($returnTo, '/')
+            && !str_starts_with($returnTo, '//')
+            && !str_contains($returnTo, '://')
+            && !str_contains($returnTo, '\\')
+            && !preg_match('/[\x00-\x1F\x7F]/', $returnTo);
     }
 
     // -------------------------------------------------------------------------

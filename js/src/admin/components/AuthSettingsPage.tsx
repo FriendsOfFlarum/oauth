@@ -1,9 +1,11 @@
 import app from 'flarum/admin/app';
+import Alert from 'flarum/common/components/Alert';
 import Button from 'flarum/common/components/Button';
 import Dropdown from 'flarum/common/components/Dropdown';
 import ExtensionPage from 'flarum/admin/components/ExtensionPage';
 import Icon from 'flarum/common/components/Icon';
 import Badge from 'flarum/common/components/Badge';
+import Link from 'flarum/common/components/Link';
 import ItemList from 'flarum/common/utils/ItemList';
 import type Group from 'flarum/common/models/Group';
 import type Mithril from 'mithril';
@@ -35,6 +37,13 @@ export default class AuthSettingsPage extends ExtensionPage {
             })}
             {this.buildSettingComponent({
               type: 'boolean',
+              setting: 'fof-oauth.oauth_only',
+              label: app.translator.trans('fof-oauth.admin.settings.oauth_only_label'),
+              help: app.translator.trans('fof-oauth.admin.settings.oauth_only_help'),
+            })}
+            {this.oauthOnlySignUpWarning()}
+            {this.buildSettingComponent({
+              type: 'boolean',
               setting: 'fof-oauth.disable_avatars',
               label: app.translator.trans('fof-oauth.admin.settings.disable_avatars_label'),
               help: app.translator.trans('fof-oauth.admin.settings.disable_avatars_help'),
@@ -60,6 +69,24 @@ export default class AuthSettingsPage extends ExtensionPage {
           </form>
         </div>
       </div>
+    );
+  }
+
+  /**
+   * Core's "Sign up" permission also gates sign-ups through providers, so with it closed OAuth-only mode lets nobody join.
+   */
+  oauthOnlySignUpWarning(): Mithril.Children {
+    const oauthOnly = !!Number(this.setting('fof-oauth.oauth_only')());
+    const signUpOpen = !!Number(app.data.settings.allow_sign_up);
+
+    if (!oauthOnly || signUpOpen) return null;
+
+    return (
+      <Alert type="warning" dismissible={false}>
+        {app.translator.trans('fof-oauth.admin.settings.oauth_only_sign_up_closed_warning', {
+          a: <Link href={app.route('permissions')} />,
+        })}
+      </Alert>
     );
   }
 
