@@ -44,6 +44,13 @@ fof-oauth:
           app_id_label: => fof-oauth.ref.settings.app_id
           app_secret_label: => fof-oauth.ref.settings.app_secret
 
+        flarum:
+          description: Let members log in with their account on another Flarum forum. That forum needs the OAuth Provider extension ({link}). In its admin page, add a client with the callback URL below, and copy its client ID and secret here.
+
+          forum_url_label: Forum URL (for example https://discuss.example.com)
+          client_id_label: => fof-oauth.ref.settings.client_id
+          client_secret_label: => fof-oauth.ref.settings.client_secret
+
         github:
           description: Create an OAuth app at {link}.
 
@@ -81,6 +88,7 @@ fof-oauth:
       # You may use {provider} in the translation.
       with_discord_button: '=> fof-oauth.forum.log_in.with_button'
       with_facebook_button: '=> fof-oauth.forum.log_in.with_button'
+      with_flarum_button: '=> fof-oauth.forum.log_in.with_button'
       with_github_button: '=> fof-oauth.forum.log_in.with_button'
       with_gitlab_button: '=> fof-oauth.forum.log_in.with_button'
       with_google_button: '=> fof-oauth.forum.log_in.with_button'
@@ -102,6 +110,7 @@ fof-oauth:
     providers:
       discord: '=> fof-oauth.lib.providers.discord'
       facebook: '=> fof-oauth.lib.providers.facebook'
+      flarum: '=> fof-oauth.lib.providers.flarum'
       github: '=> fof-oauth.lib.providers.github'
       gitlab: '=> fof-oauth.lib.providers.gitlab'
       google: '=> fof-oauth.lib.providers.google'
@@ -121,6 +130,7 @@ fof-oauth:
       bad_verification_code: Invalid or expired verification token. Please try again.
       invalid_state: Invalid state. Please try again.
       already_linked: This account is already linked to another user.
+      provider_misconfigured: This login method isn't set up correctly. Please contact the forum administrators.
 
   email:
     provider_email_change_notice:
@@ -135,6 +145,7 @@ fof-oauth:
     providers:
       discord: Discord
       facebook: Facebook
+      flarum: Flarum
       github: GitHub
       gitlab: GitLab
       google: Google
