@@ -13,10 +13,12 @@ namespace FoF\OAuth\Tests\unit\Providers;
 
 use Firebase\JWT\JWT;
 use Flarum\Forum\Auth\Registration;
+use Flarum\Foundation\Config;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Errors\AuthenticationException;
 use FoF\OAuth\Providers\Custom\Flarum\FlarumProvider;
 use FoF\OAuth\Providers\Flarum;
+use FoF\OAuth\Tests\fixtures\Flarum\IssuesFlarumIdTokens;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -29,18 +31,24 @@ use Illuminate\Contracts\Cache\Repository as Cache;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\GenericResourceOwner;
 use League\OAuth2\Client\Token\AccessToken;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use RuntimeException;
 
 class FlarumTest extends ProviderTestCase
 {
+    use IssuesFlarumIdTokens;
+
     private const ISSUER = 'https://provider.example';
     private const CLIENT_ID = 'client-id';
 
-    /** @var array<int, array{private: string, jwk: array<string, string>}> */
-    private static array $keys = [];
-
     private Cache $cache;
+
+    private TestHandler $logs;
 
     /** @var array<int, array{request: \Psr\Http\Message\RequestInterface}> */
     private array $history = [];
@@ -50,18 +58,21 @@ class FlarumTest extends ProviderTestCase
         parent::setUp();
 
         $this->cache = new CacheRepository(new ArrayStore());
+        $this->logs = new TestHandler();
         $this->history = [];
     }
 
     // Registration suggestions and email trust
 
-    private function flarum(array $settings = []): Flarum
+    private function flarum(array $settings = [], bool $debug = false): Flarum
     {
         $stub = $this->createStub(SettingsRepositoryInterface::class);
         $stub->method('get')->willReturnCallback(fn (string $key) => $settings[$key] ?? null);
 
         $container = new Container();
         $container->instance(Cache::class, $this->cache);
+        $container->instance(LoggerInterface::class, new NullLogger());
+        $container->instance(Config::class, new Config(['url' => 'https://consumer.example', 'debug' => $debug]));
 
         return new Flarum($stub, $container);
     }
@@ -137,90 +148,70 @@ class FlarumTest extends ProviderTestCase
 
     // Client configuration
 
+    private function clientFor(string $forumUrl, bool $debug = false): FlarumProvider
+    {
+        return $this->flarum([
+            'fof-oauth.flarum.forum_url'     => $forumUrl,
+            'fof-oauth.flarum.client_id'     => self::CLIENT_ID,
+            'fof-oauth.flarum.client_secret' => 'secret',
+        ], $debug)->provider('https://consumer.example/auth/flarum');
+    }
+
     #[Test]
     public function client_uses_the_forum_endpoints_and_space_separated_scopes(): void
     {
-        $provider = $this->flarum([
-            'fof-oauth.flarum.forum_url'     => ' https://provider.example/forum/ ',
-            'fof-oauth.flarum.client_id'     => self::CLIENT_ID,
-            'fof-oauth.flarum.client_secret' => 'secret',
-        ]);
+        $client = $this->clientFor(' https://provider.example/forum/ ');
+        $url = $client->getAuthorizationUrl($this->flarum()->options());
 
-        $client = $provider->provider('https://consumer.example/auth/flarum');
-        $url = $client->getAuthorizationUrl($provider->options());
-
-        $this->assertInstanceOf(FlarumProvider::class, $client);
         $this->assertStringStartsWith('https://provider.example/forum/oauth/authorize?', $url);
         $this->assertStringContainsString('scope=openid%20profile%20email', $url);
         $this->assertSame('https://provider.example/forum/oauth/token', $client->getBaseAccessTokenUrl([]));
     }
 
     #[Test]
-    public function client_requires_a_forum_url(): void
+    #[DataProvider('acceptedForumUrls')]
+    public function forum_url_is_accepted(string $url, bool $debug): void
+    {
+        $this->assertInstanceOf(FlarumProvider::class, $this->clientFor($url, $debug));
+    }
+
+    public static function acceptedForumUrls(): array
+    {
+        return [
+            'https'                => ['https://provider.example', false],
+            'http on 127.0.0.1'    => ['http://127.0.0.1:8080', false],
+            'http on localhost'    => ['http://localhost/forum', false],
+            'http on ::1'          => ['http://[::1]:8080', false],
+            'http in debug mode'   => ['http://provider.test', true],
+            'uppercase https'      => ['HTTPS://provider.example', false],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('rejectedForumUrls')]
+    public function forum_url_is_rejected(string $url, bool $debug): void
     {
         $this->expectException(RuntimeException::class);
 
-        $this->flarum()->provider('https://consumer.example/auth/flarum');
+        $this->clientFor($url, $debug);
+    }
+
+    public static function rejectedForumUrls(): array
+    {
+        return [
+            'empty'                       => ['', false],
+            'no scheme'                   => ['provider.example', false],
+            'http'                        => ['http://provider.example', false],
+            'http on a 127. host name'    => ['http://127.provider.example', false],
+            'other scheme in debug mode'  => ['ftp://provider.example', true],
+        ];
     }
 
     // ID token verification
 
-    private static function key(int $index): array
-    {
-        if (!isset(self::$keys[$index])) {
-            $resource = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
-            openssl_pkey_export($resource, $private);
-            $details = openssl_pkey_get_details($resource);
-
-            self::$keys[$index] = [
-                'private' => $private,
-                'public'  => $details['key'],
-                'jwk'     => [
-                    'kty' => 'RSA',
-                    'use' => 'sig',
-                    'alg' => 'RS256',
-                    'kid' => "key-$index",
-                    'n'   => rtrim(strtr(base64_encode($details['rsa']['n']), '+/', '-_'), '='),
-                    'e'   => rtrim(strtr(base64_encode($details['rsa']['e']), '+/', '-_'), '='),
-                ],
-            ];
-        }
-
-        return self::$keys[$index];
-    }
-
     private function idToken(array $claims = [], int $key = 0, bool $withKid = false): string
     {
-        $claims = array_filter([
-            'iss' => self::ISSUER,
-            'sub' => '42',
-            'aud' => self::CLIENT_ID,
-            'iat' => time(),
-            'exp' => time() + 3600,
-            ...$claims,
-        ], fn ($value) => $value !== null);
-
-        return JWT::encode($claims, self::key($key)['private'], 'RS256', $withKid ? "key-$key" : null);
-    }
-
-    private function jwks(int ...$keys): Response
-    {
-        return $this->json(['keys' => array_map(fn (int $key) => self::key($key)['jwk'], $keys)]);
-    }
-
-    private function json(array $body, int $status = 200): Response
-    {
-        return new Response($status, ['Content-Type' => 'application/json'], json_encode($body));
-    }
-
-    private function tokenResponse(?string $idToken): Response
-    {
-        return $this->json(array_filter([
-            'access_token' => 'access-token',
-            'token_type'   => 'Bearer',
-            'expires_in'   => 3600,
-            'id_token'     => $idToken,
-        ]));
+        return $this->issueIdToken(self::ISSUER, self::CLIENT_ID, $claims, $key, $withKid);
     }
 
     private function client(Response ...$responses): FlarumProvider
@@ -241,6 +232,7 @@ class FlarumTest extends ProviderTestCase
         ], [
             'httpClient' => new Client(['handler' => $stack]),
             'cache'      => $this->cache,
+            'logger'     => new Logger('test', [$this->logs]),
         ]);
     }
 
@@ -272,8 +264,8 @@ class FlarumTest extends ProviderTestCase
     {
         $owner = $this->login($this->client(
             $this->tokenResponse($this->idToken()),
-            $this->jwks(0),
-            $this->json(['sub' => '42', 'email' => 'user@example.com']),
+            $this->jwksResponse(0),
+            $this->jsonResponse(['sub' => '42', 'email' => 'user@example.com']),
         ));
 
         $this->assertSame('42', $owner->getId());
@@ -283,8 +275,8 @@ class FlarumTest extends ProviderTestCase
     #[Test]
     public function key_set_is_cached(): void
     {
-        $this->login($this->client($this->tokenResponse($this->idToken()), $this->jwks(0), $this->json(['sub' => '42'])));
-        $this->login($this->client($this->tokenResponse($this->idToken()), $this->json(['sub' => '42'])));
+        $this->login($this->client($this->tokenResponse($this->idToken()), $this->jwksResponse(0), $this->jsonResponse(['sub' => '42'])));
+        $this->login($this->client($this->tokenResponse($this->idToken()), $this->jsonResponse(['sub' => '42'])));
 
         $this->assertSame(1, $this->jwksRequests());
     }
@@ -294,8 +286,8 @@ class FlarumTest extends ProviderTestCase
     {
         $owner = $this->login($this->client(
             $this->tokenResponse($this->idToken(key: 1, withKid: true)),
-            $this->jwks(0, 1),
-            $this->json(['sub' => '42']),
+            $this->jwksResponse(0, 1),
+            $this->jsonResponse(['sub' => '42']),
         ));
 
         $this->assertSame('42', $owner->getId());
@@ -304,12 +296,12 @@ class FlarumTest extends ProviderTestCase
     #[Test]
     public function rotated_key_is_fetched_again(): void
     {
-        $this->login($this->client($this->tokenResponse($this->idToken()), $this->jwks(0), $this->json(['sub' => '42'])));
+        $this->login($this->client($this->tokenResponse($this->idToken()), $this->jwksResponse(0), $this->jsonResponse(['sub' => '42'])));
 
         $owner = $this->login($this->client(
             $this->tokenResponse($this->idToken(key: 1)),
-            $this->jwks(1),
-            $this->json(['sub' => '42']),
+            $this->jwksResponse(1),
+            $this->jsonResponse(['sub' => '42']),
         ));
 
         $this->assertSame('42', $owner->getId());
@@ -319,29 +311,40 @@ class FlarumTest extends ProviderTestCase
     #[Test]
     public function token_signed_by_another_key_is_rejected(): void
     {
-        $this->assertRejected($this->client($this->tokenResponse($this->idToken(key: 1)), $this->jwks(0)), 'no signing key');
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken(key: 1)), $this->jwksResponse(0)), 'no signing key');
 
         $this->assertSame(1, $this->jwksRequests(), 'A freshly fetched key set should not be fetched again');
     }
 
     #[Test]
-    public function token_signed_with_the_public_key_as_an_hmac_secret_is_rejected(): void
+    public function token_naming_a_key_the_refreshed_set_lacks_is_rejected(): void
     {
-        $forged = JWT::encode(['iss' => self::ISSUER, 'sub' => '42', 'aud' => self::CLIENT_ID, 'exp' => time() + 3600], self::key(0)['public'], 'HS256');
+        $this->login($this->client($this->tokenResponse($this->idToken()), $this->jwksResponse(0), $this->jsonResponse(['sub' => '42'])));
 
-        $this->assertRejected($this->client($this->tokenResponse($forged), $this->jwks(0)), 'Invalid ID token');
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken(key: 1, withKid: true)), $this->jwksResponse(0)), 'no signing key');
+        $this->assertSame(2, $this->jwksRequests());
     }
 
     #[Test]
-    public function token_from_another_issuer_is_rejected(): void
+    public function token_signed_with_the_public_key_as_an_hmac_secret_is_rejected(): void
     {
-        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['iss' => 'https://other.example'])), $this->jwks(0)), 'unexpected issuer');
+        $forged = JWT::encode(['iss' => self::ISSUER, 'sub' => '42', 'aud' => self::CLIENT_ID, 'exp' => time() + 3600], self::signingKey(0)['public'], 'HS256');
+
+        $this->assertRejected($this->client($this->tokenResponse($forged), $this->jwksResponse(0)), 'Invalid ID token');
+    }
+
+    #[Test]
+    public function token_from_another_issuer_is_rejected_and_the_mismatch_logged(): void
+    {
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['iss' => 'http://provider.example'])), $this->jwksResponse(0)), 'unexpected issuer');
+
+        $this->assertTrue($this->logs->hasWarningThatContains('issued by "http://provider.example", but the forum URL is set to "https://provider.example"'));
     }
 
     #[Test]
     public function token_for_another_client_is_rejected(): void
     {
-        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['aud' => 'other'])), $this->jwks(0)), 'not issued to this client');
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['aud' => 'other'])), $this->jwksResponse(0)), 'not issued to this client');
     }
 
     #[Test]
@@ -349,8 +352,8 @@ class FlarumTest extends ProviderTestCase
     {
         $owner = $this->login($this->client(
             $this->tokenResponse($this->idToken(['aud' => ['other', self::CLIENT_ID]])),
-            $this->jwks(0),
-            $this->json(['sub' => '42']),
+            $this->jwksResponse(0),
+            $this->jsonResponse(['sub' => '42']),
         ));
 
         $this->assertSame('42', $owner->getId());
@@ -359,13 +362,26 @@ class FlarumTest extends ProviderTestCase
     #[Test]
     public function expired_token_is_rejected(): void
     {
-        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['iat' => time() - 7200, 'exp' => time() - 3600])), $this->jwks(0)), 'Expired');
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['iat' => time() - 7200, 'exp' => time() - 3600])), $this->jwksResponse(0)), 'Expired');
+    }
+
+    #[Test]
+    public function token_not_yet_valid_is_rejected(): void
+    {
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['nbf' => time() + 3600])), $this->jwksResponse(0)), 'nbf');
     }
 
     #[Test]
     public function token_without_expiry_is_rejected(): void
     {
-        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['exp' => null])), $this->jwks(0)), 'no expiry');
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['exp' => null])), $this->jwksResponse(0)), 'no expiry');
+    }
+
+    #[Test]
+    public function token_without_a_string_subject_is_rejected(): void
+    {
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['sub' => null])), $this->jwksResponse(0)), 'no subject');
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken(['sub' => 42]))), 'no subject');
     }
 
     #[Test]
@@ -373,8 +389,8 @@ class FlarumTest extends ProviderTestCase
     {
         $owner = $this->login($this->client(
             $this->tokenResponse($this->idToken(['iat' => time() + 30])),
-            $this->jwks(0),
-            $this->json(['sub' => '42']),
+            $this->jwksResponse(0),
+            $this->jsonResponse(['sub' => '42']),
         ));
 
         $this->assertSame('42', $owner->getId());
@@ -390,7 +406,7 @@ class FlarumTest extends ProviderTestCase
     #[Test]
     public function userinfo_for_another_subject_is_rejected(): void
     {
-        $this->assertRejected($this->client($this->tokenResponse($this->idToken()), $this->jwks(0), $this->json(['sub' => '43'])), 'does not match');
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken()), $this->jwksResponse(0), $this->jsonResponse(['sub' => '43'])), 'does not match');
     }
 
     #[Test]
@@ -398,14 +414,14 @@ class FlarumTest extends ProviderTestCase
     {
         $this->expectException(IdentityProviderException::class);
 
-        $this->client($this->json(['sub' => '42']))->getResourceOwner(new AccessToken(['access_token' => 'access-token']));
+        $this->client($this->jsonResponse(['sub' => '42']))->getResourceOwner(new AccessToken(['access_token' => 'access-token']));
     }
 
     #[Test]
     public function unusable_key_set_is_rejected(): void
     {
-        $this->assertRejected($this->client($this->tokenResponse($this->idToken()), $this->json(['error' => 'server_error'], 500)), 'JWKS');
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken()), $this->jsonResponse(['error' => 'server_error'], 500)), 'JWKS');
         $this->assertRejected($this->client($this->tokenResponse($this->idToken()), new Response(200, [], 'not json')), 'JWKS');
-        $this->assertRejected($this->client($this->tokenResponse($this->idToken()), $this->json(['keys' => [['kty' => 'EC', 'crv' => 'P-256']]])), 'no RS256 signing key');
+        $this->assertRejected($this->client($this->tokenResponse($this->idToken()), $this->jsonResponse(['keys' => [['kty' => 'EC', 'crv' => 'P-256']]])), 'no RS256 signing key');
     }
 }

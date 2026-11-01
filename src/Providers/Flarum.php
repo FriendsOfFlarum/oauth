@@ -12,6 +12,7 @@
 namespace FoF\OAuth\Providers;
 
 use Flarum\Forum\Auth\Registration;
+use Flarum\Foundation\Config;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Provider;
 use FoF\OAuth\Providers\Custom\Flarum\FlarumProvider;
@@ -20,6 +21,7 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Arr;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\GenericResourceOwner;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 /**
@@ -65,11 +67,7 @@ class Flarum extends Provider
 
     public function provider(string $redirectUri): AbstractProvider
     {
-        $base = rtrim(trim($this->getSetting('forum_url')), '/');
-
-        if ($base === '') {
-            throw new RuntimeException('The Flarum provider has no forum URL configured.');
-        }
+        $base = $this->forumUrl();
 
         return new FlarumProvider([
             'clientId'                => $this->getSetting('client_id'),
@@ -86,8 +84,34 @@ class Flarum extends Provider
         ], [
             // Resolved here rather than in the constructor: resolving the cache while providers are being
             // registered pulls `cache.store` in before fof/redis has set up its connections.
-            'cache' => $this->container->make(Cache::class),
+            'cache'  => $this->container->make(Cache::class),
+            'logger' => $this->container->make(LoggerInterface::class),
         ]);
+    }
+
+    /**
+     * The provider forum's URL, which must use https: the client secret, the authorization code and the user's
+     * details are sent to it. Plain http is only allowed for loopback hosts, and in debug mode for local testing.
+     */
+    protected function forumUrl(): string
+    {
+        $url = rtrim(trim($this->getSetting('forum_url')), '/');
+        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+        $host = strtolower(trim((string) parse_url($url, PHP_URL_HOST), '[]'));
+
+        if ($host === '') {
+            throw new RuntimeException('The Flarum provider has no valid forum URL configured.');
+        }
+
+        $loopback = $host === 'localhost'
+            || $host === '::1'
+            || (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false && str_starts_with($host, '127.'));
+
+        if ($scheme !== 'https' && !($scheme === 'http' && ($loopback || $this->container->make(Config::class)->inDebugMode()))) {
+            throw new RuntimeException("The Flarum provider's forum URL must use https: $url");
+        }
+
+        return $url;
     }
 
     public function options(): array

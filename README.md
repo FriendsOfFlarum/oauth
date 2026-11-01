@@ -92,7 +92,7 @@ You can replace the text for the forum sign in buttons in two ways:
 The **Flarum** provider lets members log in with their account on another Flarum forum, which needs the [OAuth Provider](https://github.com/flarum/oauth-provider) extension:
 
 1. On that forum's OAuth Provider admin page, add a confidential client whose redirect URI is this forum's callback URL, `https://<your forum>/auth/flarum` (also shown in the provider's settings here). This forum must be served over HTTPS: the OAuth Provider extension only accepts `http://` redirect URIs on loopback addresses.
-2. Here, enable the Flarum provider and enter that forum's URL, exactly as set in its `config.php`, with the client's ID and secret.
+2. Here, enable the Flarum provider and enter that forum's URL, exactly as set in its `config.php`, with the client's ID and secret. The URL must use `https://`; plain `http://` is only accepted for `localhost` and loopback addresses, or while this forum is in debug mode. If logins fail with "unexpected issuer", the forum log says which URL the other forum uses.
 
 Logins are checked with OpenID Connect: the ID token's signature is verified against the other forum's `/.well-known/jwks.json`, and it must have been issued by that forum URL to this client.
 

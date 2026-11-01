@@ -23,6 +23,7 @@ use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Token\AccessTokenInterface;
+use Psr\Log\LoggerInterface;
 use stdClass;
 use Throwable;
 use UnexpectedValueException;
@@ -56,6 +57,8 @@ class FlarumProvider extends GenericProvider
 
     protected ?Cache $cache;
 
+    protected ?LoggerInterface $logger;
+
     /**
      * Subjects of the verified ID tokens, keyed by the access token they came with.
      *
@@ -69,11 +72,12 @@ class FlarumProvider extends GenericProvider
     protected bool $jwksFetched = false;
 
     /**
-     * @param array{cache?: Cache} $collaborators
+     * @param array{cache?: Cache, logger?: LoggerInterface} $collaborators
      */
     public function __construct(array $options = [], array $collaborators = [])
     {
         $this->cache = $collaborators['cache'] ?? null;
+        $this->logger = $collaborators['logger'] ?? null;
         $this->verifiedSubjects = new WeakMap();
 
         parent::__construct($options, $collaborators);
@@ -145,6 +149,14 @@ class FlarumProvider extends GenericProvider
         }
 
         if (($claims->iss ?? null) !== $this->issuer) {
+            // Usually the forum URL setting differs from the provider's `url` in scheme, host or path. Only the log
+            // says so: the error is shown to whoever is logging in.
+            $this->logger?->warning(sprintf(
+                '[OAuth][flarum] The ID token was issued by %s, but the forum URL is set to %s. Enter the provider forum\'s URL exactly as set in its config.php.',
+                json_encode($claims->iss ?? null, JSON_UNESCAPED_SLASHES),
+                json_encode($this->issuer, JSON_UNESCAPED_SLASHES)
+            ));
+
             throw new IdentityProviderException('Invalid ID token: unexpected issuer.', 0, []);
         }
 
