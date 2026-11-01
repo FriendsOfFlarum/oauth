@@ -87,6 +87,15 @@ You can replace the text for the forum sign in buttons in two ways:
 - Use `fof-oauth.forum.providers.<name>` to replace the name of the provider on the forum side
 - Use `fof-oauth.forum.log_in.with_<name>_button` to replace the entire button "Log In with \<name\>" text
 
+#### Logging in with another Flarum forum
+
+The **Flarum** provider lets members log in with their account on another Flarum forum, which needs the [OAuth Provider](https://github.com/flarum/oauth-provider) extension:
+
+1. On that forum's OAuth Provider admin page, add a confidential client whose redirect URI is this forum's callback URL, `https://<your forum>/auth/flarum` (also shown in the provider's settings here). This forum must be served over HTTPS: the OAuth Provider extension only accepts `http://` redirect URIs on loopback addresses.
+2. Here, enable the Flarum provider and enter that forum's URL, exactly as set in its `config.php`, with the client's ID and secret.
+
+Logins are checked with OpenID Connect: the ID token's signature is verified against the other forum's `/.well-known/jwks.json`, and it must have been issued by that forum URL to this client.
+
 #### Updating email addresses from the provider
 
 With **Update email address from provider** enabled, logging in with an OAuth provider whose email differs from the forum account's starts an email change, but only when the provider confirms the address is verified:
@@ -101,6 +110,7 @@ Unverified addresses never start a change, and an address already used by anothe
 |---|---|
 | Discord | the email is marked verified |
 | Facebook | always (Facebook does not return unconfirmed addresses) |
+| Flarum | the email is confirmed on the provider forum |
 | GitHub | the account has a primary, verified email (the public profile email is not used) |
 | GitLab | the account's email is confirmed |
 | Google | the email is marked verified (see below) |

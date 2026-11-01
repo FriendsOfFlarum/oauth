@@ -11,37 +11,25 @@
 
 namespace FoF\OAuth\Providers;
 
-use Exception;
 use Flarum\Forum\Auth\Registration;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Provider;
-use FoF\OAuth\Support\JwksKeyLoader;
+use FoF\OAuth\Providers\Custom\Flarum\FlarumProvider;
+use Illuminate\Contracts\Cache\Repository as Cache;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Arr;
-use Lcobucci\JWT\Signer\Rsa\Sha256;
 use League\OAuth2\Client\Provider\AbstractProvider;
-use OpenIDConnectClient\OpenIDConnectProvider;
-use Psr\Log\LoggerInterface;
+use League\OAuth2\Client\Provider\GenericResourceOwner;
+use RuntimeException;
 
 /**
- * OpenID Connect provider for federated Flarum SSO.
- *
- * Uses steverhoades/oauth2-openid-connect-client to perform OIDC authorization
- * code flow with cryptographic ID token validation: the library verifies the
- * JWT signature against the issuer's JWKS plus the iss, aud, exp, iat, and
- * nbf claims before returning the access token.
- *
- * Nonce replay-defence is not currently enforced by the upstream library's
- * ValidatorChain — see https://github.com/steverhoades/oauth2-openid-connect-client
- * — so we rely on fof/oauth's existing `state` CSRF check for replay
- * protection. Signature + issuer + audience verification still prevents any
- * spoofed or MITM'd userinfo response from being trusted.
+ * Log in with an account on another Flarum forum, which runs flarum/oauth-provider.
  */
 class Flarum extends Provider
 {
     public function __construct(
         SettingsRepositoryInterface $settings,
-        protected JwksKeyLoader $jwks,
-        protected LoggerInterface $logger,
+        protected Container $container,
     ) {
         parent::__construct($settings);
     }
@@ -58,7 +46,7 @@ class Flarum extends Provider
 
     public function link(): string
     {
-        return 'https://docs.flarum.org/extensions/oauth-provider';
+        return 'https://github.com/flarum/oauth-provider';
     }
 
     public function fields(): array
@@ -75,102 +63,91 @@ class Flarum extends Provider
         return true;
     }
 
-    public function provider(string $redirectUri): ?AbstractProvider
+    public function provider(string $redirectUri): AbstractProvider
     {
-        $base = rtrim($this->getSetting('forum_url'), '/');
+        $base = rtrim(trim($this->getSetting('forum_url')), '/');
 
         if ($base === '') {
-            return null;
+            throw new RuntimeException('The Flarum provider has no forum URL configured.');
         }
 
-        try {
-            $publicKeys = $this->jwks->load("$base/.well-known/jwks.json");
-        } catch (Exception $e) {
-            $this->logger->error('fof/oauth: failed to load JWKS from Flarum provider', [
-                'issuer' => $base,
-                'error'  => $e->getMessage(),
-            ]);
-
-            return null;
-        }
-
-        return new OpenIDConnectProvider(
-            [
-                'clientId'                => $this->getSetting('client_id'),
-                'clientSecret'            => $this->getSetting('client_secret'),
-                'redirectUri'             => $redirectUri,
-                'idTokenIssuer'           => $base,
-                'urlAuthorize'            => "$base/oauth/authorize",
-                'urlAccessToken'          => "$base/oauth/token",
-                'urlResourceOwnerDetails' => "$base/oauth/userinfo",
-                'publicKey'               => $publicKeys,
-                'scopes'                  => ['openid', 'profile', 'email'],
-                'responseResourceOwnerId' => 'sub',
-            ],
-            [
-                'signer' => new Sha256(),
-            ],
-        );
+        return new FlarumProvider([
+            'clientId'                => $this->getSetting('client_id'),
+            'clientSecret'            => $this->getSetting('client_secret'),
+            'redirectUri'             => $redirectUri,
+            'issuer'                  => $base,
+            'jwksUri'                 => "$base/.well-known/jwks.json",
+            'urlAuthorize'            => "$base/oauth/authorize",
+            'urlAccessToken'          => "$base/oauth/token",
+            'urlResourceOwnerDetails' => "$base/oauth/userinfo",
+            'scopeSeparator'          => ' ',
+            'responseResourceOwnerId' => 'sub',
+            'timeout'                 => 10,
+        ], [
+            // Resolved here rather than in the constructor: resolving the cache while providers are being
+            // registered pulls `cache.store` in before fof/redis has set up its connections.
+            'cache' => $this->container->make(Cache::class),
+        ]);
     }
 
     public function options(): array
     {
-        return [
-            'scope' => ['openid', 'profile', 'email'],
-        ];
+        return ['scope' => ['openid', 'profile', 'email']];
     }
 
+    /**
+     * @param GenericResourceOwner $user
+     */
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         $data = $user->toArray();
 
         $this->verifyEmail($email = Arr::get($data, 'email'));
 
+        if ($this->getProviderVerifiedEmail($user, $token) !== null) {
+            $registration->provideTrustedEmail($email);
+        } else {
+            $registration->suggestEmail($email);
+        }
+
         $registration
-            ->provideTrustedEmail($email)
             ->suggestUsername(Arr::get($data, 'name') ?: '')
             ->setPayload($data);
 
-        $this->provideAvatar(
-            $registration,
-            $this->bestAvatarUrl(
-                Arr::get($data, 'picture_srcset'),
-                Arr::get($data, 'picture')
-            )
-        );
+        $this->provideAvatar($registration, $this->bestAvatarUrl(Arr::get($data, 'picture_srcset'), Arr::get($data, 'picture')));
     }
 
     /**
-     * Pick the highest-density variant from an srcset, falling back to the
-     * single picture URL. The avatar pipeline downloads this and derives its
-     * own scaled variants, so handing it the largest source available gives
-     * the best result.
+     * The provider forum reports `email_verified` from its own email confirmation.
+     *
+     * @param GenericResourceOwner $user
+     */
+    public function getProviderVerifiedEmail(mixed $user, string $token): ?string
+    {
+        $data = $user->toArray();
+
+        if (($data['email_verified'] ?? null) === true && is_string($data['email'] ?? null) && $data['email'] !== '') {
+            return $data['email'];
+        }
+
+        return null;
+    }
+
+    /**
+     * The URL of the highest density avatar in the provider's `picture_srcset` (`url 1x, url 2x, ...`), or the
+     * `picture` URL. Flarum makes its own sizes from the downloaded avatar, so the largest source is best.
      */
     protected function bestAvatarUrl(?string $srcset, ?string $fallback): ?string
     {
-        if (empty($srcset)) {
-            return $fallback;
-        }
-
         $bestUrl = null;
         $bestDensity = 0.0;
 
-        foreach (explode(',', $srcset) as $entry) {
-            $entry = trim($entry);
-            if ($entry === '') {
-                continue;
-            }
+        foreach (explode(',', (string) $srcset) as $entry) {
+            $parts = preg_split('/\s+/', trim($entry), 2);
+            $url = $parts[0] ?? '';
+            $density = (float) rtrim($parts[1] ?? '1x', 'x');
 
-            $parts = preg_split('/\s+/', $entry, 2);
-            $url = $parts[0] ?? null;
-            $descriptor = $parts[1] ?? '1x';
-
-            if (!$url) {
-                continue;
-            }
-
-            $density = (float) rtrim($descriptor, 'x');
-            if ($density > $bestDensity) {
+            if ($url !== '' && $density > $bestDensity) {
                 $bestDensity = $density;
                 $bestUrl = $url;
             }
