@@ -11,19 +11,19 @@
 
 namespace FoF\OAuth\Tests\integration;
 
+use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
 use Flarum\User\LoginProvider;
-use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use FoF\OAuth\Avatar\AvatarDownloader;
 use FoF\OAuth\Providers\Discord;
-use League\OAuth2\Client\Token\AccessToken;
-use Wohali\OAuth2\Client\Provider\Discord as DiscordClient;
-use Wohali\OAuth2\Client\Provider\DiscordResourceOwner;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Interfaces\ImageInterface;
+use League\OAuth2\Client\Token\AccessToken;
 use PHPUnit\Framework\Attributes\Test;
+use Wohali\OAuth2\Client\Provider\Discord as DiscordClient;
+use Wohali\OAuth2\Client\Provider\DiscordResourceOwner;
 
 /**
  * An account that is linked to a provider, rather than signed up through it, gets the provider's avatar if it has none.

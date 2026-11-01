@@ -105,12 +105,12 @@ class AvatarDownloaderTest extends TestCase
     public static function allowedHosts(): array
     {
         return [
-            'public IP'                         => ['93.184.216.34', [], '93.184.216.34'],
+            'public IP'                          => ['93.184.216.34', [], '93.184.216.34'],
             'private LAN IP, allowed as in core' => ['192.168.1.10', [], '192.168.1.10'],
-            'public IPv6'                       => ['[2606:4700::1111]', [], '2606:4700::1111'],
-            'public IPv6 under 2001::/16'       => ['[2001:4860:4860::8888]', [], '2001:4860:4860::8888'],
-            'name'                              => ['forum.example', ['forum.example' => ['93.184.216.34']], '93.184.216.34'],
-            'first allowed of several'          => ['forum.example', ['forum.example' => ['127.0.0.1', '10.0.0.5']], '10.0.0.5'],
+            'public IPv6'                        => ['[2606:4700::1111]', [], '2606:4700::1111'],
+            'public IPv6 under 2001::/16'        => ['[2001:4860:4860::8888]', [], '2001:4860:4860::8888'],
+            'name'                               => ['forum.example', ['forum.example' => ['93.184.216.34']], '93.184.216.34'],
+            'first allowed of several'           => ['forum.example', ['forum.example' => ['127.0.0.1', '10.0.0.5']], '10.0.0.5'],
         ];
     }
 

@@ -17,8 +17,8 @@ use FoF\OAuth\Provider;
 use FoF\OAuth\Providers\Discord;
 use FoF\OAuth\Providers\GitLab;
 use League\OAuth2\Client\Provider\AbstractProvider;
-use Omines\OAuth2\Client\Provider\GitlabResourceOwner;
 use League\OAuth2\Client\Token\AccessToken;
+use Omines\OAuth2\Client\Provider\GitlabResourceOwner;
 use PHPUnit\Framework\Attributes\Test;
 use Wohali\OAuth2\Client\Provider\DiscordResourceOwner;
 
