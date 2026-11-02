@@ -24,8 +24,8 @@ fof-oauth:
       oauth_only_sign_up_closed_warning: "Sign up is set to Closed in <a>Permissions</a>. Flarum uses that setting for sign-ups through providers too, so nobody can join while it's closed."
       disable_avatars_label: Disable avatars from provider
       disable_avatars_help: >
-        If enabled, the user's avatar will not be updated to match the provider's avatar on signup.
-        Note that this only affects future signups, and will not change the avatar of existing users.
+        By default, members who sign up with a provider get its avatar, and so do members without an avatar when
+        they link a provider. If enabled, provider avatars are never used. Avatars members already have are not changed.
       providers:
         callback_url_text: If necessary, set the callback URL to {url}.
         group_label: Assign Group

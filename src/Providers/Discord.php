@@ -63,11 +63,6 @@ class Discord extends Provider
     {
         $this->verifyEmail($email = $user->getEmail());
 
-        $hash = $user->getAvatarHash();
-        $file = $hash ?
-            "https://cdn.discordapp.com/avatars/{$user->getId()}/{$user->getAvatarHash()}.png"
-            : 'https://cdn.discordapp.com/embed/avatars/0.png';
-
         $payload = $user->toArray();
 
         if ($this->getProviderVerifiedEmail($user, $token) !== null) {
@@ -80,7 +75,18 @@ class Discord extends Provider
             ->suggestUsername($user->getUsername() ?: '')
             ->setPayload($payload);
 
-        $this->provideAvatar($registration, $file);
+        // Sign-ups without an avatar get Discord's default one; linked accounts don't (see avatarUrl()).
+        $this->provideAvatar($registration, $this->avatarUrl($user, $token) ?? 'https://cdn.discordapp.com/embed/avatars/0.png');
+    }
+
+    /**
+     * @param DiscordResourceOwner $user
+     */
+    public function avatarUrl(mixed $user, string $token): ?string
+    {
+        $hash = $user->getAvatarHash();
+
+        return $hash ? "https://cdn.discordapp.com/avatars/{$user->getId()}/$hash.png" : null;
     }
 
     /**

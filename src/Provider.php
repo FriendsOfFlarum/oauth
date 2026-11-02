@@ -15,6 +15,7 @@ use Flarum\Forum\Auth\Registration;
 use Flarum\Settings\SettingsRepositoryInterface;
 use FoF\OAuth\Errors\AuthenticationException;
 use League\OAuth2\Client\Provider\AbstractProvider;
+use Throwable;
 
 abstract class Provider
 {
@@ -59,6 +60,32 @@ abstract class Provider
     public function suggestions(Registration $registration, mixed $user, string $token): void
     {
         //
+    }
+
+    /**
+     * The URL of the user's avatar at the provider, or null if they have none. Used when an existing account links
+     * the provider, to give it an avatar if it has none.
+     *
+     * The default runs {@see suggestions()} again on a throwaway registration and reads the avatar from it: whatever
+     * else `suggestions()` does (API calls, events) happens a second time, and it gives no avatar if `suggestions()`
+     * throws, for example without an email address. Providers that know the URL directly should override this, and
+     * use it in `suggestions()`.
+     *
+     * @param mixed $user The resource owner returned by the provider
+     */
+    public function avatarUrl(mixed $user, string $token): ?string
+    {
+        $registration = new Registration();
+
+        try {
+            $this->suggestions($registration, $user, $token);
+        } catch (Throwable) {
+            return null;
+        }
+
+        $provided = $registration->getProvided();
+
+        return $provided['avatar_url_3x'] ?? $provided['avatar_url_2x'] ?? $provided['avatar_url'] ?? null;
     }
 
     /**
