@@ -82,7 +82,15 @@ class GitHub extends Provider
             ->suggestUsername($user->getNickname() ?: '')
             ->setPayload($user->toArray());
 
-        $this->provideAvatar($registration, Arr::get($user->toArray(), 'avatar_url'));
+        $this->provideAvatar($registration, $this->avatarUrl($user, $token));
+    }
+
+    /**
+     * @param GithubResourceOwner $user
+     */
+    public function avatarUrl(mixed $user, string $token): ?string
+    {
+        return Arr::get($user->toArray(), 'avatar_url') ?: null;
     }
 
     /**
