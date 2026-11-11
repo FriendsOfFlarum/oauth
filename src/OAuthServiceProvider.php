@@ -32,14 +32,20 @@ class OAuthServiceProvider extends AbstractServiceProvider
             Providers\LinkedIn::class,
         ], 'fof-oauth.providers');
 
-        // Single stable route — provider is a plain path segment, validated in the controller.
+        // Single stable route, limited to the registered providers: a catch-all /auth/{provider}
+        // would clash with another extension's /auth/<name> route.
         $this->container->resolving('flarum.forum.routes', function (RouteCollection $collection, Container $container) {
             /** @var RouteHandlerFactory $factory */
             $factory = $container->make(RouteHandlerFactory::class);
 
+            $names = [];
+            foreach ($container->tagged('fof-oauth.providers') as $provider) {
+                $names[] = preg_quote($provider->name(), '~');
+            }
+
             $collection->addRoute(
                 'GET',
-                '/auth/{provider}',
+                '/auth/{provider:'.implode('|', $names).'}',
                 'fof-oauth',
                 $factory->toController(Controllers\AuthController::class)
             );
