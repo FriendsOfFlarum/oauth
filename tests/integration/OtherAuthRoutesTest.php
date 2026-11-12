@@ -33,7 +33,7 @@ class OtherAuthRoutesTest extends TestCase
         $this->extension('fof-oauth');
         $this->extend(
             new RegisterProvider(ThirdPartyProvider::class),
-            (new Extend\Routes('forum'))->get('/auth/other', 'other.auth', fn () => new class implements RequestHandlerInterface {
+            (new Extend\Routes('forum'))->get('/auth/other', 'other.auth', fn () => new class() implements RequestHandlerInterface {
                 public function handle(ServerRequestInterface $request): ResponseInterface
                 {
                     return new TextResponse('other');
