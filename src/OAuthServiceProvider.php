@@ -17,6 +17,7 @@ use Flarum\Http\RouteCollection;
 use Flarum\Http\RouteHandlerFactory;
 use Illuminate\Contracts\Cache\Store as Cache;
 use Illuminate\Contracts\Container\Container;
+use RuntimeException;
 
 class OAuthServiceProvider extends AbstractServiceProvider
 {
@@ -40,12 +41,21 @@ class OAuthServiceProvider extends AbstractServiceProvider
 
             $names = [];
             foreach ($container->tagged('fof-oauth.providers') as $provider) {
-                $names[] = preg_quote($provider->name(), '~');
+                $name = $provider->name();
+
+                if (in_array($name, $names, true)) {
+                    throw new RuntimeException(
+                        "OAuth provider '{$name}' is already registered. "
+                        .'Each provider name must be unique across all extensions.'
+                    );
+                }
+
+                $names[] = $name;
             }
 
             $collection->addRoute(
                 'GET',
-                '/auth/{provider:'.implode('|', $names).'}',
+                '/auth/{provider:'.implode('|', array_map(fn (string $name) => preg_quote($name, '~'), $names)).'}',
                 'fof-oauth',
                 $factory->toController(Controllers\AuthController::class)
             );

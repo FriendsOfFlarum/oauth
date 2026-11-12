@@ -11,8 +11,13 @@
 
 namespace FoF\OAuth\Tests\unit\Extend;
 
+use Flarum\Foundation\Application;
+use Flarum\Foundation\Paths;
+use Flarum\Http\RouteCollection;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\Testing\unit\TestCase;
 use FoF\OAuth\Extend\RegisterProvider;
+use FoF\OAuth\OAuthServiceProvider;
 use FoF\OAuth\Provider;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\Container as ContainerContract;
@@ -71,23 +76,63 @@ class RegisterProviderTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $this->container->bind('NotAProvider', fn () => new \stdClass());
-
-        $extender = new RegisterProvider('NotAProvider');
+        $extender = new RegisterProvider(\stdClass::class);
         $extender->extend($this->container);
     }
 
     #[Test]
-    public function throws_when_duplicate_provider_name_registered(): void
+    public function throws_when_duplicate_provider_names_are_resolved_for_routes(): void
     {
+        $app = new Application(new Paths(['base' => __DIR__, 'public' => __DIR__, 'storage' => __DIR__]));
+        $app->instance(SettingsRepositoryInterface::class, m::mock(SettingsRepositoryInterface::class));
+        $app->singleton('flarum.forum.routes', fn () => new RouteCollection());
+        (new OAuthServiceProvider($app))->register();
+        $class1 = $this->makeProviderClass('duplicate', $app);
+        $class2 = $this->makeProviderClass('duplicate', $app);
+        (new RegisterProvider($class1))->extend($app);
+        (new RegisterProvider($class2))->extend($app);
+
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessageMatches('/already registered/');
+        $this->expectExceptionMessage("OAuth provider 'duplicate' is already registered. Each provider name must be unique across all extensions.");
+        $app->make('flarum.forum.routes');
+    }
 
-        $class1 = $this->makeProviderClass('duplicate', $this->container);
-        $class2 = $this->makeProviderClass('duplicate', $this->container);
+    #[Test]
+    public function registers_a_provider_through_a_container_binding(): void
+    {
+        $className = $this->makeProviderClass('bound', $this->container);
+        $this->container->bind('bound-provider', fn () => $this->container->make($className));
+        $this->container->alias('bound-provider', 'provider-alias');
 
-        (new RegisterProvider($class1))->extend($this->container);
-        (new RegisterProvider($class2))->extend($this->container); // Should throw.
+        (new RegisterProvider('provider-alias'))->extend($this->container);
+
+        $tagged = iterator_to_array($this->container->tagged('fof-oauth.providers'));
+        $this->assertCount(1, $tagged);
+        $this->assertInstanceOf(Provider::class, $tagged[0]);
+        $this->assertSame('bound', $tagged[0]->name());
+    }
+
+    #[Test]
+    public function registers_an_existing_provider_instance(): void
+    {
+        $className = $this->makeProviderClass('existing', $this->container);
+        $provider = new $className(m::mock(SettingsRepositoryInterface::class));
+        $this->container->instance($className, $provider);
+
+        (new RegisterProvider($className))->extend($this->container);
+
+        $this->assertSame([$provider], iterator_to_array($this->container->tagged('fof-oauth.providers')));
+    }
+
+    #[Test]
+    public function rejects_a_binding_that_does_not_resolve_to_a_provider(): void
+    {
+        $this->container->bind('NotAProvider', fn () => new \stdClass());
+        (new RegisterProvider('NotAProvider'))->extend($this->container);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('NotAProvider must extend '.Provider::class);
+        iterator_to_array($this->container->tagged('fof-oauth.providers'));
     }
 
     #[Test]
