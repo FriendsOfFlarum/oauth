@@ -71,6 +71,11 @@ class AssignToUser
     {
         $groupId = $this->settings->get("fof-oauth.{$provider}.group");
 
-        return $groupId && is_numeric($groupId) ? (int) $groupId : null;
+        if (!$groupId || !is_numeric($groupId)) {
+            return null;
+        }
+
+        // The group may have been deleted since it was chosen, and adding it would then fail the sign-up or link.
+        return Group::query()->whereKey((int) $groupId)->exists() ? (int) $groupId : null;
     }
 }

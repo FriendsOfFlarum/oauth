@@ -358,11 +358,14 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
             throw new AuthenticationException('already_linked');
         }
 
-        $this->events->dispatch(new LinkingToProvider(
-            $this->getProviderName(),
-            $this->getIdentifier($resourceOwner),
-            $user
-        ));
+        // Linking an account that is already linked changes nothing, so it is not reported as a new link.
+        if (!$existing) {
+            $this->events->dispatch(new LinkingToProvider(
+                $this->getProviderName(),
+                $this->getIdentifier($resourceOwner),
+                $user
+            ));
+        }
 
         $user->loginProviders()->firstOrCreate([
             'provider'   => $this->getProviderName(),

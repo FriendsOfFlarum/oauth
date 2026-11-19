@@ -34,7 +34,7 @@ class AssignGroupTest extends TestCase
         $this->prepareDatabase([
             'users' => [
                 $this->normalUser(),
-                ['id' => 3, 'username' => 'existing', 'is_email_confirmed' => 1, 'email' => 'existing@machine.local', 'joined_at' => '2021-01-01 00:00:00'],
+                ['id' => 3, 'username' => 'existing', 'is_email_confirmed' => 1, 'email' => 'existing@machine.local', 'password' => '$2y$10$LO59tiT7uggl6Oe23o/O6.utnF6ipngYjvMvaxo1TciKqBttDNKim', 'joined_at' => '2021-01-01 00:00:00'],
             ],
             'group_user' => [
                 ['user_id' => 2, 'group_id' => 4],
@@ -159,5 +159,66 @@ class AssignGroupTest extends TestCase
         $this->assertEquals(204, $response->getStatusCode(), (string) $response->getBody());
         $this->assertFalse(LoginProvider::where('user_id', 3)->where('provider', 'gitlab')->exists());
         $this->assertEquals([4], User::query()->findOrFail(3)->groups()->pluck('id')->all());
+    }
+
+    /**
+     * Linking an identity that is already linked is not a new link, so a group an admin removed stays removed.
+     */
+    #[Test]
+    public function linking_an_already_linked_account_again_does_not_assign_the_group(): void
+    {
+        $this->mockGitlab(['id' => 111, 'username' => 'existing', 'email' => 'existing@machine.local', 'confirmed_at' => '2021-01-01T00:00:00Z']);
+        $this->oauthLinkCallback('gitlab', 3, 3);
+        User::query()->findOrFail(3)->groups()->detach(4);
+
+        $response = $this->oauthLinkCallback('gitlab', 3, 3);
+
+        $this->assertEquals(302, $response->getStatusCode(), (string) $response->getBody());
+        $this->assertEquals([], User::query()->findOrFail(3)->groups()->pluck('id')->all());
+    }
+
+    #[Test]
+    public function logging_in_with_an_already_linked_account_does_not_assign_the_group(): void
+    {
+        $this->prepareDatabase([
+            LoginProvider::class => [
+                ['id' => 1, 'user_id' => 3, 'provider' => 'gitlab', 'identifier' => '111', 'created_at' => '2021-01-01 00:00:00'],
+            ],
+        ]);
+        $this->mockGitlab(['id' => 111, 'username' => 'existing', 'email' => 'existing@machine.local', 'confirmed_at' => '2021-01-01T00:00:00Z']);
+
+        $this->assertStringNotContainsString('_flarum_auth', $this->oauthLogin('gitlab'));
+        $this->assertEquals([], User::query()->findOrFail(3)->groups()->pluck('id')->all());
+    }
+
+    #[Test]
+    public function linking_still_works_when_the_chosen_group_was_deleted(): void
+    {
+        $this->setting('fof-oauth.gitlab.group', 999);
+        $this->mockGitlab(['id' => 111, 'username' => 'existing', 'email' => 'existing@machine.local', 'confirmed_at' => '2021-01-01T00:00:00Z']);
+
+        $response = $this->oauthLinkCallback('gitlab', 3, 3);
+
+        $this->assertEquals(302, $response->getStatusCode(), (string) $response->getBody());
+        $this->assertTrue(LoginProvider::where('user_id', 3)->where('provider', 'gitlab')->exists());
+        $this->assertEquals([], User::query()->findOrFail(3)->groups()->pluck('id')->all());
+    }
+
+    #[Test]
+    public function signing_up_still_works_when_the_chosen_group_was_deleted(): void
+    {
+        $this->setting('fof-oauth.gitlab.group', 999);
+
+        $response = $this->send(
+            $this->request('POST', '/api/users', [
+                'json' => ['data' => ['type' => 'users', 'attributes' => [
+                    'username' => 'provideruser',
+                    'token'    => 'gitlab-registration-token',
+                ]]],
+            ])->withAttribute('bypassCsrfToken', true)
+        );
+
+        $this->assertEquals(201, $response->getStatusCode(), (string) $response->getBody());
+        $this->assertEquals([], User::query()->where('username', 'provideruser')->firstOrFail()->groups()->pluck('id')->all());
     }
 }
