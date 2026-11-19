@@ -281,6 +281,12 @@ abstract class AbstractOAuthController implements RequestHandlerInterface
                 // The account was linked by its email address just now, rather than signed up. The avatar comes from
                 // avatarUrl(), not the sign-up suggestions, which may hold a placeholder meant only for new accounts.
                 if (!$alreadyLinked && $suggested && ($link = $this->findLink($resourceOwner)) !== null) {
+                    $this->events->dispatch(new LinkingToProvider(
+                        $this->getProviderName(),
+                        $this->getIdentifier($resourceOwner),
+                        $link->user
+                    ));
+
                     $this->provideAvatarOnLink($link->user, $resourceOwner, $token);
                 }
             } catch (UnverifiedEmailInUseException $e) {

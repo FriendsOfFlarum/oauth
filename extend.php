@@ -21,6 +21,7 @@ use Flarum\Search\Database\DatabaseSearchDriver;
 use Flarum\User\Event\LoggedOut;
 use Flarum\User\Event\RegisteringFromProvider;
 use Flarum\User\Search\UserSearcher;
+use FoF\OAuth\Events\LinkingToProvider;
 use FoF\OAuth\Events\OAuthLoginSuccessful;
 
 return [
@@ -73,6 +74,7 @@ return [
 
     (new Extend\Event())
         ->listen(RegisteringFromProvider::class, Listeners\AssignToUser::class)
+        ->listen(LinkingToProvider::class, [Listeners\AssignToUser::class, 'handleLinking'])
         ->listen(OAuthLoginSuccessful::class, Listeners\UpdateEmailFromProvider::class)
         ->listen(LoggedOut::class, Listeners\HandleLogout::class)
         ->subscribe(Listeners\ClearOAuthCache::class),

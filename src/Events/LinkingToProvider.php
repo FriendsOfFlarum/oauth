@@ -13,6 +13,10 @@ namespace FoF\OAuth\Events;
 
 use Flarum\User\User;
 
+/**
+ * An existing account is being linked to an OAuth provider: by the member from their settings, or by logging in
+ * with a provider whose verified email matches the account. In the second case core has already saved the link.
+ */
 class LinkingToProvider
 {
     public function __construct(
@@ -27,7 +31,7 @@ class LinkingToProvider
         public readonly string $identifier,
 
         /**
-         * The authenticated user linking their account to this OAuth provider.
+         * The user whose account is being linked to this OAuth provider.
          */
         public readonly User $actor
     ) {

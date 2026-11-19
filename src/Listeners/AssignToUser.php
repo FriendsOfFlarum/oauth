@@ -16,6 +16,7 @@ use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\AvatarUploader;
 use Flarum\User\Event\RegisteringFromProvider;
 use Flarum\User\User;
+use FoF\OAuth\Events\LinkingToProvider;
 use Intervention\Image\ImageManager;
 
 class AssignToUser
@@ -39,23 +40,37 @@ class AssignToUser
     }
 
     /**
-     * @param RegisteringFromProvider $event
+     * A member signs up with a provider: they join its group once their account is saved.
      */
     public function handle(RegisteringFromProvider $event): void
     {
-        $provider = $event->provider;
-        $user = $event->user;
+        $groupId = $this->groupId($event->provider);
 
-        // ===== Assign Group =====
-        // Get the group ID for this provider
-        $groupId = $this->settings->get("fof-oauth.{$provider}.group");
-
-        // If a group is specified, assign it to the user
-        if ($groupId && is_numeric($groupId)) {
-            $user->afterSave(function (User $user) use ($groupId) {
+        if ($groupId !== null) {
+            $event->user->afterSave(function (User $user) use ($groupId) {
                 // Another extension may add the same group during registration, e.g. fof/doorman's doorkey group.
                 $user->groups()->syncWithoutDetaching([$groupId]);
             });
         }
+    }
+
+    /**
+     * An existing member links a provider: they join its group, as they would have by signing up with it.
+     * Unlinking leaves the group alone, because an admin may have given it by hand.
+     */
+    public function handleLinking(LinkingToProvider $event): void
+    {
+        $groupId = $this->groupId($event->providerName);
+
+        if ($groupId !== null) {
+            $event->actor->groups()->syncWithoutDetaching([$groupId]);
+        }
+    }
+
+    protected function groupId(string $provider): ?int
+    {
+        $groupId = $this->settings->get("fof-oauth.{$provider}.group");
+
+        return $groupId && is_numeric($groupId) ? (int) $groupId : null;
     }
 }

@@ -24,7 +24,7 @@ By default these providers are included:
 - **Account linked confirmation** — a modal is shown the first time a provider is linked, confirming the connection
 - **PKCE support** — providers that support Proof Key for Code Exchange can opt in per-provider
 - **Provider avatars** — members who sign up with a provider get its avatar, and so do existing members without an avatar when they link a provider (on its first link, whether from their settings or by a matching confirmed email). An avatar a member already has is never replaced. Turn this off with **Disable avatars from provider**. The avatar is downloaded by a queued job; without a queue worker (the default `sync` driver) that happens during the login, so a first link can take a few seconds longer
-- **Group assignment** — automatically assign users to a forum group when they register via a specific provider
+- **Group assignment** — automatically add members to a forum group when they sign up with a specific provider or link it to their account
 - **Admin moderation** — view and manage users' linked provider accounts from the admin panel
 - **OAuth-only mode** — optionally make providers the only way members log in and sign up, while administrators keep password login (see [OAuth-only mode](#oauth-only-mode))
 
@@ -34,7 +34,7 @@ This extension provides the ability to view the status of linked OAuth providers
 
 ### Group Assignment
 
-You can configure each OAuth provider to automatically assign users to a specific group when they register. This is useful for tracking which provider users signed up with or for granting specific permissions based on the authentication method.
+You can configure each OAuth provider to automatically add members to a specific group when they sign up with it or link it to their account. This is useful for tracking which providers members use or for granting specific permissions based on the authentication method.
 
 To configure group assignment:
 1. Go to the extension settings
@@ -43,7 +43,7 @@ To configure group assignment:
 4. Select a group from the "Assign Group" dropdown
 5. Save your changes
 
-Users who register through that provider will automatically be assigned to the selected group.
+Members who sign up with that provider are added to the selected group, and so are existing members when they link it, whether from their settings or by logging in with it when its confirmed email matches their account. Unlinking the provider does not remove the group, because an admin may have given it by hand. Members who linked the provider before this was added keep their current groups.
 
 ### Additional providers
 
