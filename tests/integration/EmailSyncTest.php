@@ -110,7 +110,7 @@ class EmailSyncTest extends TestCase
 
         $mail = $this->sentMail($logs, 'linked@machine.local');
         $this->assertCount(1, $mail);
-        $this->assertStringContainsString('fof-oauth.email.provider_email_change_notice', $mail[0]);
+        $this->assertStringContainsString('Subject: Email Address Change Requested', $mail[0]);
         $this->assertStringNotContainsString('/confirm/', $mail[0]);
     }
 
