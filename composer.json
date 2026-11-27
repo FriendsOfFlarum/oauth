@@ -27,7 +27,7 @@
         }
     ],
     "require": {
-        "flarum/core": "2.x-dev",
+        "flarum/core": "^2.1.0-beta.1",
         "firebase/php-jwt": "^6.10 || ^7.0",
         "league/oauth2-facebook": "^2.2.0",
         "league/oauth2-github": "^3.1.0",
@@ -35,7 +35,7 @@
         "omines/oauth2-gitlab": "^3.3.0",
         "wohali/oauth2-discord-new": "^1.2.1"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "beta",
     "prefer-stable": true,
     "replace": {
         "flarum/auth-facebook": "*",
