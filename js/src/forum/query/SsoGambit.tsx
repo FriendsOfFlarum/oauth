@@ -6,6 +6,10 @@ export default class SsoGambit extends KeyValueGambit {
     return app.translator.trans('fof-oauth.lib.gambits.sso.key', {}, true);
   }
 
+  canonicalKey(): string {
+    return 'sso';
+  }
+
   hint(): string {
     return app.translator.trans('fof-oauth.lib.gambits.sso.hint', {}, true);
   }

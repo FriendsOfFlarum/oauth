@@ -44,11 +44,15 @@ class RestrictPasswordReset implements MiddlewareInterface
 
         if ($routeName === 'forgot') {
             $email = Arr::get((array) $request->getParsedBody(), 'email');
-            $user = is_string($email) ? $this->users->findByEmail($email) : null;
+            $users = is_string($email) ? $this->users->findAllByEmail($email)->all() : [];
 
-            // Same empty response core gives for an unknown email, so this doesn't reveal which accounts exist.
-            if (!$this->oauthOnly->allowsPasswordAuth($user)) {
-                return new EmptyResponse();
+            // Core picks which account to reset, and from 3.0 an address can belong to several
+            // (flarum/framework#4426), so every one of them has to be allowed a password.
+            foreach ($users ?: [null] as $user) {
+                // Same empty response core gives for an unknown email, so this doesn't reveal which accounts exist.
+                if (!$this->oauthOnly->allowsPasswordAuth($user)) {
+                    return new EmptyResponse();
+                }
             }
 
             return $handler->handle($request);
