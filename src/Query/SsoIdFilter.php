@@ -13,9 +13,12 @@ namespace FoF\OAuth\Query;
 
 use Flarum\Search\Database\DatabaseSearchState;
 use Flarum\Search\Filter\FilterInterface;
+use Flarum\Search\ValidateFilterTrait;
 
 class SsoIdFilter implements FilterInterface
 {
+    use ValidateFilterTrait;
+
     public function getFilterKey(): string
     {
         return 'sso';
@@ -24,11 +27,11 @@ class SsoIdFilter implements FilterInterface
     public function filter(mixed $state, mixed $value, bool $negate): void
     {
         /** @var DatabaseSearchState $state */
-        if (!$state->getActor()->hasPermission('fof-oauth.admin.permissions.moderate_user_providers')) {
+        if (!$state->getActor()->can('moderateUserProviders')) {
             return;
         }
 
-        $sso = explode(',', trim($value, '"'));
+        $sso = $this->asStringArray($value);
 
         $state->getQuery()
             ->whereHas('loginProviders', function ($query) use ($sso) {
